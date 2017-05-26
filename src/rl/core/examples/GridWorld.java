@@ -31,17 +31,14 @@ public class GridWorld extends MDP{
 						setActionForState(GWAction.RANDOM(), state);
 					}
 				}
-				System.out.println("\n\n--------------------\n\n");
-				print();
-				policy_iteration();
-				System.out.println("\n\n--------------------\n\n");
-				print();
 			}
 		}
 		GWPolicy gwp = new GWPolicy(gw);
+		gwp.policy_iteration();
+		gwp.print();
 		//V_ValueFunction vf = new V_ValueFunction(gw);
 		//vf.getPolicyTable().print();
-		Q_ValueFunction qf = new Q_ValueFunction(gw);
+		//Q_ValueFunction qf = new Q_ValueFunction(gw);
 		//qf.getPolicyTable().print();
 	}
 	

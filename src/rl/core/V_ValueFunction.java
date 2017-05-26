@@ -18,8 +18,9 @@ public class V_ValueFunction extends ValueFunction{
 		return V.get(state.getIndex());
 	}
 	
-	// solving the linear equation V = R + df*P*V;
-	public void solveForV(Policy policy){
+	// solving the linear equation V = R + gamma*P*V;
+	@Override
+	public void solve(Policy policy){
 		int sl = mdp.getStates().length;
 		SimpleMatrix r = new SimpleMatrix(sl, 1);
 		SimpleMatrix p = new SimpleMatrix(sl, sl);
@@ -30,46 +31,39 @@ public class V_ValueFunction extends ValueFunction{
 				p.set(i, j, mdp.transitionModel(states[j], states[i], policy.pi(states[i], mdp.getActions())));
 			}
 		}
-		//r.print();
-		//p.print();
-		SimpleMatrix p1 = SimpleMatrix.identity(sl).minus(p.scale(mdp.discountFactor()));
-		SimpleMatrix p2 = SimpleMatrix.identity(sl).minus(p.scale(mdp.discountFactor())).invert();
-		//p1.print();
-		//p2.print();
-		p1.mult(p2).print();
-		System.out.println("Identily like "+((p1.mult(p2)).minus(SimpleMatrix.identity(sl))).normF());
 		V = (SimpleMatrix.identity(sl).minus(p.scale(mdp.discountFactor()))).invert().mult(r);
-		V.print(); 
+		//V.print(); 
 		
-		//TODO
-		System.out.println("\nlinear system");
-		for(int i=0; i<11; i++){
-			//System.out.print("V("+i+") = "+r.get(i, 0)+" ");
-			System.out.print(String.format("%.3f", V.get(i, 0))+" = "+r.get(i, 0)+" ");
-			for(int j=0; j<11; j++){
-				if(p.get(i, j)!=0){
-					//System.out.print(" + "+p.get(i, j)+" V("+j+")");
-					System.out.print(" + "+p.get(i, j)+" "+String.format("%.3f", V.get(j, 0)));
-				}
-			}
-			System.out.println("");
-		}
-		
-		System.out.println("\n");
-		for(int i=0; i<11; i++){
-			System.out.print("V("+i+") = "+r.get(i, 0)+" ");
-			//System.out.print(String.format("%.3f", V.get(i, 0))+" = "+r.get(i, 0)+" ");
-			for(int j=0; j<11; j++){
-				if(p.get(i, j)!=0){
-					System.out.print(" + "+p.get(i, j)+" V("+j+")");
-					//System.out.print(" + "+p.get(i, j)+" "+String.format("%.3f", V.get(j, 0)));
-				}
-			}
-			System.out.println("");
-		}
+//		//TODO
+//		System.out.println("\nlinear system");
+//		for(int i=0; i<11; i++){
+//			//System.out.print("V("+i+") = "+r.get(i, 0)+" ");
+//			System.out.print(String.format("%.3f", V.get(i, 0))+" = "+r.get(i, 0)+" ");
+//			for(int j=0; j<11; j++){
+//				if(p.get(i, j)!=0){
+//					//System.out.print(" + "+p.get(i, j)+" V("+j+")");
+//					System.out.print(" + "+p.get(i, j)+" "+String.format("%.3f", V.get(j, 0)));
+//				}
+//			}
+//			System.out.println("");
+//		}
+//		
+//		System.out.println("\n");
+//		for(int i=0; i<11; i++){
+//			System.out.print("V("+i+") = "+r.get(i, 0)+" ");
+//			//System.out.print(String.format("%.3f", V.get(i, 0))+" = "+r.get(i, 0)+" ");
+//			for(int j=0; j<11; j++){
+//				if(p.get(i, j)!=0){
+//					System.out.print(" + "+p.get(i, j)+" V("+j+")");
+//					//System.out.print(" + "+p.get(i, j)+" "+String.format("%.3f", V.get(j, 0)));
+//				}
+//			}
+//			System.out.println("");
+//		}
 	}
 	
 	// implement Value Iteration argorithm
+	@Override
 	public int valueIteration(double e, Policy p){
 		V = new SimpleMatrix(mdp.getStates().length, 1);
 		SimpleMatrix V_old;

@@ -8,6 +8,8 @@ public abstract class ValueFunction {
 		this.mdp = mdp;
 	}
 	
+	public abstract void solve(Policy p);
+	
 	public abstract int valueIteration(double e, Policy p);
 	
 	public abstract void print();

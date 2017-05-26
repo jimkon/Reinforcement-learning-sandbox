@@ -17,6 +17,12 @@ public class Q_ValueFunction extends ValueFunction{
 		return Q.get(state.getIndex(), action.getIndex());
 	}
 	
+	@Override
+	public void solve(Policy p) {
+		// TODO not implemented
+	}
+	
+	@Override
 	public int valueIteration(double e, Policy p){
 		SimpleMatrix Q_old;
 		int steps = 0;
@@ -75,6 +81,8 @@ public class Q_ValueFunction extends ValueFunction{
 		}
 		
 	}
+
+	
 	
 	
 
