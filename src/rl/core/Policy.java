@@ -2,6 +2,8 @@ package rl.core;
 
 public abstract class Policy {
 	
+	private final static int MAX_ITERATIONS = 100;
+	
 	protected MDP mdp;
 	
 	public Policy(MDP mdp){
@@ -19,10 +21,13 @@ public abstract class Policy {
 	
 	public abstract void setActionForState(Action action, State state);
 	
+	
 	public void policy_iteration(){
-		Policy p_old = copy();
+		int steps = 0;
+		Policy p_old = null;
 		V_ValueFunction vf = null;
 		do{
+			p_old = copy();
 			vf = getV();
 			for(State state:mdp.getStates()){
 				if(state.isFinal()){
@@ -47,16 +52,21 @@ public abstract class Policy {
 				}
 				//System.out.println("   max   action "+max);//TODO	
 				setActionForState(max, state);
-				//print();
+				
+				
 			}
-		}while(p_old.equals(this));
-		System.out.println("Policy iteration finished");
-		vf.print();
+			steps++;
+			if(steps>=MAX_ITERATIONS){
+				System.err.println("Policy iteration didnt converge");
+				return;
+			}
+		}while(!p_old.equals(this));
 	}
 	
 	public boolean equals(Policy p){
 		for(State state:mdp.getStates()){
-			if(!pi(state, mdp.getActions()).equals(p.pi(state, mdp.getActions()))){
+			Action a1 = pi(state, mdp.getActions()), a2 = p.pi(state, mdp.getActions());
+			if(!((a1 == a2) || (a1!=null && a1.equals(a2)))){
 				return false;
 			}
 		}
@@ -67,7 +77,7 @@ public abstract class Policy {
 	
 	public V_ValueFunction getV(){
 		V_ValueFunction vf = new V_ValueFunction(mdp);
-		vf.solveForV(this);
+		vf.solve(this);
 		return vf;
 	}
 	
