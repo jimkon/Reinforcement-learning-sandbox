@@ -17,6 +17,10 @@ public class Q_ValueFunction extends ValueFunction{
 		return Q.get(state.getIndex(), action.getIndex());
 	}
 	
+	public void updateQ(State state, Action action, double value){
+		Q.set(state.getIndex(), action.getIndex(), value);
+	}
+	
 	@Override
 	public void solve(Policy p) {
 		// TODO not implemented
@@ -33,7 +37,8 @@ public class Q_ValueFunction extends ValueFunction{
 			for(State state:mdp.getStates()){
 				for(Action action:mdp.getActions()){
 					if(state.isFinal()){
-						Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, null));
+						updateQ(state, action, mdp.reward(state, null));
+						//Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, null));
 						continue;
 					}
 					double sum = 0;
@@ -47,7 +52,8 @@ public class Q_ValueFunction extends ValueFunction{
 						}
 						sum += mdp.transitionModel(next_state, state, action)*max;
 					}
-					Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, action)+mdp.discountFactor()*sum);
+					updateQ(state, action, mdp.reward(state, action)+mdp.discountFactor()*sum);
+					//Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, action)+mdp.discountFactor()*sum);
 				}
 				
 			}

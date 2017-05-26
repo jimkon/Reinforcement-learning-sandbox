@@ -18,6 +18,10 @@ public class V_ValueFunction extends ValueFunction{
 		return V.get(state.getIndex());
 	}
 	
+	public void updateV(State state, double value){
+		V.set(state.getIndex(), 0, value);
+	}
+	
 	// solving the linear equation V = R + gamma*P*V;
 	@Override
 	public void solve(Policy policy){
@@ -74,7 +78,8 @@ public class V_ValueFunction extends ValueFunction{
 			// for each state
 			for(State state:mdp.getStates()){
 				if(state.isFinal()){
-					V.set(state.getIndex(), 0, mdp.reward(state, null));
+					updateV(state, mdp.reward(state, null));
+					//V.set(state.getIndex(), 0, mdp.reward(state, null));
 					continue;
 				}
 				double max = Double.NEGATIVE_INFINITY;
@@ -89,7 +94,8 @@ public class V_ValueFunction extends ValueFunction{
 						max = sum;
 					}
 				}
-				V.set(state.getIndex(), 0, max);
+				updateV(state, max);
+				//V.set(state.getIndex(), 0, max);
 			}
 			steps++;
 		}while(V.minus(V_old).normF()>e);
