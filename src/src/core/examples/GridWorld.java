@@ -1,40 +1,35 @@
-package rl.core.examples;
+package src.core.examples;
 
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
-import rl.core.Action;
-import rl.core.MDP;
-import rl.core.Policy;
-import rl.core.PolicyTable;
-import rl.core.Q_ValueFunction;
-import rl.core.State;
-import rl.core.V_ValueFunction;
+import src.core.Action;
+import src.core.MB_MDP;
+import src.core.State;
+import src.core.evaluation.V;
+import src.core.policy.PolicyTable;
 import toolkit.display.Screen;
 
-public class GridWorld extends MDP{
+public class GridWorld extends MB_MDP{
 
 	public static void main(String[] args) {
+		
 		GridWorld gw = new GridWorld();
 		
 		class GWPolicy extends PolicyTable{
 
 			public GWPolicy(GridWorld mdp) {
 				super(mdp);
-				for(State state:mdp.getStates()){
-					if(state.isFinal()){
-						setActionForState(null, state);
-					}
-					else{
-						setActionForState(GWAction.RANDOM(), state);
-					}
-				}
+			}
+
+			public GWPolicy(GridWorld gw, double e) {
+				super(gw, e)	;
 			}
 		}
 		GWPolicy gwp = new GWPolicy(gw);
-		gwp.policy_iteration();
+		System.out.println("\nend\n");
 		gwp.print();
 		//V_ValueFunction vf = new V_ValueFunction(gw);
 		//vf.getPolicyTable().print();
@@ -89,13 +84,13 @@ public class GridWorld extends MDP{
 	public double transitionModel(State next, State state, Action action) {
 		GWState n = (GWState)next, p = (GWState)state;
 		GWAction a = (GWAction)action;
+		if( a == null ){
+			a = (GWAction) getActions()[(int) (Math.random()*4)];
+		}
 		if(p.isFinal()){
 			return 0;
 		}
 		if( a == GWAction.NONE ){
-			if(n.equals(p)){
-				//return 1;
-			}
 			return 0;
 		}
 		GWAction[] actions = a.getAllPossibleActions();
@@ -143,10 +138,10 @@ public class GridWorld extends MDP{
 		return states[0][2];
 	}
 	
-	public void show(V_ValueFunction vf){
+	public void show(V vf){
 		double[] v = new double[getStates().length];
 		for(State s:getStates()){
-			v[s.getIndex()] = vf.V(s);
+			v[s.getIndex()] = vf.v(s);
 		}
 		class Show extends Screen{
 

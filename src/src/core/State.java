@@ -1,4 +1,4 @@
-package rl.core;
+package src.core;
 
 public abstract class State {
 	
