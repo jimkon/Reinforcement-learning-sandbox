@@ -1,29 +1,24 @@
-package rl.core;
+package src.core;
 
 import java.util.Random;
 
-public abstract class MDP{
+import src.core.policy.Policy;
 
-//	public static void main(String[] args) {
-//		// TODO Auto-generated method stub
-//
-//	}
+public abstract class MDP{
 	
 	private static final Random RANDOM = new Random();
 
-	public abstract State[] getStates();
+	protected abstract State[] getStates();
 	
-	public abstract Action[] getActions();
+	protected abstract Action[] getActions();
 	
-	//public abstract State transition(State state, Action action);
+	protected abstract double transitionModel(State next, State state, Action action);
 	
-	public abstract double transitionModel(State next, State state, Action action);
-	
-	public abstract double reward(State state, Action action);
+	protected abstract double reward(State state, Action action);
 	
 	public abstract double discountFactor();
 	
-	public abstract State initialState();
+	protected abstract State initialState();
 	
 	public final double sampleEpisode(Policy p){
 		double r = 0;
