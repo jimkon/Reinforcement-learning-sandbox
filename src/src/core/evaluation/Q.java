@@ -1,95 +1,24 @@
-package rl.core;
+package src.core.evaluation;
 
-import org.ejml.simple.SimpleMatrix;
+import src.core.Action;
+import src.core.State;
 
-public class Q_ValueFunction extends ValueFunction{
+public abstract class Q extends ValueFunction{
 	
-	private SimpleMatrix Q;
+	public abstract double q(State state, Action action);
 	
-	public Q_ValueFunction(MDP mdp){
-		super(mdp);
-		Q = new SimpleMatrix(mdp.getStates().length, mdp.getActions().length);
-		//valueIteration(0.0001);
-		
-	}
+	public abstract void updateQ(State state, Action action, double value);
 	
-	public double Q(State state, Action action){
-		return Q.get(state.getIndex(), action.getIndex());
-	}
+	protected abstract Action[] getActions();// known states
 	
-	public void updateQ(State state, Action action, double value){
-		Q.set(state.getIndex(), action.getIndex(), value);
-	}
-	
-	@Override
-	public void solve(Policy p) {
-		// TODO not implemented
-	}
-	
-	@Override
-	public int valueIteration(double e, Policy p){
-		SimpleMatrix Q_old;
-		int steps = 0;
-		do{
-			Q_old = Q.copy();
-			
-			// for each state
-			for(State state:mdp.getStates()){
-				for(Action action:mdp.getActions()){
-					if(state.isFinal()){
-						updateQ(state, action, mdp.reward(state, null));
-						//Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, null));
-						continue;
-					}
-					double sum = 0;
-					for(State next_state:mdp.getAvailableNextStatesFor(state)){
-						double max = Double.NEGATIVE_INFINITY;
-						for(Action next_action:mdp.getActions()){
-							double q_next = Q.get(next_state.getIndex(), next_action.getIndex());
-							if(max<q_next){
-								max = q_next;
-							}
-						}
-						sum += mdp.transitionModel(next_state, state, action)*max;
-					}
-					updateQ(state, action, mdp.reward(state, action)+mdp.discountFactor()*sum);
-					//Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, action)+mdp.discountFactor()*sum);
-				}
-				
-			}
-			
-			steps++;
-		}while(Q.minus(Q_old).normF()>e);
-
-		for(State state:mdp.getStates()){
-			if(state.isFinal()){
-				continue;
-			}
-			double qmax = Double.NEGATIVE_INFINITY;
-			for(Action action:mdp.getActions()){
-				if(qmax< Q(state, action)){
-					qmax = Q(state, action);
-					p.setActionForState(action, state);
-				}
+	public void print(){
+		System.out.println("Value function Q");
+		for(State state:getStates()){
+			for(Action action:getActions()){
+				System.out.println(String.format("State %s\tPolicy q(s) = %s", state, q(state, action)));
 			}
 		}
-		
-		return steps;
 	}
-
-	@Override
-	public void print() {
-		if(Q!=null){
-			Q.print();
-		}
-		else{
-			System.out.println("Q value not calculated");
-		}
 		
-	}
-
-	
-	
-	
 
 }
