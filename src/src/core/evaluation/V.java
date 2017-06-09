@@ -10,9 +10,9 @@ public abstract class V extends ValueFunction{
 	public abstract void updateV(State state, double value); // set v(s)
 	
 	public void print(){
-		System.out.println("Value function V");
+		System.out.println("Value function V  size "+getStates().length);
 		for(State state:getStates()){
-			System.out.println(String.format("\tPolicy V(%s) = %f", state, v(state)));
+			System.out.println(String.format("  V%s = %f", state, v(state)));
 		}
 	}
 	
