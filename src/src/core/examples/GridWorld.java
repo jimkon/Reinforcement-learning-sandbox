@@ -8,7 +8,9 @@ import java.awt.Graphics;
 import src.core.Action;
 import src.core.MB_MDP;
 import src.core.State;
+import src.core.TD;
 import src.core.evaluation.V;
+import src.core.evaluation.V_List;
 import src.core.policy.PolicyTable;
 import toolkit.display.Screen;
 
@@ -16,7 +18,7 @@ public class GridWorld extends MB_MDP{
 
 	public static void main(String[] args) {
 		
-		GridWorld gw = new GridWorld();
+		GridWorld gw = new GridWorld(); 
 		
 		class GWPolicy extends PolicyTable{
 
@@ -29,8 +31,13 @@ public class GridWorld extends MB_MDP{
 			}
 		}
 		GWPolicy gwp = new GWPolicy(gw);
-		System.out.println("\nend\n");
+		gwp.value_iteration(0.01);
+		//gwp.print();
+		TD td = new TD(gw, gwp, 0.1);
+		V_List v = td.computeV(10000);
 		gwp.print();
+		
+		System.out.println("Norm "+gwp.getV().euclidean_norm(v));
 		//V_ValueFunction vf = new V_ValueFunction(gw);
 		//vf.getPolicyTable().print();
 		//Q_ValueFunction qf = new Q_ValueFunction(gw);
@@ -87,7 +94,7 @@ public class GridWorld extends MB_MDP{
 		if( a == null ){
 			a = (GWAction) getActions()[(int) (Math.random()*4)];
 		}
-		if(p.isFinal()){
+		if(p.isTerminal()){
 			return 0;
 		}
 		if( a == GWAction.NONE ){
@@ -120,7 +127,7 @@ public class GridWorld extends MB_MDP{
 		}
 		//System.out.println("State ("+s.x+" , "+s.y+")  Action "+(action!=null?((GWAction)action):"NONE")+" reward "+reward);
 		//System.exit(0);
-		if(s.isFinal()){
+		if(s.isTerminal() || action == null){
 			return reward; 
 		}
 		return reward+STEP_REWARD;
@@ -141,7 +148,7 @@ public class GridWorld extends MB_MDP{
 	public void show(V vf){
 		double[] v = new double[getStates().length];
 		for(State s:getStates()){
-			v[s.getIndex()] = vf.v(s);
+			v[s.getID()] = vf.v(s);
 		}
 		class Show extends Screen{
 
@@ -159,14 +166,14 @@ public class GridWorld extends MB_MDP{
 						GWState s = (GWState)state;
 						if(s.x == 1 && s.y == 1)
 							continue;
-						if(s.isFinal())
+						if(s.isTerminal())
 							g.setColor(new Color(200, 200, 0));
 						else
 							g.setColor(new Color(200, 100, 0));
 						g.fillRect(s.x*(width+padding)+padding/2, s.y*(width+padding)+padding/2, width, width);
 						g.setColor(new Color(0, 0, 0));
 						g.setFont(new Font("Arial", Font.BOLD, 30));
-						g.drawString(String.format("%.4f", v[state.getIndex()]), s.x*(width+padding)+padding/2, s.y*(width+padding)+padding/2+width/2);
+						g.drawString(String.format("%.4f", v[state.getID()]), s.x*(width+padding)+padding/2, s.y*(width+padding)+padding/2+width/2);
 					
 				}
 				
@@ -187,7 +194,7 @@ public class GridWorld extends MB_MDP{
 		}
 
 		@Override
-		public boolean isFinal() {
+		public boolean isTerminal() {
 			// TODO Auto-generated method stub
 			return x == 3 && y < 2;
 		}
@@ -217,11 +224,11 @@ public class GridWorld extends MB_MDP{
 		}
 		
 		public String toString(){
-			return String.format("(%d, %d)%s", x, y, isFinal()?"F":"");
+			return String.format("(%d, %d)%s", x, y, isTerminal()?"F":"");
 		}
 
 		@Override
-		public int getIndex() {
+		public int getID() {
 			int index =  x+y*4;
 			return index>5?index-1:index;
 		}
@@ -284,7 +291,7 @@ public class GridWorld extends MB_MDP{
 			return (a.x*x+a.y*y)==0;
 		}
 		
-		public int getIndex(){
+		public int getID(){
 			if(this == UP){
 				return 0;
 			}

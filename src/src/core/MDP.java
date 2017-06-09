@@ -4,9 +4,12 @@ import java.util.Random;
 
 import src.core.policy.Policy;
 
+//model free markov decision process
 public abstract class MDP{
 	
 	private static final Random RANDOM = new Random();
+	
+	private State current_state = null;
 
 	protected abstract State[] getStates();
 	
@@ -24,7 +27,7 @@ public abstract class MDP{
 		double r = 0;
 		int step = 0;
 		State state = initialState(), nextState;
-		while(!state.isFinal()){
+		while(!state.isTerminal()){
 			Action action = p.pi(state, getActions());
 			nextState  = transition(state, action);
 			r += reward(state, action)*discountFactor(step);
@@ -47,6 +50,19 @@ public abstract class MDP{
 			}
 		}
 		return null;
+	}
+	
+	public State getCurrentState(){
+		if(current_state == null){
+			current_state = initialState();
+		}
+		return current_state;
+	}
+	
+	public double makeAction(Action action){
+		State temp = current_state;
+		current_state = transition(current_state, action);
+		return reward(temp, action);//+((current_state!=null)?reward(current_state, null):0);
 	}
 	
 	protected State[] getAvailableNextStatesFor(State state){

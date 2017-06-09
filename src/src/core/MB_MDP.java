@@ -1,5 +1,6 @@
 package src.core;
 
+// model based markov decision process
 public abstract class MB_MDP extends MDP{
 	
 	public abstract State[] getStates();
