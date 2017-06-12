@@ -2,8 +2,8 @@ package src.core;
 
 public abstract class State {
 	
-	public abstract boolean isFinal();
+	public abstract boolean isTerminal();
 	
-	public abstract int getIndex();
+	public abstract int getID();
 
 }
