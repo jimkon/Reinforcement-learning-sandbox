@@ -25,12 +25,12 @@ public class Q_Table extends Q{
 
 	@Override
 	public double q(State state, Action action){
-		return q_matrix.get(state.getIndex(), action.getIndex());
+		return q_matrix.get(state.getID(), action.getID());
 	}
 	
 	@Override
 	public void updateQ(State state, Action action, double value){
-		q_matrix.set(state.getIndex(), action.getIndex(), value);
+		q_matrix.set(state.getID(), action.getID(), value);
 	}
 	
 	@Override
@@ -76,7 +76,7 @@ public class Q_Table extends Q{
 			// for each state
 			for(State state:mdp.getStates()){
 				for(Action action:mdp.getActions()){
-					if(state.isFinal()){
+					if(state.isTerminal()){
 						updateQ(state, action, mdp.reward(state, null));
 						//Q.set(state.getIndex(), action.getIndex(), mdp.reward(state, null));
 						continue;
@@ -85,7 +85,7 @@ public class Q_Table extends Q{
 					for(State next_state:mdp.getAvailableNextStatesFor(state)){
 						double max = Double.NEGATIVE_INFINITY;
 						for(Action next_action:mdp.getActions()){
-							double q_next = q_matrix.get(next_state.getIndex(), next_action.getIndex());
+							double q_next = q_matrix.get(next_state.getID(), next_action.getID());
 							if(max<q_next){
 								max = q_next;
 							}
@@ -102,7 +102,7 @@ public class Q_Table extends Q{
 		}while(q_matrix.minus(Q_old).normF()>e);
 
 		for(State state:mdp.getStates()){
-			if(state.isFinal()){
+			if(state.isTerminal()){
 				continue;
 			}
 			double qmax = Double.NEGATIVE_INFINITY;

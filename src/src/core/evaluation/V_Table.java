@@ -6,7 +6,7 @@ import src.core.MB_MDP;
 import src.core.State;
 import src.core.policy.Policy;
 
-public final class V_Table extends V{
+public final class V_Table extends V_Array{
 
 	private SimpleMatrix v_matrix;
 	private MB_MDP mdp = null;
@@ -24,13 +24,31 @@ public final class V_Table extends V{
 		solve(policy);
 	}
 	
-	public double v(State state){
-		return v_matrix.get(state.getIndex());
+	@Override
+	protected int indexOfState(State state) {
+		// TODO Auto-generated method stub
+		return state.getID();
+	}
+
+	@Override
+	protected double get(int i) {
+		// TODO Auto-generated method stub
+		return v_matrix.get(i);
+	}
+
+	@Override
+	protected void set(int i, double v) {
+		// TODO Auto-generated method stub
+		v_matrix.set(i, 0, v);
 	}
 	
-	public void updateV(State state, double value){
-		v_matrix.set(state.getIndex(), 0, value);
-	}
+//	public double v(State state){
+//		return v_matrix.get(state.getID());
+//	}
+//	
+//	public void updateV(State state, double value){
+//		v_matrix.set(state.getID(), 0, value);
+//	}
 	
 	@Override
 	public void print() {
@@ -58,10 +76,10 @@ public final class V_Table extends V{
 	
 	// solving the linear equation V = R + gamma*P*V;
 	private void solve(Policy policy){
-		int sl = mdp.getStates().length;
+		int sl = getStates().length;
 		SimpleMatrix r = new SimpleMatrix(sl, 1);
 		SimpleMatrix p = new SimpleMatrix(sl, sl);
-		State[] states = mdp.getStates();
+		State[] states = getStates();
 		for(int i=0; i<states.length; i++){
 			r.set(i, 0, mdp.reward(states[i], policy.pi(states[i], mdp.getActions())));
 			for(int j=0; j<states.length; j++){
@@ -70,4 +88,5 @@ public final class V_Table extends V{
 		}
 		v_matrix = (SimpleMatrix.identity(sl).minus(p.scale(mdp.discountFactor()))).invert().mult(r);
 	}
+
 }
