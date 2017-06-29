@@ -7,7 +7,7 @@ import src.core.MB_MDP;
 import src.core.State;
 import src.core.policy.Policy;
 
-public class Q_Table extends Q{
+public class Q_Table extends Q_Array{
 
 	private SimpleMatrix q_matrix;
 	private MB_MDP mdp = null;
@@ -18,31 +18,50 @@ public class Q_Table extends Q{
 	// solves linear system to init q
 	public Q_Table(MB_MDP mdp, Policy policy, double e){
 		this.mdp = mdp;
-		q_matrix = new SimpleMatrix(getStates().length, 1);
+		q_matrix = new SimpleMatrix(getStates().length, getActions().length);
 		//solve(policy);
 		valueIteration(mdp, e, policy);
 	}
 
 	@Override
-	public double q(State state, Action action){
-		return q_matrix.get(state.getID(), action.getID());
+	protected int indexOfState(State state) {
+		return state.getID();
 	}
-	
+
 	@Override
-	public void updateQ(State state, Action action, double value){
-		q_matrix.set(state.getID(), action.getID(), value);
+	protected int indexOfAction(Action action) {
+		return action.getID();
 	}
-	
+
 	@Override
-	public void print() {
-		if(q_matrix!=null){
-			System.out.println("Value function Q");
-			q_matrix.print();
-		}
-		else{
-			System.out.println("Q value not calculated");
-		}
+	protected double get(int i, int j) {
+		return q_matrix.get(i, j);
 	}
+
+	@Override
+	protected void set(int i, int j, double v) {
+		q_matrix.set(i, j, v);
+	}
+//	@Override
+//	public double q(State state, Action action){
+//		return q_matrix.get(state.getID(), action.getID());
+//	}
+//	
+//	@Override
+//	public void updateQ(State state, Action action, double value){
+//		q_matrix.set(state.getID(), action.getID(), value);
+//	}
+	
+//	@Override
+//	public void print() {
+//		if(q_matrix!=null){
+//			System.out.println("Value function Q");
+//			q_matrix.print();
+//		}
+//		else{
+//			System.out.println("Q value not calculated");
+//		}
+//	}
 
 	@Override
 	protected State[] getStates() {
@@ -116,6 +135,8 @@ public class Q_Table extends Q{
 		
 		return steps;
 	}
+
+	
 
 	
 }

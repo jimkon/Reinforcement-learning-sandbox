@@ -17,6 +17,7 @@ public abstract class V extends ValueFunction{
 	
 	public abstract void updateV(State state, double value); // set v(s)
 	
+	@Override
 	public void print(){
 		System.out.println("Value function V  size "+getStates().length);
 		for(State state:getStates()){
@@ -37,22 +38,22 @@ public abstract class V extends ValueFunction{
 	}
 	
 	// showing grid world 
-	private VL_Show vl = null;
+	private V_Show v = null;
 	public void show(boolean auto){
-		if(vl == null){
-			vl = new VL_Show();
+		if(v == null){
+			v = new V_Show();
 		}
-		vl.refresh(auto);
+		v.refresh(auto);
 	}
 	
 	@SuppressWarnings("serial")
-	private class VL_Show extends Screen{
+	private class V_Show extends Screen{
 
 		private volatile boolean flag = true;
 		
-		public VL_Show() {
-			super("V", 440, 330);
-			setBackground(100, 100, 100);
+		public V_Show() {
+			super("V", 409, 306);
+			setBackground(100, 100, 0);
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {

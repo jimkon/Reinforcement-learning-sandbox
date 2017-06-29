@@ -9,7 +9,7 @@ import src.core.evaluation.V_Table;
 
 public abstract class Policy {
 	
-	private final static int MAX_ITERATIONS = 10;
+	private final static int MAX_ITERATIONS = 100;
 	
 //	public Policy(){}
 //	
@@ -24,6 +24,12 @@ public abstract class Policy {
 //	}
 	
 	private MB_MDP mdp = null;
+	
+	public Policy(){}
+	
+	public Policy(MB_MDP mdp){
+		this.mdp = mdp;
+	}
 	
 	public abstract Action pi(State state, Action[] actions); // p(s)
 	
@@ -58,8 +64,7 @@ public abstract class Policy {
 		return true;
 	}
 
-	public void policy_iteration(MB_MDP mdp){
-		this.mdp = mdp;
+	public int policy_iteration(){
 		int steps = 0;
 		Policy p_old = null;
 		V_Table vf = null;
@@ -67,7 +72,7 @@ public abstract class Policy {
 			p_old = copy();
 			vf = getV();
 			for(State state:mdp.getStates()){
-				if(state.isFinal()){
+				if(state.isTerminal()){
 					setActionForState(null, state);
 					continue;
 				}
@@ -92,6 +97,7 @@ public abstract class Policy {
 				throw new DidNotConvergeException("Policy iteration did not converge after "+MAX_ITERATIONS+" iterations");
 			}
 		}while(!equals(p_old));
+		return steps;
 	}
 	
 	public V_Table getV(){
@@ -101,8 +107,7 @@ public abstract class Policy {
 	}
 	
 	// implement Value Iteration algorithm
-	public int valueIteration(MB_MDP mdp,double e){
-		this.mdp = mdp;
+	public int value_iteration( double e){
 		int steps = 0;
 		V V_old = null, v = new V_Table(mdp);
 		do{
@@ -110,7 +115,7 @@ public abstract class Policy {
 			
 			// for each state
 			for(State state:mdp.getStates()){
-				if(state.isFinal()){
+				if(state.isTerminal()){
 					v.updateV(state, mdp.reward(state, null));
 					continue;
 				}
