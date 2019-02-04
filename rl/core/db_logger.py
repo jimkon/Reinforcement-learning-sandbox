@@ -1,12 +1,15 @@
 import numpy as np
 import sqlite3 as sql
 
-conn = sql.connect(".\rl.db")
+def db_path():
+    import os
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '../../dbs/'))
 
-cursor = conn.cursor()
+class rl_db(Object):
 
-# cursor.execute("CREATE TABLE experiment (id integer, name text)")
-cursor.execute("INSERT INTO experiment VALUES (1, 'test_exp')")
-cursor.execute("INSERT INTO experiment VALUES (2, 'test_exp')")
+    def __init__(self, name):
+        self.conn = sql.connect("{}/{}.db".format(db_path(), name))
+        self.cursor = self.conn.cursor()
 
-conn.commit()
+    def scheme(self):
+        
