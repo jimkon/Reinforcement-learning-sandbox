@@ -20,7 +20,7 @@ class Agent:
 
 class Env:
     def reset(self):
-        pass
+        return np.random.random(3)
 
     def step(self, action):
         return np.random.random(3), np.random.random(1)[0], np.random.random(1)[0]>0.5, None
@@ -32,12 +32,30 @@ class Env:
         return 'test_env'
 
 
+class DB:
+    def execute(self, query):
+        print('DB', query)
+
 def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', experiment_id=None):
     if not experiment_id:
         experiment_id = f'{to_table}:{agent_id}:{time.strftime("%Y-%m-%d:%H-%M-%S")}'
 
     episodes, steps_list, states, actions, rewards, dones = data
+
     print('LOGGING steps', experiment_id, episodes, steps_list)
+    print(states, actions, rewards, dones)
+    states_dim, actions_dim = len(states[0]), len(actions[-1])
+
+    db.execute(f"""CREATE TABLE IF NOT EXISTS {to_table}
+                   (exp_id text NOT NULL,
+                    agent_id text NOT NULL,
+                    episode integer NOT NULL,
+                    step integer NOT NULL,
+                    {' '.join([f'state_{i} double precision NOT NULL,' for i in range(states_dim)])}
+                    {' '.join([f'action_{i} double precision,' for i in range(actions_dim)])}
+                    reward double precision NOT NULL,
+                    done integer NOT NULL)
+                """)
 
 
 def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, render=False, verbosity='progress'):
@@ -135,4 +153,5 @@ def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, re
 
 agent = Agent()
 env = Env()
-run_episodes(env, agent, 5, log_database="db", log_frequency=-1, verbosity='episode')
+db = DB()
+run_episodes(env, agent, 5, log_database=db, log_frequency=-1, verbosity='episode')
