@@ -32,9 +32,12 @@ class Env:
         return 'test_env'
 
 
-def store_results_to_database(db, data):
+def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', experiment_id=None):
+    if not experiment_id:
+        experiment_id = f'{to_table}:{agent_id}:{time.strftime("%Y-%m-%d:%H-%M-%S")}'
+
     episodes, steps_list, states, actions, rewards, dones = data
-    print('LOGGING steps', episodes, steps_list)
+    print('LOGGING steps', experiment_id, episodes, steps_list)
 
 
 def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, render=False, verbosity='progress'):
@@ -106,7 +109,9 @@ def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, re
                                                      states[last_log_step:],
                                                      actions[last_log_step:],
                                                      rewards[last_log_step:],
-                                                     dones[last_log_step:]))
+                                                     dones[last_log_step:]),
+                                  to_table=env.name(),
+                                  agent_id=agent.name())
             last_log_step = total_steps
 
     elapsed_time = time.time()-start_time
@@ -115,16 +120,19 @@ def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, re
         print(f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {env.name()}. Total reward {total_reward} ({total_reward/episode} avg episode reward). Steps {total_steps}")
 
     if log_database:
-        store_results_to_database(log_database, (episodes[last_log_step:],
+        store_results_to_database(log_database,
+                                  (episodes[last_log_step:],
                                                  steps_list[last_log_step:],
                                                  states[last_log_step:],
                                                  actions[last_log_step:],
                                                  rewards[last_log_step:],
-                                                 dones[last_log_step:]))
+                                                 dones[last_log_step:]),
+                                  to_table=env.name(),
+                                  agent_id=agent.name())
 
     return states, actions, rewards, dones
 
 
 agent = Agent()
 env = Env()
-run_episodes(env, agent, 5, log_database="db", log_frequency=2, verbosity='episode')
+run_episodes(env, agent, 5, log_database="db", log_frequency=-1, verbosity='episode')
