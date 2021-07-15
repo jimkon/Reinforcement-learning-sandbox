@@ -35,18 +35,27 @@ class TestFunctions(unittest.TestCase):
 
 class TestDB(unittest.TestCase):
     def setUp(self):
-        os.remove(os.path.join(db.db_path(), 'test_db.db'))
+        self.db_path = os.path.join(db.db_path(), 'test_db.db')
         self.db_obj = db.DB('test_db.db')
-        self.db_obj.execute("create table table1 (id integer);")
-        self.db_obj.execute("insert into table1(id) values(1),(2),(3);")
 
     def tearDown(self):
         self.db_obj.close()
         os.remove(os.path.join(db.db_path(), self.db_obj.db_name))
 
+    def test_init_db(self):
+        self.assertTrue(os.path.exists(self.db_path))
+
     def test_execute_and_return(self):
+        self.db_obj.execute("create table table1 (id integer);")
+        self.db_obj.execute("insert into table1(id) values(1),(2),(3);")
+
         res = self.db_obj.execute_and_return('select * from table1').to_numpy()
         self.assertTrue(all(np.equal(res, [[1], [2], [3]])))
+
+        self.db_obj.execute("insert into table1(id) values(1),(2),(3);")
+
+        res = self.db_obj.execute_and_return('select * from table1').to_numpy()
+        self.assertTrue(all(np.equal(res, [[1], [2], [3], [1], [2], [3]])))
 
 
 
