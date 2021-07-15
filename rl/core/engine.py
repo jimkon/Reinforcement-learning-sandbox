@@ -9,7 +9,7 @@ import numpy as np
 
 class Agent:
     def act(self, state):
-        return np.random.random(1)
+        return [state[0], state[0]]
 
     def observe(self, *args):
         pass
@@ -19,11 +19,16 @@ class Agent:
 
 
 class Env:
+    def __init__(self):
+        self.cnt = 0.
+
     def reset(self):
-        return np.random.random(3)
+        self.cnt = 0.
+        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3]
 
     def step(self, action):
-        return np.random.random(3), np.random.random(1)[0], np.random.random(1)[0]>0.5, None
+        self.cnt += 1
+        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3], self.cnt, np.random.random(1)[0]>0.5, None
 
     def render(self):
         pass
@@ -34,7 +39,7 @@ class Env:
 
 class DB:
     def execute(self, query):
-        print('DB', query)
+        print('DB:\n', query)
 
 def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', experiment_id=None):
     if not experiment_id:
@@ -43,8 +48,18 @@ def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', e
     episodes, steps_list, states, actions, rewards, dones = data
 
     print('LOGGING steps', experiment_id, episodes, steps_list)
-    print(states, actions, rewards, dones)
+    print("states", len(states), states)
+    print("actions", len(actions), actions)
+    print("rewards", len(rewards), rewards)
+    print("dones", len(dones), dones)
     states_dim, actions_dim = len(states[0]), len(actions[-1])
+
+    dones = list(map(int, dones))
+    states = list(map(list, zip(*states)))
+    # print(states)
+    actions = list(map(list, zip(*[a if a else [None]*actions_dim for a in actions])))
+    # print(actions)
+    # exit()
 
     db.execute(f"""CREATE TABLE IF NOT EXISTS {to_table}
                    (exp_id text NOT NULL,
@@ -56,6 +71,15 @@ def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', e
                     reward double precision NOT NULL,
                     done integer NOT NULL)
                 """)
+
+    insert_str = f"""INSERT INTO {to_table}
+                    (exp_id, agent_id, episode, step,
+                    {' '.join([f'state_{i},' for i in range(states_dim)])}
+                    {' '.join([f'action_{i},' for i in range(actions_dim)])}
+                    reward, done)
+                    VALUES """ +\
+                 ',\n'.join(map(str, zip(episodes, steps_list, *states, *actions, rewards, dones)))
+    db.execute(insert_str)
 
 
 def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, render=False, verbosity='progress'):
@@ -154,4 +178,4 @@ def run_episodes(env, agent, n_episodes, log_database=None, log_frequency=-1, re
 agent = Agent()
 env = Env()
 db = DB()
-run_episodes(env, agent, 5, log_database=db, log_frequency=-1, verbosity='episode')
+run_episodes(env, agent, 2, log_database=db, log_frequency=-1, verbosity='episode')
