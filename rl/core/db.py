@@ -34,7 +34,7 @@ def stored_dbs_names():
 
 
 class DB:
-    def __init__(self, db_name, log_file=None):
+    def __init__(self, db_name, log_file=None, verbose=0):
         if db_name[-3:] != DB_FILE_EXTENSION:
             db_name += DB_FILE_EXTENSION
 
@@ -44,10 +44,18 @@ class DB:
         self.__cursor = self.__conn.cursor()
         self.__log_file = log_file
 
-    def execute(self, query):
+        self.verbose = verbose
+
+    def execute(self, query, verbose=0):
+        verbose = max(self.verbose, verbose)
+        if verbose > 0:
+            print(query)
         return self.__cursor.execute(query)
 
-    def execute_and_return(self, query):
+    def execute_and_return(self, query, verbose=0):
+        verbose = max(self.verbose, verbose)
+        if verbose > 0:
+            print(query)
         return pd.read_sql_query(query, self.__conn)
 
     def close(self):
