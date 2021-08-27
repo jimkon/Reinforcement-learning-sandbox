@@ -1,8 +1,18 @@
 import os
+import sys
 from functools import lru_cache
+from traceback import format_exc
+
 
 import pandas as pd
 import sqlite3 as sql
+
+import rl.core.configs as configs
+
+"""
+TODO:
+default db object
+"""
 
 DB_FILE_EXTENSION = '.db'
 
@@ -34,7 +44,7 @@ def stored_dbs_names():
 
 
 class DB:
-    def __init__(self, db_name, log_file=None, verbose=0):
+    def __init__(self, db_name, log_file=None, verbose=None):
         if db_name[-3:] != DB_FILE_EXTENSION:
             db_name += DB_FILE_EXTENSION
 
@@ -44,20 +54,41 @@ class DB:
         self.__cursor = self.__conn.cursor()
         self.__log_file = log_file
 
-        self.verbose = verbose
+        self.verbose = verbose if verbose else configs.DB_VERBOSITY
 
-    def execute(self, query, verbose=0):
+    def execute(self, query, verbose=0, error_log_file=None):
         verbose = max(self.verbose, verbose)
         if verbose > 0:
             print(query)
-        return self.__cursor.execute(query)
 
-    def execute_and_return(self, query, verbose=0):
+        try:
+            self.__cursor.execute(query)
+            return True
+        except Exception as e:
+            print("EXCEPTION IN DATABASE:")
+            print(format_exc(), sys.stderr if not error_log_file else error_log_file)
+            print("EXCEPTION PRODUCED BY QUERY:")
+            print(query, sys.stderr if not error_log_file else error_log_file)
+            return None
+
+    def execute_and_return(self, query, verbose=0, error_log_file=None):
         verbose = max(self.verbose, verbose)
         if verbose > 0:
             print(query)
-        return pd.read_sql_query(query, self.__conn)
+        try:
+            return pd.read_sql_query(query, self.__conn)
+        except Exception as e:
+            print("EXCEPTION IN DATABASE:")
+            print(format_exc(), sys.stderr if not error_log_file else error_log_file)
+            print("EXCEPTION PRODUCED BY QUERY:")
+            print(query, sys.stderr if not error_log_file else error_log_file)
+            return None
+
 
     def close(self):
         self.__cursor.close()
         self.__conn.close()
+
+
+def default_db():
+    return DB(db_path()+"/"+configs.DB_DEFAULT_DB_NAME+DB_FILE_EXTENSION)
