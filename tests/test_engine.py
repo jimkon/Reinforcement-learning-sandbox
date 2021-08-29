@@ -8,7 +8,7 @@ from rl.core import engine, db
 
 class Agent:
     def act(self, state):
-        return [state[0]+1, state[1]+1]
+        return [state[0], state[1]]
 
     def observe(self, *args):
         pass
@@ -27,12 +27,12 @@ class Env:
 
     def step(self, action):
         self.cnt += 1
-        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3], self.cnt, np.random.random(1)[0]>0.5, None
+        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3], self.cnt, int(np.random.random(1)[0]>0.5), None
 
     def render(self):
         pass
 
-    def name(self):
+    def __repr__(self):
         return 'test_env'
 
 
@@ -92,18 +92,21 @@ class TestEngine(unittest.TestCase):
                             log_frequency=-1,
                             verbosity=None)
 
-        res = self.db_obj.execute_and_return(f"select * from {self.env.name()} order by episode, step")
+        res = self.db_obj.execute_and_return(f"select * from {str(self.env)} order by episode, step")
 
         ep_cnt = 0
         for i, row in res.iterrows():
+            done = res.iloc[i]['done']
+            step = res.iloc[i]['step']
+
             self.assertEqual(res.iloc[i]['agent_id'], self.agent.name())
             self.assertEqual(res.iloc[i]['episode'], ep_cnt)
-            ep_cnt += 1 if res.iloc[i]['done'] else 0
-            step = res.iloc[i]['step']
+
             self.assertEqual(res.iloc[i]['state_0'], step+0.1)
             self.assertEqual(res.iloc[i]['state_1'], step+0.2)
             self.assertEqual(res.iloc[i]['state_2'], step+0.3)
-            self.assertTrue(np.isnan(res.iloc[i]['action_0']) if step == 0 else res.iloc[i]['action_0'] == step + 0.1)
-            self.assertTrue(np.isnan(res.iloc[i]['action_1']) if step == 0 else res.iloc[i]['action_1'] == step + 0.2)
-            self.assertEqual(res.iloc[i]['reward'], step)
+            self.assertTrue(np.isnan(res.iloc[i]['action_0']) if done==-1 else res.iloc[i]['action_0'] == step + 0.1)
+            self.assertTrue(np.isnan(res.iloc[i]['action_1']) if done==-1 else res.iloc[i]['action_1'] == step + 0.2)
+            self.assertEqual(res.iloc[i]['reward'], step+1 if done>=0 else 0)
 
+            ep_cnt += 1 if done==-1 else 0
