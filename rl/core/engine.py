@@ -6,44 +6,6 @@ import numpy as np
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-class Agent:
-    def act(self, state):
-        return [state[0], state[0]]
-
-    def observe(self, *args):
-        pass
-
-    def name(self):
-        return 'test_agent'
-
-
-class Env:
-    def __init__(self):
-        self.cnt = 0.
-
-    def reset(self):
-        self.cnt = 0.
-        return [self.cnt + 0.1, self.cnt + 0.2, self.cnt + 0.3]
-
-    def step(self, action):
-        self.cnt += 1
-        return [self.cnt + 0.1, self.cnt + 0.2, self.cnt + 0.3], self.cnt, np.random.random(1)[0] > 0.5, None
-
-    def render(self):
-        pass
-
-    def __repr__(self):
-        return 'test_env'
-
-
-# class DB:
-#     def __init__(self, dbname):
-#         pass
-#
-#     def execute(self, query):
-#         print('mocked DB:\n', query)
-
-
 def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
@@ -134,13 +96,13 @@ def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, r
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save((episodes[last_log_step:],
-                                                         steps_list[last_log_step:],
-                                                         states[last_log_step:],
-                                                         actions[last_log_step:],
-                                                         rewards[last_log_step:],
-                                                         dones[last_log_step:]),
-                                                        env=env,
-                                                        agent=agent)
+                                    steps_list[last_log_step:],
+                                    states[last_log_step:],
+                                    actions[last_log_step:],
+                                    rewards[last_log_step:],
+                                    dones[last_log_step:]),
+                                   env=env,
+                                   agent=agent)
             last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
@@ -151,18 +113,12 @@ def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, r
 
     if store_results_obj:
         store_results_obj.save((episodes[last_log_step:],
-                                                     steps_list[last_log_step:],
-                                                     states[last_log_step:],
-                                                     actions[last_log_step:],
-                                                     rewards[last_log_step:],
-                                                     dones[last_log_step:]),
-                                                    env=env,
-                                                    agent=agent)
+                                steps_list[last_log_step:],
+                                states[last_log_step:],
+                                actions[last_log_step:],
+                                rewards[last_log_step:],
+                                dones[last_log_step:]),
+                               env=env,
+                               agent=agent)
 
     return states, actions, rewards, dones
-
-
-agent = Agent()
-env = Env()
-# db = DB()
-run_episodes(env, agent, 2, log_database='default', log_frequency=-1, verbosity='episode_step')
