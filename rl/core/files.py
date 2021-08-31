@@ -2,8 +2,9 @@ import time
 import os
 
 import pandas as pd
+from sqlalchemy import create_engine
 
-from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
+from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH, DEFAULT_STORE_DATABASE_OBJECT_PATH
 
 """
 TODO 
@@ -60,12 +61,13 @@ def store_results_to_database(db, data, env, agent=None, experiment_id=None):
     db.execute(insert_str.replace("'", " "))
 
 
-def generate_experiment_name(env, agent, experiment_id=None):
-    to_table = str(env)
-    agent_id = 'unknown_agent_id' if not agent else agent.name()
-    general_id = f'{to_table},{agent_id}'
-    experiment_name = f'{general_id},{experiment_id if experiment_id else time.strftime("%Y-%m-%d,%H-%M-%S")}'
-    return experiment_name, general_id
+def store_df_in_db(df, to_table, db_path=None):
+    if not db_path:
+        db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
+
+    engine = create_engine('sqlite:///'+db_path, echo=False)
+
+    df.to_sql(to_table, con=engine, if_exists='append', index=False)
 
 
 def data_to_df(episodes, steps_list, states, actions, rewards, dones):
@@ -134,6 +136,8 @@ class StoreResultsInDataframe(StoreResultsAbstract):
         if not os.path.exists(self.experiment_temp_dir_path):
             os.mkdir(self.experiment_temp_dir_path)
 
+        self.df_path = None
+
     def save(self, episodes, steps_list, states, actions, rewards, dones):
         df = data_to_df(episodes, steps_list, states, actions, rewards, dones)
 
@@ -149,8 +153,8 @@ class StoreResultsInDataframe(StoreResultsAbstract):
         temp_dfs = [pd.read_csv(df_name, index_col=None) for df_name in dfs]
         res_df = pd.concat(temp_dfs)
 
-        df_path = os.path.join(self.experiment_dir_path, self.experiment_name+','+self.experiment_id+'.csv')
-        res_df.to_csv(df_path, index=False)
+        self.df_path = os.path.join(self.experiment_dir_path, self.experiment_name+','+self.experiment_id+'.csv')
+        res_df.to_csv(self.df_path, index=False)
 
         for df_name in dfs:
             os.remove(df_name)
@@ -158,5 +162,26 @@ class StoreResultsInDataframe(StoreResultsAbstract):
 
 
 class StoreResultsInDatabase(StoreResultsAbstract):
-    pass
+    def __init__(self, to_table, db_path=None):
+        self.to_table = to_table
+        self.db_path = db_path if db_path else DEFAULT_STORE_DATABASE_OBJECT_PATH
+
+        self.store_in_df = StoreResultsInDataframe(experiment_name=to_table+"_"+time.strftime('%Y-%m-%d,%H-%M-%S'))
+        print('----------db __init__')
+
+    def save(self, episodes, steps_list, states, actions, rewards, dones):
+        self.store_in_df.save(episodes, steps_list, states, actions, rewards, dones)
+        print('----------db savee')
+
+    def finalize(self):
+        self.store_in_df.finalize()
+
+        df = pd.read_csv(self.store_in_df.df_path, index_col=None)
+        store_df_in_db(df, self.to_table)
+        os.remove(self.store_in_df.df_path)
+        # os.rmdir(self.store_in_df.experiment_dir_path)
+        print('----------db finalize')
+
+
+
 

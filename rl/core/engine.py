@@ -3,17 +3,19 @@ from tqdm import tqdm
 
 import numpy as np
 
+from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='dataframe', log_frequency=-1,
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
                  render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
 
+    store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase()
+        store_results_obj = StoreResultsInDatabase(to_table=str(env))
     elif store_results == 'dataframe':
         store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
     else:
