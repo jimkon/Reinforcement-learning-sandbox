@@ -2,6 +2,8 @@ import time
 
 import pandas as pd
 
+from rl.core.configs import STORE_COMPRESSED_DATA
+
 
 def store_results_to_database(db, data, env, agent=None, experiment_id=None):
     to_table = str(env)
@@ -50,6 +52,8 @@ def store_results_to_database(db, data, env, agent=None, experiment_id=None):
                                          dones)))
     db.execute(insert_str.replace("'", " "))
 
+def expand_data(df):
+    return df
 
 def data_to_df(episodes, steps_list, states, actions, rewards, dones):
     to_dict = {}
@@ -71,7 +75,21 @@ def data_to_df(episodes, steps_list, states, actions, rewards, dones):
     to_dict['done'] = list(map(int, dones))
 
     df = pd.DataFrame(to_dict)
-    print(df.head(-1))
+
+    pd.set_option('display.max_columns', None)
+    print(df.head(100))
+
+    if not STORE_COMPRESSED_DATA:
+        dones = df['done']
+        del df['done']
+        for i in range(len(states)):
+            df[f"next_state_{i}"] = df[f"state_{i}"].shift(periods=-1)
+
+        df['done'] = dones
+
+        df = df[df['done'] >= 0]
+    print('after')
+    print(df.head(100))
 
     return df
 

@@ -1,8 +1,6 @@
-from rl.core.files import StoreResultsInDataframe
-
 STORE_COMPRESSED_DATA = False
 
-DEFAULT_STORE_RESULTS_OBJECT = StoreResultsInDataframe()
+DEFAULT_STORE_RESULTS_OBJECT = 'dataframe'
 
 DB_VERBOSITY = 1
 DB_DEFAULT_DB_NAME = 'rl'
