@@ -7,7 +7,6 @@ from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRE
 
 """
 TODO 
-- check temp dataframes
 - unittesting
 - store in database
 """
