@@ -6,7 +6,7 @@ import numpy as np
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-def run_episodes(env, agent, n_episodes, store_results='dataframe', log_frequency=-1, render=False, verbosity='progress'):
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='dataframe', log_frequency=-1, render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
@@ -14,7 +14,7 @@ def run_episodes(env, agent, n_episodes, store_results='dataframe', log_frequenc
     if store_results == 'database':
         store_results_obj = StoreResultsInDatabase()
     elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe()
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
     else:
         store_results_obj = store_results
 
@@ -100,9 +100,7 @@ def run_episodes(env, agent, n_episodes, store_results='dataframe', log_frequenc
                                     states[last_log_step:],
                                     actions[last_log_step:],
                                     rewards[last_log_step:],
-                                    dones[last_log_step:],
-                                   env=env,
-                                   agent=agent)
+                                    dones[last_log_step:])
             last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
@@ -117,8 +115,7 @@ def run_episodes(env, agent, n_episodes, store_results='dataframe', log_frequenc
                                 states[last_log_step:],
                                 actions[last_log_step:],
                                 rewards[last_log_step:],
-                                dones[last_log_step:],
-                               env=env,
-                               agent=agent)
+                                dones[last_log_step:])
+        store_results_obj.finalize()
 
     return states, actions, rewards, dones

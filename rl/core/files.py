@@ -1,8 +1,9 @@
 import time
+import os
 
 import pandas as pd
 
-from rl.core.configs import STORE_COMPRESSED_DATA
+from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
 
 
 def store_results_to_database(db, data, env, agent=None, experiment_id=None):
@@ -52,8 +53,14 @@ def store_results_to_database(db, data, env, agent=None, experiment_id=None):
                                          dones)))
     db.execute(insert_str.replace("'", " "))
 
-def expand_data(df):
-    return df
+
+def generate_experiment_name(env, agent, experiment_id=None):
+    to_table = str(env)
+    agent_id = 'unknown_agent_id' if not agent else agent.name()
+    general_id = f'{to_table},{agent_id}'
+    experiment_name = f'{general_id},{experiment_id if experiment_id else time.strftime("%Y-%m-%d,%H-%M-%S")}'
+    return experiment_name, general_id
+
 
 def data_to_df(episodes, steps_list, states, actions, rewards, dones):
     to_dict = {}
@@ -77,7 +84,6 @@ def data_to_df(episodes, steps_list, states, actions, rewards, dones):
     df = pd.DataFrame(to_dict)
 
     pd.set_option('display.max_columns', None)
-    print(df.head(100))
 
     if not STORE_COMPRESSED_DATA:
         dones = df['done']
@@ -88,21 +94,61 @@ def data_to_df(episodes, steps_list, states, actions, rewards, dones):
         df['done'] = dones
 
         df = df[df['done'] >= 0]
-    print('after')
-    print(df.head(100))
 
     return df
 
 
 class StoreResultsAbstract:
-    def save(self, episodes, steps_list, states, actions, rewards, dones, env, agent, experiment_id=None):
+    def save(self, episodes, steps_list, states, actions, rewards, dones):
         raise NotImplementedError
+
+    def finalize(self):
+        pass
 
 
 class StoreResultsInDataframe(StoreResultsAbstract):
-    def save(self, episodes, steps_list, states, actions, rewards, dones, env, agent, experiment_id=None):
-        print(episodes, steps_list, states, actions, rewards, dones, sep='\n')
-        data_to_df(episodes, steps_list, states, actions, rewards, dones)
+    def __init__(self, dir_path=None, experiment_name=None, env=None, agent=None):
+        self.dir_path = dir_path if dir_path else DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
+
+        if experiment_name:
+            self.experiment_name = experiment_name
+        elif env and agent:
+            self.experiment_name = f"{str(env)},{agent.name()}"
+        else:
+            self.experiment_name = "unknown_env,unknown_agent"
+
+        self.experiment_id = f"{time.strftime('%Y-%m-%d,%H-%M-%S')}"
+
+        self.experiment_dir_path = os.path.join(self.dir_path, self.experiment_name)
+        if not os.path.exists(self.experiment_dir_path):
+            os.mkdir(self.experiment_dir_path)
+
+        self.experiment_temp_dir_path = os.path.join(self.experiment_dir_path,
+                                                     'temp_'+self.experiment_name+'_'+self.experiment_id)
+        if not os.path.exists(self.experiment_temp_dir_path):
+            os.mkdir(self.experiment_temp_dir_path)
+
+    def save(self, episodes, steps_list, states, actions, rewards, dones):
+        df = data_to_df(episodes, steps_list, states, actions, rewards, dones)
+
+        df_path = os.path.join(self.experiment_temp_dir_path,
+                               self.experiment_name+','+self.experiment_id+','+str(time.time())+'.csv')
+
+        df.to_csv(df_path, index=False)
+
+    def finalize(self):
+        dfs = [os.path.join(self.experiment_temp_dir_path, df_name) for df_name in os.listdir(self.experiment_temp_dir_path)]
+        if len(dfs) < 1:
+            return
+        temp_dfs = [pd.read_csv(df_name, index_col=None) for df_name in dfs]
+        res_df = pd.concat(temp_dfs)
+
+        df_path = os.path.join(self.experiment_dir_path, self.experiment_name+','+self.experiment_id+'.csv')
+        res_df.to_csv(df_path, index=False)
+
+        for df_name in dfs:
+            os.remove(df_name)
+        os.rmdir(self.experiment_temp_dir_path)
 
 
 class StoreResultsInDatabase(StoreResultsAbstract):
