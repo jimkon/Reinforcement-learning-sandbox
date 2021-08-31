@@ -6,7 +6,8 @@ import numpy as np
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='dataframe', log_frequency=-1, render=False, verbosity='progress'):
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='dataframe', log_frequency=-1,
+                 render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
@@ -80,6 +81,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='da
                 state = None
                 episodes.append(episode), steps_list.append(step + 1), states.append(next_state), actions.append(
                     ['null'] * n_actions), rewards.append(.0), dones.append(-1)
+                step += 1
             else:
                 state = next_state
                 episode_reward += reward
@@ -96,11 +98,11 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='da
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save(episodes[last_log_step:],
-                                    steps_list[last_log_step:],
-                                    states[last_log_step:],
-                                    actions[last_log_step:],
-                                    rewards[last_log_step:],
-                                    dones[last_log_step:])
+                                   steps_list[last_log_step:],
+                                   states[last_log_step:],
+                                   actions[last_log_step:],
+                                   rewards[last_log_step:],
+                                   dones[last_log_step:])
             last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
@@ -111,11 +113,11 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results='da
 
     if store_results_obj:
         store_results_obj.save(episodes[last_log_step:],
-                                steps_list[last_log_step:],
-                                states[last_log_step:],
-                                actions[last_log_step:],
-                                rewards[last_log_step:],
-                                dones[last_log_step:])
+                               steps_list[last_log_step:],
+                               states[last_log_step:],
+                               actions[last_log_step:],
+                               rewards[last_log_step:],
+                               dones[last_log_step:])
         store_results_obj.finalize()
 
     return states, actions, rewards, dones
