@@ -5,6 +5,13 @@ import pandas as pd
 
 from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
 
+"""
+TODO 
+- check temp dataframes
+- unittesting
+- store in database
+"""
+
 
 def store_results_to_database(db, data, env, agent=None, experiment_id=None):
     to_table = str(env)
