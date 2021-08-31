@@ -6,7 +6,7 @@ import numpy as np
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, render=False, verbosity='progress'):
+def run_episodes(env, agent, n_episodes, store_results='dataframe', log_frequency=-1, render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
@@ -95,12 +95,12 @@ def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, r
                 f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step + 1}")
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
-            store_results_obj.save((episodes[last_log_step:],
+            store_results_obj.save(episodes[last_log_step:],
                                     steps_list[last_log_step:],
                                     states[last_log_step:],
                                     actions[last_log_step:],
                                     rewards[last_log_step:],
-                                    dones[last_log_step:]),
+                                    dones[last_log_step:],
                                    env=env,
                                    agent=agent)
             last_log_step = total_steps
@@ -112,12 +112,12 @@ def run_episodes(env, agent, n_episodes, store_results=None, log_frequency=-1, r
             f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} ({total_reward / episode} avg episode reward). Steps {total_steps}")
 
     if store_results_obj:
-        store_results_obj.save((episodes[last_log_step:],
+        store_results_obj.save(episodes[last_log_step:],
                                 steps_list[last_log_step:],
                                 states[last_log_step:],
                                 actions[last_log_step:],
                                 rewards[last_log_step:],
-                                dones[last_log_step:]),
+                                dones[last_log_step:],
                                env=env,
                                agent=agent)
 

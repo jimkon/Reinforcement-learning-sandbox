@@ -1,5 +1,7 @@
 import time
 
+import pandas as pd
+
 
 def store_results_to_database(db, data, env, agent=None, experiment_id=None):
     to_table = str(env)
@@ -49,13 +51,40 @@ def store_results_to_database(db, data, env, agent=None, experiment_id=None):
     db.execute(insert_str.replace("'", " "))
 
 
+def data_to_df(episodes, steps_list, states, actions, rewards, dones):
+    to_dict = {}
+
+    to_dict['episode'] = episodes
+
+    to_dict['step'] = steps_list
+
+    states = list(map(list, zip(*states)))
+    for i, state_i in enumerate(states):
+        to_dict[f"state_{i}"] = state_i
+
+    actions = list(map(list, zip(*actions)))
+    for i, action_i in enumerate(actions):
+        to_dict[f"action_{i}"] = action_i
+
+    to_dict['reward'] = rewards
+
+    to_dict['done'] = list(map(int, dones))
+
+    df = pd.DataFrame(to_dict)
+    print(df.head(-1))
+
+    return df
+
+
 class StoreResultsAbstract:
-    def save(self, data, env, agent, experiment_id=None):
+    def save(self, episodes, steps_list, states, actions, rewards, dones, env, agent, experiment_id=None):
         raise NotImplementedError
 
 
 class StoreResultsInDataframe(StoreResultsAbstract):
-    pass
+    def save(self, episodes, steps_list, states, actions, rewards, dones, env, agent, experiment_id=None):
+        print(episodes, steps_list, states, actions, rewards, dones, sep='\n')
+        data_to_df(episodes, steps_list, states, actions, rewards, dones)
 
 
 class StoreResultsInDatabase(StoreResultsAbstract):
