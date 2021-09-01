@@ -1,104 +1,29 @@
 import time
 from tqdm import tqdm
-from rl.core.db import default_db
 
 import numpy as np
 
-# import agents
-# import custom_envs
-
-#
-class Agent:
-    def act(self, state):
-        return [state[0], state[0]]
-
-    def observe(self, *args):
-        pass
-
-    def name(self):
-        return 'test_agent'
+from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
+from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
-class Env:
-    def __init__(self):
-        self.cnt = 0.
-
-    def reset(self):
-        self.cnt = 0.
-        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3]
-
-    def step(self, action):
-        self.cnt += 1
-        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3], self.cnt, np.random.random(1)[0]>0.5, None
-
-    def render(self):
-        pass
-
-    def __repr__(self):
-        return 'test_env'
-
-
-# class DB:
-#     def __init__(self, dbname):
-#         pass
-#
-#     def execute(self, query):
-#         print('mocked DB:\n', query)
-
-
-def store_results_to_database(db, data, to_table, agent_id='unknown_agent_id', experiment_id=None):
-    if not experiment_id:
-        experiment_id = f'{to_table}:{agent_id}:{time.strftime("%Y-%m-%d:%H-%M-%S")}'
-
-    experiment_id = f'"{experiment_id}"'
-    agent_id = f'"{agent_id}"'
-
-    episodes, steps_list, states, actions, rewards, dones = data
-
-    states_dim, actions_dim = len(states[0]), len(actions[0])
-
-    dones = list(map(int, dones))
-    states = list(map(list, zip(*states)))
-    # print(actions)
-    # actions = list(map(list, zip(*[a if a else ['null']*actions_dim for a in actions])))
-    print(actions)
-
-    db.execute(f"""CREATE TABLE IF NOT EXISTS {to_table}
-                   (exp_id text NOT NULL,
-                    agent_id text NOT NULL,
-                    episode integer NOT NULL,
-                    step integer NOT NULL,
-                    {' '.join([f'state_{i} double precision NOT NULL,' for i in range(states_dim)])}
-                    {' '.join([f'action_{i} double precision,' for i in range(actions_dim)])}
-                    reward double precision NOT NULL,
-                    done integer NOT NULL)
-                """)
-
-    insert_str = f"""INSERT INTO {to_table}
-                    (exp_id, agent_id, episode, step,
-                    {' '.join([f'state_{i},' for i in range(states_dim)])}
-                    {' '.join([f'action_{i},' for i in range(actions_dim)])}
-                    reward, done)
-                    VALUES """ +\
-                 ',\n'.join(map(str, zip([experiment_id] * len(episodes),
-                                         [agent_id] * len(episodes),
-                                         episodes,
-                                         steps_list,
-                                         *states,
-                                         *actions,
-                                         rewards,
-                                         dones)))
-    db.execute(insert_str.replace("'" , " "))
-
-
-def run_episodes(env, agent, n_episodes, log_database='default', log_frequency=-1, render=False, verbosity='progress'):
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
+                 render=False, verbosity='progress'):
     """
-    log_database: database object, if 'default' the dbs/rl.db will be used.
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
 
-    if log_database=='default':
-        log_database = default_db()
+    store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
+    if store_results == 'database':
+        store_results_obj = StoreResultsInDatabase(to_table=str(env),
+                                                   env=env,
+                                                   agent=agent)
+    elif store_results == 'dataframe':
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name,
+                                                   env=env,
+                                                   agent=agent)
+    else:
+        store_results_obj = store_results
 
     start_time = time.time()
 
@@ -150,15 +75,19 @@ def run_episodes(env, agent, n_episodes, log_database='default', log_frequency=-
             agent.observe(state, action, reward, next_state, done)
 
             if verbosity >= 4:
-                print(f"Episode:{episode}, Step:{step}, state:{state}, action:{action}, reward:{reward}, next state:{next_state}, done:{done}")
+                print(
+                    f"Episode:{episode}, Step:{step}, state:{state}, action:{action}, reward:{reward}, next state:{next_state}, done:{done}")
 
             action = np.atleast_1d(action)
 
-            episodes.append(episode), steps_list.append(step), states.append(state), actions.append(action), rewards.append(reward), dones.append(done)
+            episodes.append(episode), steps_list.append(step), states.append(state), actions.append(
+                action), rewards.append(reward), dones.append(done)
 
             if done:
                 state = None
-                episodes.append(episode), steps_list.append(step+1), states.append(next_state), actions.append(['null']*n_actions), rewards.append(.0), dones.append(-1)
+                episodes.append(episode), steps_list.append(step + 1), states.append(next_state), actions.append(
+                    ['null'] * n_actions), rewards.append(.0), dones.append(-1)
+                step += 1
             else:
                 state = next_state
                 episode_reward += reward
@@ -168,41 +97,33 @@ def run_episodes(env, agent, n_episodes, log_database='default', log_frequency=-
                 env.render()
 
         total_reward += episode_reward
-        total_steps += step+1
+        total_steps += step + 1
         if verbosity >= 3:
-            print(f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step+1}")
+            print(
+                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step + 1}")
 
-        if log_database and episode % log_frequency == log_frequency-1:
-            store_results_to_database(log_database, (episodes[last_log_step:],
-                                                     steps_list[last_log_step:],
-                                                     states[last_log_step:],
-                                                     actions[last_log_step:],
-                                                     rewards[last_log_step:],
-                                                     dones[last_log_step:]),
-                                  to_table=str(env),
-                                  agent_id=agent.name())
+        if store_results_obj and episode % log_frequency == log_frequency - 1:
+            store_results_obj.save(episodes[last_log_step:],
+                                   steps_list[last_log_step:],
+                                   states[last_log_step:],
+                                   actions[last_log_step:],
+                                   rewards[last_log_step:],
+                                   dones[last_log_step:])
             last_log_step = total_steps
 
-    elapsed_time = time.time()-start_time
+    elapsed_time = time.time() - start_time
     if verbosity >= 2:
         episode += 1
-        print(f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} ({total_reward/episode} avg episode reward). Steps {total_steps}")
+        print(
+            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} ({total_reward / episode} avg episode reward). Steps {total_steps}")
 
-    if log_database:
-        store_results_to_database(log_database,
-                                  (episodes[last_log_step:],
-                                                 steps_list[last_log_step:],
-                                                 states[last_log_step:],
-                                                 actions[last_log_step:],
-                                                 rewards[last_log_step:],
-                                                 dones[last_log_step:]),
-                                  to_table=str(env),
-                                  agent_id=agent.name())
+    if store_results_obj:
+        store_results_obj.save(episodes[last_log_step:],
+                               steps_list[last_log_step:],
+                               states[last_log_step:],
+                               actions[last_log_step:],
+                               rewards[last_log_step:],
+                               dones[last_log_step:])
+        store_results_obj.finalize()
 
     return states, actions, rewards, dones
-
-
-agent = Agent()
-env = Env()
-# db = DB()
-run_episodes(env, agent, 2, log_database='default', log_frequency=-1, verbosity='episode_step')

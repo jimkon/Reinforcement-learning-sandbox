@@ -105,8 +105,8 @@ class TestEngine(unittest.TestCase):
             self.assertEqual(res.iloc[i]['state_0'], step+0.1)
             self.assertEqual(res.iloc[i]['state_1'], step+0.2)
             self.assertEqual(res.iloc[i]['state_2'], step+0.3)
-            self.assertTrue(np.isnan(res.iloc[i]['action_0']) if done==-1 else res.iloc[i]['action_0'] == step + 0.1)
-            self.assertTrue(np.isnan(res.iloc[i]['action_1']) if done==-1 else res.iloc[i]['action_1'] == step + 0.2)
-            self.assertEqual(res.iloc[i]['reward'], step+1 if done>=0 else 0)
+            self.assertTrue(np.isnan(res.iloc[i]['action_0']) if done == -1 else res.iloc[i]['action_0'] == step + 0.1)
+            self.assertTrue(np.isnan(res.iloc[i]['action_1']) if done == -1 else res.iloc[i]['action_1'] == step + 0.2)
+            self.assertEqual(res.iloc[i]['reward'], step+1 if done >= 0 else 0)
 
-            ep_cnt += 1 if done==-1 else 0
+            ep_cnt += 1 if done == -1 else 0
