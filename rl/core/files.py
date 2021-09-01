@@ -9,6 +9,7 @@ from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRE
 """
 TODO 
 - unittesting
+- store experiment details in experiments table
 """
 
 
@@ -127,14 +128,16 @@ class StoreResultsInDatabase(StoreResultsAbstract):
     def finalize(self):
         self.store_in_df.finalize()
 
-        print(self.store_in_df.df_path)
-        print(self.experiment_id)
         df = pd.read_csv(self.store_in_df.df_path, index_col=None)
         df['experiment_id'] = self.experiment_id
+
         store_df_in_db(df, self.to_table)
+
         os.remove(self.store_in_df.df_path)
         if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
             os.rmdir(self.store_in_df.experiment_dir_path)
+
+
 
 
 
