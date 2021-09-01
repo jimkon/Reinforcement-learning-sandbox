@@ -75,13 +75,14 @@ class StoreResultsInDataframe(StoreResultsAbstract):
             self.experiment_name = "unknown_env,unknown_agent"
 
         self.experiment_id = f"{time.strftime('%Y-%m-%d,%H-%M-%S')}"
+        self.df_name = self.experiment_name+','+self.experiment_id
 
         self.experiment_dir_path = os.path.join(self.dir_path, self.experiment_name)
         if not os.path.exists(self.experiment_dir_path):
             os.mkdir(self.experiment_dir_path)
 
         self.experiment_temp_dir_path = os.path.join(self.experiment_dir_path,
-                                                     'temp_'+self.experiment_name+'_'+self.experiment_id)
+                                                     'temp_'+self.df_name)
         if not os.path.exists(self.experiment_temp_dir_path):
             os.mkdir(self.experiment_temp_dir_path)
 
@@ -91,7 +92,7 @@ class StoreResultsInDataframe(StoreResultsAbstract):
         df = data_to_df(episodes, steps_list, states, actions, rewards, dones)
 
         df_path = os.path.join(self.experiment_temp_dir_path,
-                               self.experiment_name+','+self.experiment_id+','+str(time.time())+'.csv')
+                               self.df_name+','+str(time.time())+'.csv')
 
         df.to_csv(df_path, index=False)
 
@@ -102,7 +103,7 @@ class StoreResultsInDataframe(StoreResultsAbstract):
         temp_dfs = [pd.read_csv(df_name, index_col=None) for df_name in dfs]
         res_df = pd.concat(temp_dfs)
 
-        self.df_path = os.path.join(self.experiment_dir_path, self.experiment_name+','+self.experiment_id+'.csv')
+        self.df_path = os.path.join(self.experiment_dir_path, self.df_name+'.csv')
         res_df.to_csv(self.df_path, index=False)
 
         for df_name in dfs:
@@ -117,7 +118,8 @@ class StoreResultsInDatabase(StoreResultsAbstract):
 
         self.env, self.agent = env, agent
 
-        self.store_in_df = StoreResultsInDataframe(experiment_name=to_table+"_"+time.strftime('%Y-%m-%d,%H-%M-%S'))
+        self.store_in_df = StoreResultsInDataframe(env=env, agent=agent)
+        self.experiment_id = self.store_in_df.df_name
 
     def save(self, episodes, steps_list, states, actions, rewards, dones):
         self.store_in_df.save(episodes, steps_list, states, actions, rewards, dones)
@@ -126,8 +128,9 @@ class StoreResultsInDatabase(StoreResultsAbstract):
         self.store_in_df.finalize()
 
         print(self.store_in_df.df_path)
-
+        print(self.experiment_id)
         df = pd.read_csv(self.store_in_df.df_path, index_col=None)
+        df['experiment_id'] = self.experiment_id
         store_df_in_db(df, self.to_table)
         os.remove(self.store_in_df.df_path)
         if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:

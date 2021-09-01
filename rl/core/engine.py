@@ -15,9 +15,13 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase(to_table=str(env))
+        store_results_obj = StoreResultsInDatabase(to_table=str(env),
+                                                   env=env,
+                                                   agent=agent)
     elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name,
+                                                   env=env,
+                                                   agent=agent)
     else:
         store_results_obj = store_results
 
