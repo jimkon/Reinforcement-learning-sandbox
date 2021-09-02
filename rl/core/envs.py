@@ -5,12 +5,12 @@ from functools import lru_cache
 
 
 @lru_cache()
-def gym_env_list():
+def gym_envs_list():
     envids = sorted([spec.id for spec in gym.envs.registry.all()])
     return envids
 
 
-class EnvScraper:
+class EnvWrapper:
     def __init__(self, gym_env_id):
         self.env_id = gym_env_id
         self.gym_env = gym.make(gym_env_id)
@@ -95,14 +95,22 @@ class EnvScraper:
 
 
 @lru_cache()
-def scrapable_envs():
+def wrappable_envs():
     res = []
-    for env_id in gym_env_list():
+    for env_id in gym_envs_list():
         try:
-            EnvScraper(env_id)
+            EnvWrapper(env_id)
         except Exception as e:
             pass
             # print(e)
         else:
             res.append(env_id)
     return res
+
+
+def scrap_env(env_id):
+    if env_id in wrappable_envs():
+        return EnvWrapper(env_id)
+
+    print(env_id, 'cannot be wrapped.')
+    return None
