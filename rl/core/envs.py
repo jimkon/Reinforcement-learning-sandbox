@@ -4,12 +4,6 @@ import gym
 from functools import lru_cache
 
 
-@lru_cache()
-def gym_envs_list():
-    envids = sorted([spec.id for spec in gym.envs.registry.all()])
-    return envids
-
-
 class EnvWrapper:
     def __init__(self, gym_env_id):
         self.env_id = gym_env_id
@@ -35,6 +29,14 @@ class EnvWrapper:
         self.action_high = action_space.high if isinstance(action_space, gym.spaces.box.Box) else [
                 action_space.n-1]
 
+    # @lru_cache()
+    # def is_observation_space_discrete(self):
+    #     return isinstance(self.gym_env.observation_space, gym.spaces.discrete.Discrete)
+
+    @lru_cache()
+    def is_action_space_discrete(self):
+        return isinstance(self.gym_env.action_space, gym.spaces.discrete.Discrete)
+
     @lru_cache()
     def state_dims(self):
         return len(self.state_low)
@@ -52,10 +54,6 @@ class EnvWrapper:
     def action_limits(self):
         res = np.array([self.action_low, self.action_high])
         return res
-
-    @lru_cache()
-    def is_action_space_discrete(self):
-        return isinstance(self.gym_env.action_space, gym.spaces.discrete.Discrete)
 
     def __step(self, state, action):
         self.gym_env.state = state
@@ -95,6 +93,12 @@ class EnvWrapper:
 
 
 @lru_cache()
+def gym_envs_list():
+    envids = sorted([spec.id for spec in gym.envs.registry.all()])
+    return envids
+
+
+@lru_cache()
 def wrappable_envs():
     res = []
     for env_id in gym_envs_list():
@@ -108,9 +112,12 @@ def wrappable_envs():
     return res
 
 
-def scrap_env(env_id):
+def wrap_env(env_id):
     if env_id in wrappable_envs():
         return EnvWrapper(env_id)
 
     print(env_id, 'cannot be wrapped.')
     return None
+
+for env in wrappable_envs():
+    EnvWrapper(env).info()
