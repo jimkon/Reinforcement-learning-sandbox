@@ -127,3 +127,31 @@ def wrap_env(env_id):
     print(env_id, 'cannot be wrapped.')
     return None
 
+# for env in wrappable_envs():
+#     EnvWrapper(env).info()
+
+env_id = 'Acrobot-v1'
+gym_env = gym.make(env_id)
+env = EnvWrapper(env_id)
+
+gym_initial_state = gym_env.reset()
+random_action = env.random_action()
+print(env_id, random_action)
+gym_next_state, gym_reward, gym_done, _ = gym_env.step(random_action)
+
+next_state = env.transition(gym_initial_state, random_action)
+print(gym_next_state, next_state, np.isclose(gym_next_state, next_state, atol=0.01))
+
+reward = env.reward(gym_initial_state, random_action)
+print(gym_reward, reward)
+
+done = env.is_done(gym_initial_state, random_action)
+print(gym_done, done)
+
+while not gym_done:
+    gym_initial_state = gym_next_state
+    random_action = env.random_action()
+
+    gym_next_state, gym_reward, gym_done, _ = gym_env.step(random_action)
+    done = env.is_done(gym_initial_state, random_action)
+    print(gym_done, done)
