@@ -124,7 +124,7 @@ def wrap_env(env):
         if isinstance(env, str):
             return EnvWrapper(gym.make(env))
         else:
-            return EnvWrapper()
+            return EnvWrapper(env)
     except Exception as e:
         # print(env, 'cannot be wrapped.', str(e))
         return None
