@@ -28,8 +28,8 @@ class TestEnvs(unittest.TestCase):
         self.assertIsNone(envs.wrap_env(None))
 
     def test_is_action_space_discrete(self):
-        self.assertTrue(envs.wrap_env('MountainCar-v0'))
-        self.assertTrue(not envs.wrap_env('MountainCarContinuous-v0'))
+        self.assertTrue(envs.wrap_env('MountainCar-v0').is_action_space_discrete())
+        self.assertTrue(not envs.wrap_env('MountainCarContinuous-v0').is_action_space_discrete())
 
     def test_state_dims(self):
         wrappable_envs = envs.wrappable_envs()
