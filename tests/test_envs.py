@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import gym
 import numpy as np
 
 from rl.core import envs
@@ -65,4 +66,5 @@ class TestEnvs(unittest.TestCase):
             action_low, action_high = action_lims[0], action_lims[1]
             diff = action_high-action_low
             self.assertTrue(all(diff >= 0))
+
 

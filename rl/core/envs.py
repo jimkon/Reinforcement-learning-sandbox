@@ -2,6 +2,7 @@ import numpy as np
 import gym
 
 from functools import lru_cache
+from collections.abc import Iterable
 
 
 class EnvWrapper:
@@ -57,7 +58,10 @@ class EnvWrapper:
 
     def __step(self, state, action):
         self.gym_env.state = state
-        next_state, reward, done, _ = self.gym_env.step(action)
+        if isinstance(action, Iterable):
+            next_state, reward, done, _ = self.gym_env.step(tuple(action))
+        else:
+            next_state, reward, done, _ = self.gym_env.step(action)
         return next_state, reward, done
 
     # walks
@@ -65,7 +69,11 @@ class EnvWrapper:
         return self.gym_env.reset()
 
     def transition(self, state, action):
-        next_state, reward, done = self.__step(tuple(state), tuple(action))
+        # print(state, action, isinstance(action, Iterable))
+        # if isinstance(action, Iterable):
+        next_state, reward, done = self.__step(tuple(state), action)
+        # else:
+        #     next_state, reward, done = self.__step(tuple(state), action)
         return next_state
 
     def reward(self, state, action):
@@ -73,7 +81,7 @@ class EnvWrapper:
         return reward
 
     def is_done(self, state, action):
-        next_state, reward, done = self.__step(tuple(state), tuple(action))
+        next_state, reward, done = self.__step(tuple(state), action)
         return done
 
     def info(self):
@@ -119,5 +127,3 @@ def wrap_env(env_id):
     print(env_id, 'cannot be wrapped.')
     return None
 
-for env in wrappable_envs():
-    EnvWrapper(env).info()
