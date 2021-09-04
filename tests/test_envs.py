@@ -28,8 +28,8 @@ class TestEnvs(unittest.TestCase):
         self.assertIsNone(envs.wrap_env(None))
 
     def test_is_action_space_discrete(self):
-        self.assertTrue(envs.wrap_env('MountainCar-v0'))
-        self.assertTrue(not envs.wrap_env('MountainCarContinuous-v0'))
+        self.assertTrue(envs.wrap_env('MountainCar-v0').is_action_space_discrete())
+        self.assertTrue(not envs.wrap_env('MountainCarContinuous-v0').is_action_space_discrete())
 
     def test_state_dims(self):
         wrappable_envs = envs.wrappable_envs()
@@ -67,29 +67,4 @@ class TestEnvs(unittest.TestCase):
             diff = action_high-action_low
             self.assertTrue(all(diff >= 0))
 
-    def test_inner_methods(self):
-        wrappable_envs = envs.wrappable_envs()
-
-        for env_id in wrappable_envs:
-            gym_env = gym.make(env_id)
-            env = envs.EnvWrapper(env_id)
-
-            gym_initial_state = gym_env.reset()
-            random_action = env.random_action()
-            print(env_id, random_action)
-            gym_next_state, gym_reward, gym_done, _ = gym_env.step(random_action)
-
-            next_state = env.transition(gym_initial_state, random_action)
-            # self.assertTrue(all(np.isclose(gym_next_state, next_state, atol=0.01)))
-            reward = env.reward(gym_initial_state, random_action)
-            self.assertTrue(gym_reward, reward)
-
-            done = env.is_done(gym_initial_state, random_action)
-            self.assertTrue(gym_done == done)
-
-            while gym_done:
-                gym_initial_state = gym_next_state
-                gym_next_state, gym_reward, gym_done, _ = gym_env.step(env.random_action())
-                done = env.is_done(gym_initial_state, random_action)
-                self.assertTrue(gym_done == done)
 
