@@ -39,6 +39,8 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     log_frequency = -1 if log_frequency == 0 else log_frequency
 
+    agent.set_env(env)
+
     episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
 
     last_log_step = 0

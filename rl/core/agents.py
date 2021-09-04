@@ -3,6 +3,9 @@ import numpy as np
 
 class Agent:
 
+    def set_env(self, env):
+        pass
+
     def act(self, state):
         raise NotImplementedError
 
@@ -23,18 +26,3 @@ class RandomAgent(Agent):
     def act(self, state):
         return np.random.randint(0, self.n_actions)
 
-
-
-if __name__=="__main__":
-    import gym
-    from rl.core.engine import run_episodes
-    from rl.core.db import DB
-    env = gym.make('MountainCar-v0')
-    agent = RandomAgent(3)
-
-    run_episodes(env, agent, 2, render=False, verbosity='episode_step')
-
-
-    db = DB('rl.db')
-    res = db.execute_and_return('select distinct(exp_id) from <TimeLimit<MountainCarEnv<MountainCar-v0>>>')
-    print(res)
