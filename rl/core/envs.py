@@ -6,9 +6,8 @@ from collections.abc import Iterable
 
 
 class EnvWrapper:
-    def __init__(self, gym_env_id):
-        self.env_id = gym_env_id
-        self.gym_env = gym.make(gym_env_id)
+    def __init__(self, env):
+        self.gym_env = env if not isinstance(env, str) else gym.make(env)
         self.gym_env.reset()
         assert self.gym_env.state is not None
         assert self.gym_env.observation_space is not None
@@ -86,7 +85,7 @@ class EnvWrapper:
 
     def info(self):
         print_format = "%(env_id)s: state_dims:%(state_dims)s state_limits:%(state_limits)s action_dims:%(action_dims)s action_limits:%(action_limits)s"
-        env_id = self.env_id
+        env_id = str(self)
         state_dims = self.state_dims()
         state_limits = "(%s %s)" % (self.state_low, self.state_high)
         action_dims = self.action_dims()
@@ -120,10 +119,13 @@ def wrappable_envs():
     return res
 
 
-def wrap_env(env_id):
-    if env_id in wrappable_envs():
-        return EnvWrapper(env_id)
-
-    print(env_id, 'cannot be wrapped.')
-    return None
+def wrap_env(env):
+    try:
+        if isinstance(env, str):
+            return EnvWrapper(gym.make(env))
+        else:
+            return EnvWrapper()
+    except Exception as e:
+        # print(env, 'cannot be wrapped.', str(e))
+        return None
 
