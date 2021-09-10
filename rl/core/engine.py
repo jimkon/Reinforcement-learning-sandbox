@@ -99,10 +99,10 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                 env.render()
 
         total_reward += episode_reward
-        total_steps += step + 1
+        total_steps += step
         if verbosity >= 3:
             print(
-                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step + 1}")
+                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step}")
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save(episodes[last_log_step:],
