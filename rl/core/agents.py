@@ -18,18 +18,4 @@ class Agent:
         return 'default_agent'
 
 
-class QLearningAgent(Agent):
-    def __init__(self, n_dims):
-        self.n_dims = n_dims
-        self.q_table = None
 
-    def set_env(self, env):
-        wrapped_env = wrap_env(env)
-        pass
-
-    def act(self, state):
-        return np.random.randint(0, self.n_actions)
-
-import gym
-env = gym.make('MountainCar-v0')
-print(env.)
