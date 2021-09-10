@@ -13,7 +13,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
 
-    store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
+    # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
         store_results_obj = StoreResultsInDatabase(to_table=str(env),
                                                    env=env,
@@ -63,7 +63,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
         while not done:
 
-            if not state:
+            if state is None:
                 state = env.reset()
 
             action = agent.act(state)
