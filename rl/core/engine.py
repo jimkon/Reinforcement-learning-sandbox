@@ -42,6 +42,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     agent.set_env(env)
 
     episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
+    episode_rewards = []
 
     last_log_step = 0
 
@@ -98,11 +99,13 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             if render:
                 env.render()
 
+        episode_rewards.append(episode_reward)
         total_reward += episode_reward
         total_steps += step
         if verbosity >= 3:
+            avg_rewards = sum(episode_rewards[int(0.1*len(episode_rewards)):])/len(episode_rewards)
             print(
-                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step}")
+                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step}, rolling avg reward(10%) {avg_rewards:.02f}")
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save(episodes[last_log_step:],
@@ -116,8 +119,9 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     elapsed_time = time.time() - start_time
     if verbosity >= 2:
         episode += 1
+        avg_rewards = sum(episode_rewards[int(0.1 * len(episode_rewards)):]) / len(episode_rewards)
         print(
-            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} ({total_reward / episode} avg episode reward). Steps {total_steps}")
+            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}")
 
     if store_results_obj:
         store_results_obj.save(episodes[last_log_step:],
