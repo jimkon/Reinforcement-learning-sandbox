@@ -5,40 +5,47 @@ from rl.core.envs import wrap_env
 
 from my_experiments.misc import MapFloatToInteger
 
+
 class TabularQLearningAgent(Agent):
-    def __init__(self, points_per_dim):
+    def __init__(self, points_per_dim, a=0.1, gamma=0.9, epsilon=0.3):
         assert points_per_dim >= 2
         self.points_per_dim = points_per_dim
         self.q_table = None
 
+        self.learning_rate = a
+        self.discount_rate = gamma
+        self.epsilon = epsilon
+
     def set_env(self, env):
         print(env)
-        wrapped_env = wrap_env(env)
-        print(wrapped_env.info())
-        self.state_low, self.state_high = wrapped_env.state_low, wrapped_env.state_high
+        self.wrapped_env = wrap_env(env)
+        print(self.wrapped_env.info())
+        self.state_low, self.state_high = self.wrapped_env.state_low, self.wrapped_env.state_high
         self.state_diff = self.state_high-self.state_low
 
-        self.state_dims = wrapped_env.state_dims()
+        self.state_dims = self.wrapped_env.state_dims()
         print(self.state_low, self.state_high, self.state_diff, self.state_dims)
 
-        assert wrapped_env.action_dims() == 1, 'QLearningAgent is not working for environments with action space with more than one dimensions.'
+        self.is_action_space_discrete = self.wrapped_env.is_action_space_discrete()
 
-        if wrapped_env.is_action_space_discrete():
-            n_action_points = wrapped_env.action_high[0]-wrapped_env.action_low[0]+1
+        assert self.wrapped_env.action_dims() == 1, 'QLearningAgent is not working for environments with action space with more than one dimensions.'
+
+        if self.is_action_space_discrete:
+            n_action_points = self.wrapped_env.action_high[0]-self.wrapped_env.action_low[0]+1
             self.actions_mapping_f = lambda x: x
         else:
             n_action_points = self.points_per_dim
-            mapper = MapFloatToInteger(low=wrapped_env.action_low[0],
-                                       high=wrapped_env.action_high[0],
+            mapper = MapFloatToInteger(low=self.wrapped_env.action_low[0],
+                                       high=self.wrapped_env.action_high[0],
                                        n=n_action_points)
             self.actions_mapping_f = lambda x: mapper.map(x)
 
         print(n_action_points)
-        self.q_table = np.random.normal(size=[self.points_per_dim]*self.state_dims+[n_action_points])
-        print(self.q_table)
+        self.q_table = np.ones(shape=[self.points_per_dim]*self.state_dims+[n_action_points])*0.8
+        print(np.moveaxis(self.q_table, -1, 0))
 
         self.states_mapping_f_list = []
-        for dim_range in wrapped_env.state_limits().T:
+        for dim_range in self.wrapped_env.state_limits().T:
             low, high = dim_range
             self.states_mapping_f_list.append(MapFloatToInteger(low, high, self.points_per_dim))
 
@@ -68,11 +75,41 @@ class TabularQLearningAgent(Agent):
         return res
 
     def act(self, state):
-        return [np.argmax(self.__q_of_state(state))]
+        if np.random.uniform() < self.epsilon:
+            action = self.wrapped_env.random_action()
 
-import gym
-from rl.core import engine
-env = gym.make('MountainCarContinuous-v0')
-# env = gym.make('MountainCar-v0')
-agent = TabularQLearningAgent(4)
-engine.run_episodes(env, agent, 2)
+        else:
+            action = np.argmax(self.__q_of_state(state))
+            if not self.is_action_space_discrete:
+                action = [action]
+
+        return action
+
+    def observe(self, state, action, reward, next_state, done):
+        if done:
+            new_Q_s_a = reward
+        else:
+            Q_s = self.__q_of_state(state)
+            current_Q_s_a = Q_s[action]
+            Q_sn = self.__q_of_state(next_state)
+            max_Q_sn = np.max(Q_sn)
+
+            new_Q_s_a = current_Q_s_a + self.learning_rate * (reward*self.discount_rate*max_Q_sn-current_Q_s_a)
+
+        index = self.__state_index(state)
+        self.q_table[index][action] = new_Q_s_a
+
+        return
+
+    def name(self):
+        return 'tabular_Q_learning'
+
+
+if __name__=="__main__":
+    import gym
+    from rl.core import engine
+    # env = gym.make('MountainCarContinuous-v0')
+    env = gym.make('MountainCar-v0')
+    agent = TabularQLearningAgent(5)
+    engine.run_episodes(env, agent, 10000, verbosity='episode')
+    print(np.moveaxis(agent.q_table, -1, 0))
