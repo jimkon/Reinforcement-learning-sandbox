@@ -106,7 +106,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
         if verbosity >= 3:
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             print(
-                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step}, rolling avg reward(10%) {avg_rewards:.02f}")
+                f"Agent {agent.name()} completed the {episode} episode. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save(episodes[last_log_step:],
@@ -118,7 +118,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
-    if verbosity >= 2:
+    if verbosity >= 1:
         episode += 1
         avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
         print(
