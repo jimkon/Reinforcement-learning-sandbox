@@ -77,6 +77,8 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
             agent.observe(state, action, reward, next_state, done)
 
+            episode_reward += reward
+
             if verbosity >= 4:
                 print(
                     f"Episode:{episode}, Step:{step}, state:{state}, action:{action}, reward:{reward}, next state:{next_state}, done:{done}")
@@ -93,7 +95,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                 step += 1
             else:
                 state = next_state
-                episode_reward += reward
                 step += 1
 
             if render:
@@ -103,7 +104,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
         total_reward += episode_reward
         total_steps += step
         if verbosity >= 3:
-            avg_rewards = sum(episode_rewards[int(0.1*len(episode_rewards)):])/len(episode_rewards)
+            avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             print(
                 f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step}, rolling avg reward(10%) {avg_rewards:.02f}")
 
@@ -119,7 +120,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     elapsed_time = time.time() - start_time
     if verbosity >= 2:
         episode += 1
-        avg_rewards = sum(episode_rewards[int(0.1 * len(episode_rewards)):]) / len(episode_rewards)
+        avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
         print(
             f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}")
 

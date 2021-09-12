@@ -104,7 +104,7 @@ def gym_envs_list():
     envids = sorted([spec.id for spec in gym.envs.registry.all()])
     return envids
 
-
+"""['Acrobot-v1', 'CartPole-v0', 'CartPole-v1', 'MountainCar-v0', 'MountainCarContinuous-v0', 'NChain-v0', 'Pendulum-v0']"""
 @lru_cache()
 def wrappable_envs():
     res = []
@@ -128,4 +128,3 @@ def wrap_env(env):
     except Exception as e:
         # print(env, 'cannot be wrapped.', str(e))
         return None
-
