@@ -3,11 +3,11 @@ import numpy as np
 from rl.core.agents import Agent
 from rl.core.envs import wrap_env
 
-from my_experiments.misc import MapFloatToInteger
+from experiments.misc import MapFloatToInteger
 
 
 class TabularQLearningAgent(Agent):
-    def __init__(self, points_per_dim, a=0.9, gamma=0.9, epsilon=1):
+    def __init__(self, points_per_dim, a=0.9, gamma=0.9, epsilon=.2):
         assert points_per_dim >= 2
         self.points_per_dim = points_per_dim
         self.q_table = None
@@ -41,7 +41,7 @@ class TabularQLearningAgent(Agent):
             self.actions_mapping_f = lambda x: self.action_mapper.map(x)
 
         print(n_action_points)
-        self.q_table = np.ones(shape=[self.points_per_dim]*self.state_dims+[n_action_points])*0.8
+        self.q_table = np.ones(shape=[self.points_per_dim]*self.state_dims+[n_action_points])*2
         print(np.moveaxis(self.q_table, -1, 0))
 
         self.states_mapping_f_list = []
@@ -76,8 +76,9 @@ class TabularQLearningAgent(Agent):
 
     def act(self, state):
         if np.random.uniform() < self.epsilon:
-            # action = self.wrapped_env.random_action()
-            action_i = 0 if state[1] < 0 else 2
+            action = self.wrapped_env.random_action()
+            return action
+            # return 0 if state[1] < 0 else 2
         else:
             action_i = np.argmax(self.__q_of_state(state))
 
@@ -116,9 +117,28 @@ class TabularQLearningAgent(Agent):
 
 if __name__=="__main__":
     import gym
+
+    class RewardWrapper(gym.RewardWrapper):
+        def __init__(self, env):
+            super().__init__(env)
+
+        def step(self, action):
+            next_state, reward, done, _ = super().step(action)
+            x, v = next_state
+            if done and x >= .5:
+                reward = 100
+            else:
+                reward = abs(x+0.5)
+            return next_state, reward, done, _
+
+        def reward(self, rew):
+            return 0
+
     from rl.core import engine
-    env = gym.make('MountainCarContinuous-v0')
+    # env = gym.make('MountainCarContinuous-v0')
     # env = gym.make('MountainCar-v0')
-    agent = TabularQLearningAgent(6)
-    engine.run_episodes(env, agent, 1000, verbosity='episode', render=False)
+    # env = RewardWrapper(gym.make('MountainCar-v0'))
+    env = gym.make('Pendulum-v0')
+    agent = TabularQLearningAgent(3, epsilon=.2)
+    engine.run_episodes(env, agent, 10000, verbosity='episode', render=False)
     print(np.moveaxis(agent.q_table, -1, 0))
