@@ -70,7 +70,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             action = agent.act(state)
 
             if not n_actions:
-                print(action)
                 n_actions = len(np.atleast_1d(action))
 
             next_state, reward, done, _ = env.step(action)

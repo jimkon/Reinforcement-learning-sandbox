@@ -82,17 +82,17 @@ class TabularQLearningAgent(Agent):
         else:
             action_i = np.argmax(self.__q_of_state(state))
 
-        if not self.is_action_space_discrete:
-            action = [self.action_mapper.map_out(action_i)]
+        if self.is_action_space_discrete:
+            action = action_i
 
         else:
-            action = action_i
+            action = [self.action_mapper.reverse(action_i)]
 
         return action
 
     def observe(self, state, action, reward, next_state, done):
         if not self.is_action_space_discrete:
-            action_i = int(self.action_mapper.map_in(action[0]))
+            action_i = int(self.action_mapper.map(action[0]))
         else:
             action_i = action
 
@@ -103,8 +103,8 @@ class TabularQLearningAgent(Agent):
             current_Q_s_a = Q_s[action_i]
             Q_sn = self.__q_of_state(next_state)
             max_Q_sn = np.max(Q_sn)
-
-            new_Q_s_a = current_Q_s_a + self.learning_rate * (reward+self.discount_rate*max_Q_sn-current_Q_s_a)
+            td = reward+self.discount_rate*max_Q_sn-current_Q_s_a
+            new_Q_s_a = current_Q_s_a + self.learning_rate * td
 
         index = self.__state_index(state)
         self.q_table[index][action_i] = new_Q_s_a
@@ -139,6 +139,12 @@ if __name__=="__main__":
     # env = gym.make('MountainCar-v0')
     # env = RewardWrapper(gym.make('MountainCar-v0'))
     env = gym.make('Pendulum-v0')
-    agent = TabularQLearningAgent(3, epsilon=.2)
-    engine.run_episodes(env, agent, 10000, verbosity='episode', render=False)
+    agent = TabularQLearningAgent(20, epsilon=.0)
+    engine.run_episodes(env,
+                        agent,
+                        2000,
+                        store_results='dataframe',
+                        experiment_name='pend',
+                        verbosity='episode',
+                        render=False)
     print(np.moveaxis(agent.q_table, -1, 0))

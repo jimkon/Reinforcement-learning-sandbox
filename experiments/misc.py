@@ -1,5 +1,3 @@
-import numpy as np
-
 
 def clip(n, low, high):
     if low > high:
@@ -55,11 +53,6 @@ class MapFloatToInteger:
 
         self.__map_in = Map1D(low, high, 0, n-1, clip=clip_flag)
         self.__map_out = Map1D(0, n-1, low, high, clip=clip_flag)
-
-        # if clip_flag:
-        #     self.clip_f = lambda x : clip(x, 0, n-1)
-        # else:
-        #     self.clip_f = lambda x : x
 
     def map(self, x):
         return round(self.__map_in(x))
