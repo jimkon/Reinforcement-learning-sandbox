@@ -41,36 +41,49 @@ def detect_balance(thetas, theta_threshold=.5, thetadot_threshold=0.02, balance_
         return -1
 
 
-def process_df(df_name):
-    print(f'Reading file: {df_name}')
-    df = pd.read_csv(df_name, index_col=False)
-    df['state_th'] = list(map(con_sin_to_theta, df['state_0'], df['state_1']))
-    df['theta_0_label'] = list(map(labeling_thetas, df['state_th']))
+def process_df(df_in, theta_threshold=.5, thetadot_threshold=0.02, balance_cnt_threshold=10):
+    print('Enriching dataframe.')
+    df_in['acos'] = np.arccos(df_in['state_0'])
+    df_in['asin_sign'] = 1 - 2 * (np.arcsin(df_in['state_1']) < 0).astype(int)
 
-    episode_stats = []
+    df_in['state_th'] = df_in['acos'] * df_in['asin_sign']
+    df_in['theta_label'] = np.digitize(df_in['state_th'], bins=[-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi])
+    df_in['theta_label'] = df_in['theta_label'].map({1: 'BL', 2: 'UL', 3: 'UR', 4: 'BR'})
 
-    for ep in tqdm(df['episode'].unique()):
-        stats = {}
-        ep_df = df[df['episode'] == ep]
-        step = detect_balance(ep_df['state_th'])
-        stats['ep'] = ep
-        stats['reward'] = ep_df['reward'].sum()
-        stats['balance_step'] = step
-        stats['theta_0'] = float(ep_df[ep_df['step'] == 0]['state_th'])
+    del df_in['acos']
+    del df_in['asin_sign']
 
-        episode_stats.append(stats)
-    print('Creating episode_stats_df')
-    episode_stats_df = pd.DataFrame.from_records(episode_stats)
+    df_in['state_th2'] = df_in['state_th'].shift(1)
+    df_in['state_thdot_abs'] = (df_in['state_th2'] - df_in['state_th']).abs()
+    df_in['state_th_abs'] = df_in['state_th'].abs()
+    df_in['is_unbalanced'] = 1 - ((df_in['step'] > 0) & (df_in['state_th_abs'] <= theta_threshold) & (
+                df_in['state_thdot_abs'] <= thetadot_threshold)).astype(int)
+    df_in['unbalanced_step'] = df_in['is_unbalanced'] * df_in['step']
+
+    balancing_step_df = df_in.groupby('episode').agg({'unbalanced_step': 'max'}).reset_index().rename(
+        columns={'unbalanced_step': 'balance_step'})
+    balancing_step_df['balance_step'] = balancing_step_df['balance_step'].replace(199, -1)
+    balancing_step_df.loc[balancing_step_df['balance_step'] > (200 - balance_cnt_threshold), 'balance_step'] = -1
+
+    episode_stats_df = df_in.groupby('episode').agg(
+        {'reward': 'sum', 'state_th': 'first', 'theta_label': 'first'}).reset_index().rename(
+        columns={'state_th': 'theta_0', 'theta_label': 'theta_0_label'})
+    episode_stats_df = episode_stats_df.merge(balancing_step_df, on='episode', how='left')
     episode_stats_df['solved'] = (episode_stats_df['balance_step'] >= 0).astype(int)
-    episode_stats_df['theta_0_label'] = list(map(labeling_thetas, episode_stats_df['theta_0']))
 
-    return df, episode_stats_df
+    del df_in['state_th2']
+    del df_in['state_thdot_abs']
+    del df_in['state_th_abs']
+    del df_in['is_unbalanced']
+    del df_in['unbalanced_step']
+
+    return df_in, episode_stats_df
 
 
 def episode_rewards(df):
     eps = df[df['step'] == 0]
-    for l, c in zip(['BL', 'UL', 'UR', 'BR'], ['C0', 'C1', 'C2', 'C3']):
-        episodes_list = eps[eps['theta_0_label'] == l]['episode'].to_list()
+    for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
+        episodes_list = eps[eps['theta_label'] == l]['episode'].to_list()
 
         df_res = df[df['episode'].isin(episodes_list)]
 
@@ -98,13 +111,14 @@ def solution_ratios(episode_stats_df):
     plt.plot(solutions, c='black', alpha=0.8, linewidth=3)
     plt.plot(solutions, c='grey', alpha=0.8, linewidth=2, label='Overall')
 
-    for l, c in zip(['BL', 'UL', 'UR', 'BR'], ['C0', 'C1', 'C2', 'C3']):
+    for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
         plt.plot(
             100 * episode_stats_df[episode_stats_df['theta_0_label'] == l]['solved'].rolling(window=100, center=True,
                                                                                              min_periods=1).mean(),
-            linewidth=2, c=c, label=l, alpha=.5)
+            linewidth=1, c=c, label=l, alpha=1)
 
-    xticks = list(range(0, len(solutions) + 1, 500))  # list(ax.get_xticks())
+    ax = plt.gca()
+    xticks = list(ax.get_xticks())#list(range(0, len(solutions) + 1, 500))
     for y in [50, 75, 90, 95, 99, 100]:
         episode_numbers = np.where(solutions >= y)[0]
         if len(episode_numbers) == 0:
@@ -125,10 +139,10 @@ def solution_ratios(episode_stats_df):
 
 
 def balance_steps(episode_stats_df):
-    for l, c in zip(['BL', 'UL', 'UR', 'BR'], ['C0', 'C1', 'C2', 'C3']):
-        temp_df = episode_stats_df[episode_stats_df['theta_0_label']==l]
-        temp_df = temp_df[temp_df['solved']>0]
-        plt.scatter(temp_df['ep'], temp_df['balance_step'], c=c, label=l, marker='s', alpha=0.5)
+    for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
+        temp_df = episode_stats_df[episode_stats_df['theta_0_label'] == l]
+        temp_df = temp_df[temp_df['solved'] > 0]
+        plt.scatter(temp_df['episode'], temp_df['balance_step'], c=c, label=l, marker='s', alpha=0.25)
         line = temp_df['balance_step'].rolling(window=min(ROLLING_WINDOW_SIZE, int(len(temp_df)*0.5)), center=True, min_periods=1).mean()
         plt.plot(line, c='black', linewidth=4)
         plt.plot(line, c=c, linewidth=2)
@@ -143,7 +157,7 @@ def balance_steps(episode_stats_df):
 
 
 def balancing_progress(df, episode_stats_df):
-    temp_df = df.merge(episode_stats_df[['ep', 'balance_step']], left_on='episode', right_on='ep')
+    temp_df = df.merge(episode_stats_df[['episode', 'balance_step']], on='episode')
     temp_df = temp_df[temp_df['balance_step'] > -1]
     min_ep, max_ep = temp_df['episode'].min(), temp_df['episode'].max()
     # temp_df['after_balancing'] = temp_df['balance_step']>=temp_df['step']
@@ -166,6 +180,7 @@ def balancing_progress(df, episode_stats_df):
     plt.title('Theta averages after balancing')
     plt.xlabel('Episodes')
     plt.ylabel('Theta (rads)')
+    plt.yticks(np.linspace(-.5, .5, 11))
     plt.legend()
 
 
@@ -193,5 +208,7 @@ if __name__=="__main__":
     files = [dir+f for f in os.listdir(dir)]
     print(files)
 
-    file = files[1]
-    plot(file)
+    file = files[2]
+    print(f'Reading file: {file}')
+    df = pd.read_csv(file, index_col=False)
+    plot(df)
