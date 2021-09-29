@@ -186,7 +186,7 @@ def balancing_progress(df, episode_stats_df):
     plt.legend()
 
 
-def plot(df):
+def plot(df, save_to_path=None):
     exp_id = df['experiment_id'][0]
 
     enriched_df, episode_stats_df = process_df(df)
@@ -208,6 +208,9 @@ def plot(df):
     balancing_progress(enriched_df, episode_stats_df)
 
     plt.tight_layout()
+
+    if save_to_path:
+        plt.savefig(save_to_path)
     plt.show()
 
 if __name__=="__main__":
@@ -218,4 +221,4 @@ if __name__=="__main__":
     file = files[3]
     print(f'Reading file: {file}')
     df = pd.read_csv(file, index_col=False)
-    plot(df)
+    plot(df, f"graphs/overall/{df['experiment_id'][0]}.png")
