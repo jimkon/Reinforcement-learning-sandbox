@@ -117,6 +117,7 @@ class StoreResultsInDataframe(StoreResultsAbstract):
             return
         temp_dfs = [pd.read_csv(df_name, index_col=None) for df_name in dfs]
         res_df = pd.concat(temp_dfs)
+        res_df['experiment_id'] = self.experiment_id
 
         self.df_path = os.path.join(self.experiment_dir_path, self.df_name+'.csv')
         res_df.to_csv(self.df_path, index=False)
