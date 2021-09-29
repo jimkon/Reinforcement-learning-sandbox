@@ -13,13 +13,27 @@ TODO
 """
 
 
-def store_df_in_db(df, to_table, db_path=None):
+def upload_df_in_db(df, to_table, db_path=None):
     if not db_path:
         db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
 
     engine = create_engine('sqlite:///'+db_path, echo=False)
 
     df.to_sql(to_table, con=engine, if_exists='append', index=False)
+
+
+def download_df_from_db(experiment_id, from_table, db_path=None):
+    if not db_path:
+        db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
+
+    engine = create_engine('sqlite:///'+db_path, echo=False)
+
+    df = pd.read_sql(f'select * from {from_table} where experiment_id=\"{experiment_id}\"',
+                     con=engine,
+                     coerce_float=True,
+                     index_col='episode').reset_index()
+
+    return df
 
 
 def data_to_df(episodes, steps_list, states, actions, rewards, dones):
@@ -131,7 +145,7 @@ class StoreResultsInDatabase(StoreResultsAbstract):
         df = pd.read_csv(self.store_in_df.df_path, index_col=None)
         df['experiment_id'] = self.experiment_id
 
-        store_df_in_db(df, self.to_table)
+        upload_df_in_db(df, self.to_table)
 
         os.remove(self.store_in_df.df_path)
         if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
