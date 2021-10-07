@@ -14,20 +14,36 @@ TODO
 """
 
 
-def upload_df_in_db(df, to_table, db_path=None):
+def get_engine(db_path=None):
     if not db_path:
         db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
 
     engine = create_engine('sqlite:///'+db_path, echo=False)
+
+    return engine
+
+
+def execute_query_and_return(query, db_path=None):
+    engine = get_engine(db_path)
+
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        return list(result)
+
+
+def check_if_exp_id_already_exists(experiment_id):
+    res = execute_query_and_return(query=f'select experiment_id from test_env where experiment_id="{experiment_id}" limit 1')
+    return res is not None and len(res) > 0
+
+
+def upload_df_in_db(df, to_table, db_path=None):
+    engine = get_engine(db_path)
 
     df.to_sql(to_table, con=engine, if_exists='append', index=False)
 
 
 def download_df_from_db(experiment_id, from_table, db_path=None):
-    if not db_path:
-        db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
-
-    engine = create_engine('sqlite:///'+db_path, echo=False)
+    engine = get_engine(db_path)
 
     df = pd.read_sql(f'select * from {from_table} where experiment_id=\"{experiment_id}\"',
                      con=engine,
@@ -38,11 +54,10 @@ def download_df_from_db(experiment_id, from_table, db_path=None):
 
 
 def data_to_df(episodes, steps_list, states, actions, rewards, dones):
-    to_dict = {}
-
-    to_dict['episode'] = episodes
-
-    to_dict['step'] = steps_list
+    to_dict = {
+        'episode': episodes,
+        'step': steps_list
+    }
 
     states = list(map(list, zip(*states)))
     for i, state_i in enumerate(states):
@@ -119,14 +134,15 @@ class StoreResultsInDataframe(StoreResultsAbstract):
 
 
 class StoreResultsInDatabase(StoreResultsAbstract):
-    def __init__(self, to_table, db_path=None, env=None, agent=None):
+    def __init__(self, experiment_name, to_table, db_path=None):
         self.to_table = to_table
+        self.experiment_name = experiment_name
         self.db_path = db_path if db_path else DEFAULT_STORE_DATABASE_OBJECT_PATH
 
-        self.env, self.agent = env, agent
+        # self.env, self.agent = env, agent
 
-        self.store_in_df = StoreResultsInDataframe(env=env, agent=agent)
-        self.experiment_id = self.store_in_df.df_name
+        self.store_in_df = StoreResultsInDataframe(experiment_name=experiment_name)
+        self.experiment_id = self.store_in_df.experiment_name
 
     def save(self, episodes, steps_list, states, actions, rewards, dones):
         self.store_in_df.save(episodes, steps_list, states, actions, rewards, dones)
