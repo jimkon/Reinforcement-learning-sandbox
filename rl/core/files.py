@@ -80,20 +80,12 @@ class StoreResultsAbstract:
 
 
 class StoreResultsInDataframe(StoreResultsAbstract):
-    def __init__(self, experiment_name, dir_path=None, env=None, agent=None):
+    def __init__(self, experiment_name, dir_path=None):
         self.dir_path = dir_path if dir_path else DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
 
         assert experiment_name is not None
 
         self.experiment_name = experiment_name
-
-        # self.experiment_id = f"{time.strftime('%Y-%m-%d,%H-%M-%S')}"
-        # self.df_name = self.experiment_name+','+self.experiment_id
-        # self.df_name = self.experiment_name
-
-        # self.experiment_dir_path = os.path.join(self.dir_path, self.experiment_name)
-        # if not os.path.exists(self.experiment_dir_path):
-        #     os.mkdir(self.experiment_dir_path)
 
         self.experiment_temp_dir_path = os.path.join(self.dir_path,
                                                      'temp_'+self.experiment_name)
