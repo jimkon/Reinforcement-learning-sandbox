@@ -10,6 +10,7 @@ from rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRE
 TODO 
 - unittesting
 - store experiment details in experiments table
+- clear experiment name and experiment id 
 """
 
 
@@ -79,25 +80,23 @@ class StoreResultsAbstract:
 
 
 class StoreResultsInDataframe(StoreResultsAbstract):
-    def __init__(self, dir_path=None, experiment_name=None, env=None, agent=None):
+    def __init__(self, experiment_name, dir_path=None, env=None, agent=None):
         self.dir_path = dir_path if dir_path else DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH
 
-        if experiment_name:
-            self.experiment_name = experiment_name
-        elif env and agent:
-            self.experiment_name = f"{str(env)},{agent.name()}"
-        else:
-            self.experiment_name = "unknown_env,unknown_agent"
+        assert experiment_name is not None
 
-        self.experiment_id = f"{time.strftime('%Y-%m-%d,%H-%M-%S')}"
-        self.df_name = self.experiment_name+','+self.experiment_id
+        self.experiment_name = experiment_name
 
-        self.experiment_dir_path = os.path.join(self.dir_path, self.experiment_name)
-        if not os.path.exists(self.experiment_dir_path):
-            os.mkdir(self.experiment_dir_path)
+        # self.experiment_id = f"{time.strftime('%Y-%m-%d,%H-%M-%S')}"
+        # self.df_name = self.experiment_name+','+self.experiment_id
+        # self.df_name = self.experiment_name
 
-        self.experiment_temp_dir_path = os.path.join(self.experiment_dir_path,
-                                                     'temp_'+self.df_name)
+        # self.experiment_dir_path = os.path.join(self.dir_path, self.experiment_name)
+        # if not os.path.exists(self.experiment_dir_path):
+        #     os.mkdir(self.experiment_dir_path)
+
+        self.experiment_temp_dir_path = os.path.join(self.dir_path,
+                                                     'temp_'+self.experiment_name)
         if not os.path.exists(self.experiment_temp_dir_path):
             os.mkdir(self.experiment_temp_dir_path)
 
@@ -107,7 +106,7 @@ class StoreResultsInDataframe(StoreResultsAbstract):
         df = data_to_df(episodes, steps_list, states, actions, rewards, dones)
 
         df_path = os.path.join(self.experiment_temp_dir_path,
-                               self.df_name+','+str(time.time())+'.csv')
+                               self.experiment_name+','+str(time.time())+'.csv')
 
         df.to_csv(df_path, index=False)
 
@@ -117,9 +116,9 @@ class StoreResultsInDataframe(StoreResultsAbstract):
             return
         temp_dfs = [pd.read_csv(df_name, index_col=None) for df_name in dfs]
         res_df = pd.concat(temp_dfs)
-        res_df['experiment_id'] = self.experiment_id
+        res_df['experiment_id'] = self.experiment_name
 
-        self.df_path = os.path.join(self.experiment_dir_path, self.df_name+'.csv')
+        self.df_path = os.path.join(self.dir_path, self.experiment_name+'.csv')
         res_df.to_csv(self.df_path, index=False)
 
         for df_name in dfs:

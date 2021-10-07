@@ -7,6 +7,11 @@ from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
+"""
+TODO
+save expreiment stats (name, total reward, total steps, time_start, time_end) in experiments table
+"""
+
 def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
                  render=False, verbosity='progress'):
     """
