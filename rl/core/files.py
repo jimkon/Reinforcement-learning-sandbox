@@ -32,7 +32,7 @@ def execute_query_and_return(query, db_path=None):
 
 
 def check_if_exp_id_already_exists(experiment_id):
-    res = execute_query_and_return(query=f'select experiment_id from test_env where experiment_id="{experiment_id}" limit 1')
+    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
     return res is not None and len(res) > 0
 
 
@@ -139,7 +139,8 @@ class StoreResultsInDatabase(StoreResultsAbstract):
         self.experiment_name = experiment_name
         self.db_path = db_path if db_path else DEFAULT_STORE_DATABASE_OBJECT_PATH
 
-        # self.env, self.agent = env, agent
+        if check_if_exp_id_already_exists(self.db_path):
+            raise ValueError(f"{experiment_name} has to be unique in the experiments table")
 
         self.store_in_df = StoreResultsInDataframe(experiment_name=experiment_name)
         self.experiment_id = self.store_in_df.experiment_name
@@ -156,8 +157,8 @@ class StoreResultsInDatabase(StoreResultsAbstract):
         upload_df_in_db(df, self.to_table)
 
         os.remove(self.store_in_df.df_path)
-        if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
-            os.rmdir(self.store_in_df.experiment_dir_path)
+        # if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
+        #     os.rmdir(self.store_in_df.experiment_dir_path)
 
 
 

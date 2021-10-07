@@ -12,6 +12,7 @@ TODO
 save expreiment stats (name, total reward, total steps, time_start, time_end) in experiments table
 """
 
+
 def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
                  render=False, verbosity='progress'):
     """
@@ -20,13 +21,10 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase(to_table=str(env),
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
+                                                   to_table=str(env))
     elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name,
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
     else:
         store_results_obj = store_results
 
