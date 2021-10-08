@@ -1,9 +1,6 @@
-import os
 import unittest
 
-import numpy as np
-
-from experiments.misc import *
+from experiments.qleaning_pendulum_v0.misc import *
 
 
 class TestClip(unittest.TestCase):

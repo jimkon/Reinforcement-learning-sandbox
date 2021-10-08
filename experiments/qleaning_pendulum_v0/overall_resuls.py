@@ -1,12 +1,9 @@
 import math
-import os
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('bmh')
-
-from tqdm import tqdm
 
 ROLLING_WINDOW_SIZE = 100
 
@@ -90,8 +87,9 @@ def episode_rewards(df):
         episode_rewards = df_res.groupby('episode').agg({'reward': 'sum'})
 
         plt.plot(episode_rewards,
-                 alpha=0.2,
-                 linewidth=2)
+                 alpha=0.3,
+                 linewidth=2,
+                 c=c)
 
         rolling_avg = episode_rewards.rolling(ROLLING_WINDOW_SIZE,
                                               center=True,
@@ -143,10 +141,11 @@ def balance_steps(episode_stats_df):
         temp_df = episode_stats_df[episode_stats_df['theta_0_label'] == l]
         temp_df = temp_df[temp_df['solved'] > 0]
         plt.scatter(temp_df['episode'], temp_df['balance_step'], c=c, label=l, marker='s', alpha=0.25)
-        line = temp_df['balance_step'].rolling(window=min(ROLLING_WINDOW_SIZE, int(len(temp_df)*0.5)), center=True, min_periods=1).mean()
+        line = temp_df['balance_step'].rolling(window=max(min(ROLLING_WINDOW_SIZE, int(len(temp_df)*0.5)), 1),
+                                               center=True,
+                                               min_periods=1).mean()
         plt.plot(line, c='black', linewidth=4)
         plt.plot(line, c=c, linewidth=2)
-
 
     plt.xticks(np.linspace(0, len(episode_stats_df), 11))
     # plt.xticks(rotation=-90)
@@ -184,12 +183,17 @@ def balancing_progress(df, episode_stats_df):
     plt.legend()
 
 
-def plot(df):
-    df, episode_stats_df = process_df(df)
+def plot(df, save_to_path=None):
+    exp_id = df['experiment_id'][0]
 
-    plt.figure(figsize=(15, 10))
+    enriched_df, episode_stats_df = process_df(df)
+
+    fig = plt.figure(figsize=(15, 10))
+    fig.suptitle(exp_id)
+    fig.patch.set_facecolor('xkcd:light grey')
+
     plt.subplot(2, 2, 1)
-    episode_rewards(df)
+    episode_rewards(enriched_df)
 
     plt.subplot(2, 2, 2)
     solution_ratios(episode_stats_df)
@@ -198,17 +202,17 @@ def plot(df):
     balance_steps(episode_stats_df)
 
     plt.subplot(2, 2, 4)
-    balancing_progress(df, episode_stats_df)
+    balancing_progress(enriched_df, episode_stats_df)
 
     plt.tight_layout()
+
+    if save_to_path:
+        plt.savefig(save_to_path)
     plt.show()
 
 if __name__=="__main__":
-    dir = 'csvs/'
-    files = [dir+f for f in os.listdir(dir)]
-    print(files)
+    from rl.core.files import download_df_from_db
 
-    file = files[2]
-    print(f'Reading file: {file}')
-    df = pd.read_csv(file, index_col=False)
-    plot(df)
+    df = download_df_from_db('pend', 'Pendulum_v0')
+
+    plot(df, f"graphs/overall/{df['experiment_id'][0]}.png")

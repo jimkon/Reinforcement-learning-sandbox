@@ -7,6 +7,20 @@ from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
+"""
+TODO
+save expreiment stats (name, total reward, total steps, time_start, time_end) in experiments table
+"""
+
+
+def env_name_to_table(s):
+    if '<' in s and '>' in s:
+        s = s.split('<')[-1]
+        s = s.split('>')[0]
+        s = s.replace('-', '_')
+    return s
+
+
 def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
                  render=False, verbosity='progress'):
     """
@@ -15,13 +29,12 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase(to_table=str(env),
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
+                                                   to_table=env_name_to_table(str(env)),
+                                                   agent_id=agent.name(),
+                                                   env_id=str(env))
     elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name,
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
     else:
         store_results_obj = store_results
 
