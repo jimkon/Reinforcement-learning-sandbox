@@ -183,7 +183,7 @@ def balancing_progress(df, episode_stats_df):
     plt.legend()
 
 
-def plot(df, save_to_path=None):
+def plot(df, save_graph=None):
     exp_id = df['experiment_id'][0]
 
     enriched_df, episode_stats_df = process_df(df)
@@ -206,13 +206,25 @@ def plot(df, save_to_path=None):
 
     plt.tight_layout()
 
-    if save_to_path:
-        plt.savefig(save_to_path)
+    if save_graph is not None:
+        path = None
+        if isinstance(save_graph, str):
+            path = save_graph
+        elif isinstance(save_graph, bool):
+            path = f"graphs/overall/{exp_id}.png"
+            plt.savefig(path)
+
+        try:
+            plt.savefig(path)
+        except Exception as e:
+            print(e)
+            print('Due to the exception, graph was not saved.')
+
     plt.show()
 
 if __name__=="__main__":
     from rl.core.files import download_df_from_db
 
-    df = download_df_from_db('pend', 'Pendulum_v0')
+    df = download_df_from_db('qlearning_tab20_pend', 'Pendulum_v0')
 
-    plot(df, f"graphs/overall/{df['experiment_id'][0]}.png")
+    plot(df, save_graph=True)
