@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import os
 
 import pandas as pd
@@ -31,8 +32,8 @@ def execute_query_and_return(query, db_path=None):
         return list(result)
 
 
-def check_if_exp_id_already_exists(experiment_id):
-    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
+def check_if_exp_id_already_exists(experiment_id, db_path=None):
+    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1', db_path=db_path)
     return res is not None and len(res) > 0
 
 
@@ -40,6 +41,20 @@ def upload_df_in_db(df, to_table, db_path=None):
     engine = get_engine(db_path)
 
     df.to_sql(to_table, con=engine, if_exists='append', index=False)
+
+
+def add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=None, total_steps=None, start_time=None,
+                        end_time=None, db_path=None):
+    engine = get_engine(db_path)
+
+    args = locals()
+    del args['db_path']
+    del args['engine']
+    for k, v in args.items():
+        args[k] = [v]
+
+    df = pd.DataFrame.from_dict(args)
+    df.to_sql('experiments', con=engine, if_exists='append', index=False)
 
 
 def download_df_from_db(experiment_id, from_table, db_path=None):
@@ -134,34 +149,41 @@ class StoreResultsInDataframe(StoreResultsAbstract):
 
 
 class StoreResultsInDatabase(StoreResultsAbstract):
-    def __init__(self, experiment_name, to_table, db_path=None):
+    def __init__(self, experiment_name, to_table, db_path=None, agent_id=None, env_id=None):
         self.to_table = to_table
         self.experiment_name = experiment_name
         self.db_path = db_path if db_path else DEFAULT_STORE_DATABASE_OBJECT_PATH
 
-        if check_if_exp_id_already_exists(self.db_path):
+        if check_if_exp_id_already_exists(experiment_name, db_path=self.db_path):
             raise ValueError(f"{experiment_name} has to be unique in the experiments table")
 
         self.store_in_df = StoreResultsInDataframe(experiment_name=experiment_name)
         self.experiment_id = self.store_in_df.experiment_name
+        self.__start_time, self.__end_time = datetime.now(), None
+        self.__agent_id = agent_id
+        self.__env_id = env_id
 
     def save(self, episodes, steps_list, states, actions, rewards, dones):
         self.store_in_df.save(episodes, steps_list, states, actions, rewards, dones)
 
     def finalize(self):
+        self.__end_time = datetime.now()
         self.store_in_df.finalize()
 
         df = pd.read_csv(self.store_in_df.df_path, index_col=None)
         df['experiment_id'] = self.experiment_id
 
         upload_df_in_db(df, self.to_table)
+        add_experiment_info(
+            self.experiment_id,
+            agent_id=self.__agent_id,
+            env_id=self.__env_id,
+            total_reward=df['reward'].sum(),
+            total_steps=len(df),
+            start_time=self.__start_time,
+            end_time=self.__end_time
+        )
 
         os.remove(self.store_in_df.df_path)
         # if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
         #     os.rmdir(self.store_in_df.experiment_dir_path)
-
-
-
-
-
-

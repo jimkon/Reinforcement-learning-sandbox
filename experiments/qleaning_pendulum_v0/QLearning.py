@@ -112,4 +112,4 @@ class TabularQLearningAgent(Agent):
         return
 
     def name(self):
-        return 'tabular_Q_learning'
+        return 'Q_learning_tabular'
