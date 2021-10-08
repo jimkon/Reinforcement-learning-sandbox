@@ -1,12 +1,9 @@
 import math
-import os
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('bmh')
-
-from tqdm import tqdm
 
 ROLLING_WINDOW_SIZE = 100
 
@@ -214,11 +211,8 @@ def plot(df, save_to_path=None):
     plt.show()
 
 if __name__=="__main__":
-    dir = 'csvs/'
-    files = [dir+f for f in os.listdir(dir)]
-    print(files)
+    from rl.core.files import download_df_from_db
 
-    file = files[3]
-    print(f'Reading file: {file}')
-    df = pd.read_csv(file, index_col=False)
+    df = download_df_from_db('pend', 'Pendulum_v0')
+
     plot(df, f"graphs/overall/{df['experiment_id'][0]}.png")

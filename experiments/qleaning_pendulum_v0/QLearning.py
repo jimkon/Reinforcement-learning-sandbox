@@ -112,4 +112,4 @@ class TabularQLearningAgent(Agent):
         return
 
     def name(self):
-        return 'Q_learning_tabular'
+        return f'Q_learning_tabular({self.points_per_dim})_v1'
