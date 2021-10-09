@@ -105,35 +105,42 @@ def episode_rewards(df):
 
 
 def solution_ratios(episode_stats_df):
+
+    plt.axhline(0, c='#cccccc')
+    plt.axvline(0, c='#cccccc')
+
     solutions = 100 * episode_stats_df['solved'].rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean()
-    plt.plot(solutions, c='black', alpha=0.8, linewidth=3)
-    plt.plot(solutions, c='grey', alpha=0.8, linewidth=2, label='Overall')
+    plt.plot(solutions, c='black', alpha=0.6, linewidth=4, zorder=3)
+    plt.plot(solutions, c='#dddddd', alpha=0.8, linewidth=2, label='Overall', zorder=4)
 
     for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
         plt.plot(
             100 * episode_stats_df[episode_stats_df['theta_0_label'] == l]['solved'].rolling(window=100, center=True,
                                                                                              min_periods=1).mean(),
-            linewidth=1, c=c, label=l, alpha=1)
+            linewidth=0.7, c=c, label=l, alpha=1, zorder=4)
 
     ax = plt.gca()
-    xticks = list(np.linspace(0, len(solutions), 11))#list(ax.get_xticks())#list(range(0, len(solutions) + 1, 500))
+    xticks = list(np.linspace(0, len(solutions), 11))  # list(ax.get_xticks())#list(range(0, len(solutions) + 1, 500))
     for y in [50, 75, 90, 95, 99, 100]:
         episode_numbers = np.where(solutions >= y)[0]
         if len(episode_numbers) == 0:
             break
         x = episode_numbers[0]
-        plt.plot([0, x], [y, y], alpha=0.35, c='y')
-        plt.plot([x, x], [0, y], alpha=0.45, c='y')
+        plt.plot([0, x], [y, y], alpha=0.35, c='C7', zorder=1, linewidth=1)
+        plt.plot([x, x], [0, y], alpha=0.35, c='C7', zorder=1, linewidth=1)
         # plt.scatter(x, y, marker='o', c='black')
-        # plt.scatter(x, y, marker='x', c='y')
+        plt.scatter(x, y, marker='s', c='C7', zorder=5, alpha=0.35)
+        plt.annotate(f'{y}% ({x})', xy=(x, y), c='C7', zorder=5)
         xticks.append(x)
-    plt.xticks(np.sort(xticks), rotation=-90)
+    # plt.xticks(np.sort(xticks), rotation=-90)
 
     plt.legend()
     # plt.xlabel('Episodes')
     # plt.ylabel('%')
     plt.title('% of episodes been solved')
-    plt.yticks(range(0, 101, 10))
+    plt.yticks(range(0, 101, 10));
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
 
 
 def balance_steps(episode_stats_df):
@@ -164,17 +171,17 @@ def balancing_progress(df, episode_stats_df):
     temp_df = temp_df.groupby('episode').agg({'state_th': 'mean'})
     # temp_df
 
-    plt.plot(temp_df['state_th'].rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean(), c='C3',
+    plt.plot(temp_df['state_th'].rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean(), c='C5',
              label='mean')
 
     mean_abs = temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean()
 
-    plt.plot(mean_abs, c='C0', label='mean(abs)')
+    plt.plot(mean_abs, c='C4', label='mean(abs)')
     plt.plot([min_ep, max_ep], [mean_abs.mean()] * 2, alpha=0.5, c='grey',
              label=f'overall mean {mean_abs.mean():.02f}')
 
     plt.plot(temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).max(),
-             c='C1', label='max(abs)')
+             c='C6', label='max(abs)')
 
     plt.title('Avg theta (rads) averages after balancing')
     plt.xlabel('Episodes')
@@ -226,5 +233,5 @@ if __name__=="__main__":
     from rl.core.files import download_df_from_db
 
     df = download_df_from_db('qlearning_tab20_pend', 'Pendulum_v0')
-
+    df.to_csv('qlearning_tab20_pend.csv')
     plot(df, save_graph=True)
