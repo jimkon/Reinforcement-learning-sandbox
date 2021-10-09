@@ -105,7 +105,6 @@ def episode_rewards(df):
 
 
 def solution_ratios(episode_stats_df):
-
     plt.axhline(0, c='#cccccc')
     plt.axvline(0, c='#cccccc')
 
@@ -163,31 +162,45 @@ def balance_steps(episode_stats_df):
 
 
 def balancing_progress(df, episode_stats_df):
+    plt.axhline(0, c='#cccccc')
+    plt.axvline(0, c='#cccccc')
+
     temp_df = df.merge(episode_stats_df[['episode', 'balance_step']], on='episode')
     temp_df = temp_df[temp_df['balance_step'] > -1]
     min_ep, max_ep = temp_df['episode'].min(), temp_df['episode'].max()
     # temp_df['after_balancing'] = temp_df['balance_step']>=temp_df['step']
     temp_df = temp_df[temp_df['balance_step'] <= temp_df['step']]
     temp_df = temp_df.groupby('episode').agg({'state_th': 'mean'})
-    # temp_df
 
-    plt.plot(temp_df['state_th'].rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean(), c='C5',
-             label='mean')
+    first_balancing_point = temp_df.index.values.min()
+    plt.axvline(first_balancing_point, alpha=0.5, color='#444444',
+                label=f'first balancing point {first_balancing_point:.00f}')
+
+    mean = temp_df['state_th'].rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean()
+    x = mean.index.values.tolist()
+    y1 = np.zeros(mean.shape)
+
+    plt.fill_between(x=x, y1=y1, y2=mean, color='C5', alpha=0.75, label='mean', zorder=2)
 
     mean_abs = temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).mean()
+    plt.fill_between(x=x, y1=y1, y2=mean_abs, color='C4', alpha=0.5, label='mean(abs)', zorder=1)
+    # plt.plot(mean_abs, color='C4', alpha=0.5, label='mean(abs)', zorder=1)
 
-    plt.plot(mean_abs, c='C4', label='mean(abs)')
-    plt.plot([min_ep, max_ep], [mean_abs.mean()] * 2, alpha=0.5, c='grey',
-             label=f'overall mean {mean_abs.mean():.02f}')
+    overall_mean = mean_abs.mean()
+    plt.axhline(overall_mean, alpha=0.5, color='#444444', label=f'overall mean {overall_mean:.02f}')
 
-    plt.plot(temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).max(),
-             c='C6', label='max(abs)')
+    max_abs = temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).max()
+    plt.fill_between(x=x, y1=y1, y2=max_abs, color='C6', alpha=0.25, label='max(abs)', zorder=0)
 
     plt.title('Avg theta (rads) averages after balancing')
     plt.xlabel('Episodes')
     # plt.ylabel('Theta (rads)')
-    plt.yticks(np.linspace(-.5, .5, 11))
+    y_ticks = np.append(np.linspace(-.5, .5, 11), overall_mean)
+    plt.yticks(y_ticks)
+    plt.xticks(np.append(np.linspace(0, df['episode'].max() + 1, 11), first_balancing_point))
     plt.legend()
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
 
 
 def plot(df, save_graph=None):
