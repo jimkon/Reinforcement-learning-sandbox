@@ -207,6 +207,36 @@ def balancing_progress(df, episode_stats_df):
     plt.legend()
 
 
+def state_uniformity(episode_stats_df):
+    WINDOW_SIZE = len(episode_stats_df) // 10
+    STEP = WINDOW_SIZE // 2
+    res = {
+        'UR': [],
+        'BR': [],
+        'UL': [],
+        'BL': [],
+    }
+    x = list(range(0, len(episode_stats_df) - WINDOW_SIZE + 1, STEP))
+    for step in x:
+        temp_df = episode_stats_df[
+            (episode_stats_df['episode'] >= step) & (episode_stats_df['episode'] < step + WINDOW_SIZE)]
+        hist = temp_df['theta_0_label'].value_counts().to_dict()
+        for k, v in hist.items():
+            res[k].append(100 * v / WINDOW_SIZE)
+
+    sum_line = 100 * np.ones(len(res['UR']))
+    y2 = np.zeros(len(res['UR']))
+    for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
+        plt.fill_between(x=x, y1=sum_line, y2=y2, color=c, label=l)
+        plt.plot(x, sum_line, color='#444444', linewidth=1)
+        sum_line -= res[l]
+
+    plt.yticks([0, 25, 50, 75, 100])
+    plt.xticks(range(0, max(x) + 1, STEP))
+    plt.legend()
+    plt.title(f'Uniformity of initial thetas,(window:{WINDOW_SIZE})')
+
+
 def plot(df, save_graph=None):
     exp_id = df['experiment_id'][0]
 
@@ -227,6 +257,9 @@ def plot(df, save_graph=None):
 
     plt.subplot(2, 2, 4)
     balancing_progress(enriched_df, episode_stats_df)
+
+    # plt.subplot(4, 2, 8)
+    # state_uniformity(episode_stats_df)
 
     plt.tight_layout()
 
