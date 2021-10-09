@@ -4,6 +4,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('bmh')
+plt.rcParams.update({'xtick.labelsize': 6})
+plt.rcParams.update({'ytick.labelsize': 6})
+plt.rcParams.update({'axes.titlesize': 9})
+plt.rcParams.update({'axes.spines.top': False})
+plt.rcParams.update({'axes.spines.right': False})
+plt.rcParams.update({'axes.xmargin': 0.01})
+plt.rcParams.update({'legend.fontsize': 7})
+plt.rcParams.update({'figure.titlesize': 10})
 
 ROLLING_WINDOW_SIZE = 100
 
@@ -129,7 +137,7 @@ def solution_ratios(episode_stats_df):
         plt.plot([x, x], [0, y], alpha=0.35, c='C7', zorder=1, linewidth=1)
         # plt.scatter(x, y, marker='o', c='black')
         plt.scatter(x, y, marker='s', c='C7', zorder=5, alpha=0.35)
-        plt.annotate(f'{y}% ({x})', xy=(x, y), c='C7', zorder=5)
+        plt.annotate(f'{y}% ({x})', xy=(x, y), c='#333333', zorder=5)
         xticks.append(x)
     # plt.xticks(np.sort(xticks), rotation=-90)
 
@@ -138,8 +146,6 @@ def solution_ratios(episode_stats_df):
     # plt.ylabel('%')
     plt.title('% of episodes been solved')
     plt.yticks(range(0, 101, 10));
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
 
 
 def balance_steps(episode_stats_df):
@@ -199,8 +205,6 @@ def balancing_progress(df, episode_stats_df):
     plt.yticks(y_ticks)
     plt.xticks(np.append(np.linspace(0, df['episode'].max() + 1, 11), first_balancing_point))
     plt.legend()
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
 
 
 def plot(df, save_graph=None):
@@ -209,7 +213,7 @@ def plot(df, save_graph=None):
     enriched_df, episode_stats_df = process_df(df)
 
     fig = plt.figure(figsize=(15, 10))
-    fig.suptitle(exp_id)
+    fig.suptitle(f"Experiment: {exp_id}, Total reward: {df['reward'].sum():.0f}")
     fig.patch.set_facecolor('xkcd:light grey')
 
     plt.subplot(2, 2, 1)
