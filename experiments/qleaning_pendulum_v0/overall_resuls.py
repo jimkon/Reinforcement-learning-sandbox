@@ -98,9 +98,9 @@ def episode_rewards(df):
         plt.plot(rolling_avg, color='black', linewidth=3)
         plt.plot(rolling_avg, color=c, label=l, linewidth=2)
 
-    plt.title("Score per episode")
+    plt.title("Score (reward) per episode")
     # plt.xlabel("Episodes")
-    plt.ylabel("Reward")
+    # plt.ylabel("Reward")
     plt.legend()
 
 
@@ -116,7 +116,7 @@ def solution_ratios(episode_stats_df):
             linewidth=1, c=c, label=l, alpha=1)
 
     ax = plt.gca()
-    xticks = list(ax.get_xticks())#list(range(0, len(solutions) + 1, 500))
+    xticks = list(np.linspace(0, len(solutions), 11))#list(ax.get_xticks())#list(range(0, len(solutions) + 1, 500))
     for y in [50, 75, 90, 95, 99, 100]:
         episode_numbers = np.where(solutions >= y)[0]
         if len(episode_numbers) == 0:
@@ -131,7 +131,7 @@ def solution_ratios(episode_stats_df):
 
     plt.legend()
     # plt.xlabel('Episodes')
-    plt.ylabel('%')
+    # plt.ylabel('%')
     plt.title('% of episodes been solved')
     plt.yticks(range(0, 101, 10))
 
@@ -150,8 +150,8 @@ def balance_steps(episode_stats_df):
     plt.xticks(np.linspace(0, len(episode_stats_df), 11))
     # plt.xticks(rotation=-90)
     plt.xlabel('Episodes')
-    plt.ylabel('Count')
-    plt.title('Step count before solution')
+    # plt.ylabel('Count')
+    plt.title('# of steps before solution')
     plt.legend()
 
 
@@ -176,9 +176,9 @@ def balancing_progress(df, episode_stats_df):
     plt.plot(temp_df['state_th'].abs().rolling(window=ROLLING_WINDOW_SIZE, center=True, min_periods=1).max(),
              c='C1', label='max(abs)')
 
-    plt.title('Theta averages after balancing')
+    plt.title('Avg theta (rads) averages after balancing')
     plt.xlabel('Episodes')
-    plt.ylabel('Theta (rads)')
+    # plt.ylabel('Theta (rads)')
     plt.yticks(np.linspace(-.5, .5, 11))
     plt.legend()
 
