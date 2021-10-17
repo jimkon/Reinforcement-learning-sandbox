@@ -1,4 +1,5 @@
 import math
+import time
 
 import numpy as np
 import pandas as pd
@@ -48,6 +49,7 @@ def detect_balance(thetas, theta_threshold=.5, thetadot_threshold=0.02, balance_
 
 def process_df(df_in, theta_threshold=.5, thetadot_threshold=0.02, balance_cnt_threshold=10):
     print('Enriching dataframe.')
+    start_time = time.time()
     df_in['acos'] = np.arccos(df_in['state_0'])
     df_in['asin_sign'] = 1 - 2 * (np.arcsin(df_in['state_1']) < 0).astype(int)
 
@@ -82,10 +84,11 @@ def process_df(df_in, theta_threshold=.5, thetadot_threshold=0.02, balance_cnt_t
     del df_in['is_unbalanced']
     del df_in['unbalanced_step']
 
+    print(f'Enrichment finished after {time.time()-start_time:.04f} s')
     return df_in, episode_stats_df
 
 
-def episode_rewards(df):
+def episode_rewards_graph(df):
     eps = df[df['step'] == 0]
     for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
         episodes_list = eps[eps['theta_label'] == l]['episode'].to_list()
@@ -112,7 +115,7 @@ def episode_rewards(df):
     plt.legend()
 
 
-def solution_ratios(episode_stats_df):
+def solution_ratios_graph(episode_stats_df):
     plt.axhline(0, c='#cccccc')
     plt.axvline(0, c='#cccccc')
 
@@ -148,7 +151,7 @@ def solution_ratios(episode_stats_df):
     plt.yticks(range(0, 101, 10));
 
 
-def balance_steps(episode_stats_df):
+def balance_steps_graph(episode_stats_df):
     for l, c in zip(['UL', 'UR', 'BL', 'BR'], ['C1', 'C2', 'C0', 'C3']):
         temp_df = episode_stats_df[episode_stats_df['theta_0_label'] == l]
         temp_df = temp_df[temp_df['solved'] > 0]
@@ -167,7 +170,7 @@ def balance_steps(episode_stats_df):
     plt.legend()
 
 
-def balancing_progress(df, episode_stats_df):
+def balancing_progress_graph(df, episode_stats_df):
     plt.axhline(0, c='#cccccc')
     plt.axvline(0, c='#cccccc')
 
@@ -207,7 +210,7 @@ def balancing_progress(df, episode_stats_df):
     plt.legend()
 
 
-def state_uniformity(episode_stats_df):
+def state_uniformity_graph(episode_stats_df):
     WINDOW_SIZE = len(episode_stats_df) // 10
     STEP = WINDOW_SIZE // 2
     res = {
@@ -247,16 +250,16 @@ def plot(df, save_graph=None):
     fig.patch.set_facecolor('xkcd:light grey')
 
     plt.subplot(2, 2, 1)
-    episode_rewards(enriched_df)
+    episode_rewards_graph(enriched_df)
 
     plt.subplot(2, 2, 2)
-    solution_ratios(episode_stats_df)
+    solution_ratios_graph(episode_stats_df)
 
     plt.subplot(2, 2, 3)
-    balance_steps(episode_stats_df)
+    balance_steps_graph(episode_stats_df)
 
     plt.subplot(2, 2, 4)
-    balancing_progress(enriched_df, episode_stats_df)
+    balancing_progress_graph(enriched_df, episode_stats_df)
 
     # plt.subplot(4, 2, 8)
     # state_uniformity(episode_stats_df)
