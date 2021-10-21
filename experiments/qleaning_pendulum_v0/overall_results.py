@@ -278,7 +278,7 @@ def plot(df, save_graph=None):
             plt.savefig(path)
         except Exception as e:
             print(e)
-            print('Due to the exception, graph was not saved.')
+            print('Due to the exception above, graph was not saved.')
 
     plt.show()
 
