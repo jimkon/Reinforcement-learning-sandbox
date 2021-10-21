@@ -5,11 +5,11 @@ from QLearning import TabularQLearningAgent
 if __name__=="__main__":
     import gym
 
-    from rl.core import engine
+    from rl.core.engine import run_episodes
 
     env = gym.make('Pendulum-v0')
     agent = TabularQLearningAgent(10, epsilon=.0)
-    engine.run_episodes(env,
+    run_episodes(env,
                         agent,
                         2000,
                         store_results='database',
