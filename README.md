@@ -7,7 +7,8 @@ also for the proof of concept.
 
 A complete example can be found in *experiments/qlearning_pendulum_v0/run_experiment.py*
 file, where an implementation of a tabular QLearning agent is tested on the
-Pendulum-v0 openai-gym environment for 2000 episodes.
+Pendulum-v0 openai-gym environment for 2000 episodes. For this case, there
+is also a script containing graphs to evaluate the performance of each execution.
 
 The core function is ***run_experiment( environment, agent, number_of_episodes, args)***.
     
