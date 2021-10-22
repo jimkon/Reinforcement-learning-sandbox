@@ -185,5 +185,3 @@ class StoreResultsInDatabase(StoreResultsAbstract):
         )
 
         os.remove(self.store_in_df.df_path)
-        # if len(os.listdir(self.store_in_df.experiment_dir_path)) == 0:
-        #     os.rmdir(self.store_in_df.experiment_dir_path)

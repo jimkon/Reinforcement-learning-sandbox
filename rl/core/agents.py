@@ -1,8 +1,3 @@
-import numpy as np
-
-from rl.core.envs import wrap_env
-
-
 class Agent:
 
     def set_env(self, env):
@@ -16,6 +11,3 @@ class Agent:
 
     def name(self):
         return 'default_agent'
-
-
-

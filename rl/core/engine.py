@@ -3,7 +3,6 @@ from tqdm import tqdm
 
 import numpy as np
 
-from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 

@@ -16,6 +16,14 @@ class TabularQLearningAgent(Agent):
         self.discount_rate = gamma
         self.epsilon = epsilon
 
+        self.wrapped_env = None
+        self.state_low, self.state_high = None, None
+        self.state_diff = None
+        self.state_dims = None
+        self.is_action_space_discrete = None
+        self.action_mapper, self.actions_mapping_f = None, None
+        self.states_mapping_f_list = None
+
     def set_env(self, env):
         print(env)
         self.wrapped_env = wrap_env(env)
@@ -49,23 +57,6 @@ class TabularQLearningAgent(Agent):
             low, high = dim_range
             self.states_mapping_f_list.append(MapFloatToInteger(low, high, self.points_per_dim))
 
-        # print(wrapped_env.state_limits())
-        # for i in np.linspace(-1.2, 0.6, 10):
-        #     for j in np.linspace(-.07, .07, 10):
-        #         # s = wrapped_env.random_state()
-        #         s = [i, j]
-        #         print(s, self.__state_index(s), self.__q_of_state(s), self.act(s))
-        # # s = [-1.2, -0.07]
-        # # print(s, self.__q_of_state(s))
-        # # s = [0.6, 0.07]
-        # # print(s, self.__q_of_state(s))
-        # # s = [-1.2, 0.07]
-        # # print(s, self.__q_of_state(s))
-        # # s = [0.6, -0.07]
-        # # print(s, self.__q_of_state(s))
-        # # exit()
-        pass
-
     def __state_index(self, state):
         return tuple([self.states_mapping_f_list[i].map(s) for i, s in enumerate(state)])
 
@@ -78,7 +69,6 @@ class TabularQLearningAgent(Agent):
         if np.random.uniform() < self.epsilon:
             action = self.wrapped_env.random_action()
             return action
-            # return 0 if state[1] < 0 else 2
         else:
             action_i = np.argmax(self.__q_of_state(state))
 

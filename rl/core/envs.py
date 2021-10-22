@@ -29,10 +29,6 @@ class EnvWrapper:
         self.action_high = action_space.high if isinstance(action_space, gym.spaces.box.Box) else [
                 action_space.n-1]
 
-    # @lru_cache()
-    # def is_observation_space_discrete(self):
-    #     return isinstance(self.gym_env.observation_space, gym.spaces.discrete.Discrete)
-
     @lru_cache()
     def is_action_space_discrete(self):
         return isinstance(self.gym_env.action_space, gym.spaces.discrete.Discrete)
@@ -68,11 +64,7 @@ class EnvWrapper:
         return self.gym_env.reset()
 
     def transition(self, state, action):
-        # print(state, action, isinstance(action, Iterable))
-        # if isinstance(action, Iterable):
         next_state, reward, done = self.__step(tuple(state), action)
-        # else:
-        #     next_state, reward, done = self.__step(tuple(state), action)
         return next_state
 
     def reward(self, state, action):
@@ -113,7 +105,6 @@ def wrappable_envs():
             EnvWrapper(env_id)
         except Exception as e:
             pass
-            # print(e)
         else:
             res.append(env_id)
     return res
@@ -126,5 +117,4 @@ def wrap_env(env):
         else:
             return EnvWrapper(env)
     except Exception as e:
-        # print(env, 'cannot be wrapped.', str(e))
         return None
