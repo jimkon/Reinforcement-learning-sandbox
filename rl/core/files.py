@@ -24,6 +24,13 @@ def get_engine(db_path=None):
     return engine
 
 
+def execute_query(query, db_path=None):
+    engine = get_engine(db_path)
+
+    with engine.connect() as connection:
+        connection.execute(query)
+
+
 def execute_query_and_return(query, db_path=None):
     engine = get_engine(db_path)
 
@@ -35,12 +42,6 @@ def execute_query_and_return(query, db_path=None):
 def check_if_exp_id_already_exists(experiment_id, db_path=None):
     res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1', db_path=db_path)
     return res is not None and len(res) > 0
-
-
-def upload_df_in_db(df, to_table, db_path=None):
-    engine = get_engine(db_path)
-
-    df.to_sql(to_table, con=engine, if_exists='append', index=False)
 
 
 def add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=None, total_steps=None, start_time=None,
@@ -57,6 +58,12 @@ def add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=
     df.to_sql('experiments', con=engine, if_exists='append', index=False)
 
 
+def upload_df_in_db(df, to_table, db_path=None):
+    engine = get_engine(db_path)
+
+    df.to_sql(to_table, con=engine, if_exists='append', index=False)
+
+
 def download_df_from_db(experiment_id, from_table, db_path=None):
     engine = get_engine(db_path)
 
@@ -68,7 +75,10 @@ def download_df_from_db(experiment_id, from_table, db_path=None):
     return df
 
 
-def data_to_df(episodes, steps_list, states, actions, rewards, dones):
+def data_to_df(episodes, steps_list, states, actions, rewards, dones, compressed=False):
+    if compressed is None:
+        compressed = STORE_COMPRESSED_DATA
+
     to_dict = {
         'episode': episodes,
         'step': steps_list
@@ -88,7 +98,7 @@ def data_to_df(episodes, steps_list, states, actions, rewards, dones):
 
     df = pd.DataFrame(to_dict)
 
-    if not STORE_COMPRESSED_DATA:
+    if not compressed:
         dones = df['done']
         del df['done']
         for i in range(len(states)):

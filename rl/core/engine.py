@@ -16,7 +16,8 @@ def env_name_to_table(s):
     if '<' in s and '>' in s:
         s = s.split('<')[-1]
         s = s.split('>')[0]
-        s = s.replace('-', '_')
+
+    s = s.replace('-', '_')
     return s
 
 
@@ -25,7 +26,8 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
-
+    if experiment_name is None:
+        experiment_name = f"{agent.name()}_{env_name_to_table(str(env))}"
     # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
         store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
