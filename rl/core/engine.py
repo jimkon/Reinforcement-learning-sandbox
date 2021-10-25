@@ -3,8 +3,22 @@ from tqdm import tqdm
 
 import numpy as np
 
-from rl.core.configs import DEFAULT_STORE_RESULTS_OBJECT
 from rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
+
+
+"""
+TODO
+save expreiment stats (name, total reward, total steps, time_start, time_end) in experiments table
+"""
+
+
+def env_name_to_table(s):
+    if '<' in s and '>' in s:
+        s = s.split('<')[-1]
+        s = s.split('>')[0]
+
+    s = s.replace('-', '_')
+    return s
 
 
 def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
@@ -12,16 +26,16 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
-
-    store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
+    if experiment_name is None:
+        experiment_name = f"{agent.name()}_{env_name_to_table(str(env))}"
+    # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase(to_table=str(env),
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
+                                                   to_table=env_name_to_table(str(env)),
+                                                   agent_id=agent.name(),
+                                                   env_id=str(env))
     elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name,
-                                                   env=env,
-                                                   agent=agent)
+        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
     else:
         store_results_obj = store_results
 
@@ -39,7 +53,10 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     log_frequency = -1 if log_frequency == 0 else log_frequency
 
+    agent.set_env(env)
+
     episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
+    episode_rewards = []
 
     last_log_step = 0
 
@@ -56,23 +73,21 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     for episode in iter_:
         episode_reward = 0
         step = 0
-        state = None
+        state = env.reset()
         done = False
 
         while not done:
 
-            if not state:
-                state = env.reset()
-
             action = agent.act(state)
 
             if not n_actions:
-                print(action)
                 n_actions = len(np.atleast_1d(action))
 
             next_state, reward, done, _ = env.step(action)
 
             agent.observe(state, action, reward, next_state, done)
+
+            episode_reward += reward
 
             if verbosity >= 4:
                 print(
@@ -84,23 +99,23 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                 action), rewards.append(reward), dones.append(done)
 
             if done:
-                state = None
                 episodes.append(episode), steps_list.append(step + 1), states.append(next_state), actions.append(
                     ['null'] * n_actions), rewards.append(.0), dones.append(-1)
                 step += 1
             else:
                 state = next_state
-                episode_reward += reward
                 step += 1
 
             if render:
                 env.render()
 
+        episode_rewards.append(episode_reward)
         total_reward += episode_reward
-        total_steps += step + 1
+        total_steps += step
         if verbosity >= 3:
+            avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             print(
-                f"Agent {agent.name()} completed the {episode} episode. Total reward {episode_reward}, Steps {step + 1}")
+                f"Agent {agent.name()} completed the {episode} episode. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
 
         if store_results_obj and episode % log_frequency == log_frequency - 1:
             store_results_obj.save(episodes[last_log_step:],
@@ -112,10 +127,11 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
-    if verbosity >= 2:
+    if verbosity >= 1:
         episode += 1
+        avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
         print(
-            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} ({total_reward / episode} avg episode reward). Steps {total_steps}")
+            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}")
 
     if store_results_obj:
         store_results_obj.save(episodes[last_log_step:],
