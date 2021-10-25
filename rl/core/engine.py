@@ -73,13 +73,10 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     for episode in iter_:
         episode_reward = 0
         step = 0
-        state = None
+        state = env.reset()
         done = False
 
         while not done:
-
-            if state is None:
-                state = env.reset()
 
             action = agent.act(state)
 
@@ -102,7 +99,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                 action), rewards.append(reward), dones.append(done)
 
             if done:
-                state = None
                 episodes.append(episode), steps_list.append(step + 1), states.append(next_state), actions.append(
                     ['null'] * n_actions), rewards.append(.0), dones.append(-1)
                 step += 1

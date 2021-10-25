@@ -2,111 +2,98 @@ import os
 import unittest
 
 import numpy as np
+import pandas as pd
 
-from rl.core import engine, db
-
-
-class Agent:
-    def act(self, state):
-        return [state[0], state[1]]
-
-    def observe(self, *args):
-        pass
-
-    def name(self):
-        return 'test_agent'
+from rl.core import engine
 
 
-class Env:
-    def __init__(self):
-        self.cnt = 0.
-
-    def reset(self):
-        self.cnt = 0.
-        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3]
-
-    def step(self, action):
-        self.cnt += 1
-        return [self.cnt+0.1, self.cnt+0.2, self.cnt+0.3], self.cnt, int(np.random.random(1)[0]>0.5), None
-
-    def render(self):
-        pass
-
-    def __repr__(self):
-        return 'test_env'
-
-
-# class DB:
-#     def execute(self, query):
-#         print('DB:\n', query)
+class TestEngine(unittest.TestCase):
+    def test_env_name_to_table(self):
+        self.assertEqual(engine.env_name_to_table('<a<b<table-name>>>'), 'table_name')
+        self.assertEqual(engine.env_name_to_table('table-name'), 'table_name')
 
 
 class TestEngine(unittest.TestCase):
 
     def setUp(self):
-        self.db_path = os.path.join(db.db_path(), 'test_db.db')
-        self.db_obj = db.DB('test_db.db', verbose=1)
+        row_num_obj = [-1]
+        df = pd.DataFrame({
+            'episode': [0, 0, 0, 1, 1, 1, 1, 1, 2, 2],
+            'step': [0, 1, 2, 0, 1, 2, 3, 4, 0, 1],
+            'state_0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+            'state_1': [11, 12, 13, 14, 15, 16, 17, 18, 19, 10],
+            'action_0': [100, 101, 102, 103, 104, 105, 106, 107, 108, 109],
+            'reward': [110, 111, 112, 113, 114, 115, 116, 117, 118, 119],
+            'done': [0, 1, -1, 0, 0, 0, 1, -1, 1, -1],
+        })
+        class TestAgent:
+            def __init__(self):
+                self.df = df
+                # self.row_num = 0
 
-        self.agent = Agent()
-        self.env = Env()
+            def act(self, state):
+                res = self.df['action_0'].tolist()[row_num_obj[0]]
+                # self.row_num += 1
+                return res
+
+            def set_env(self, env):
+                pass
+
+            def observe(self, *args):
+                pass
+
+            def name(self):
+                return 'test_agent'
+
+        class TestEnv:
+            def __init__(self):
+                self.df = df
+                # self.row_num = 0
+
+            def reset(self):
+                # print('reset', row_num_obj[0])
+                res = [self.df['state_0'].tolist()[row_num_obj[0]], self.df['state_1'].tolist()[row_num_obj[0]]]
+                row_num_obj[0] += 1
+                return res
+
+            def step(self, action):
+                # print('step', row_num_obj[0])
+                res = [self.df['state_0'].tolist()[row_num_obj[0]], self.df['state_1'].tolist()[row_num_obj[0]]]
+                done = self.df['done'].tolist()[row_num_obj[0]]
+                reward = 110+row_num_obj[0]
+                row_num_obj[0] += 1
+                return res, reward, done, None
+
+            def __repr__(self):
+                return 'test_env'
+
+        self.agent = TestAgent()
+        self.env = TestEnv()
 
     def tearDown(self):
-        self.db_obj.close()
-        os.remove(os.path.join(db.db_path(), self.db_obj.db_name))
+        pass
 
-    def test_store_results_to_database(self):
-        tablename = 'to_table_arg'
-        agent_id = 'agent_id_arg'
-        experiment_id = 'experiment_id_arg'
-        episodes = [0, 1, 1, 1]
-        steps_list = [0, 0, 1, 2]
-        states = [[0, 0], [1, 11], [2, 22], [3, 33]]
-        actions = [[0], [10], [20], [30]]
-        rewards = [0, 100, 200, 300]
-        dones = [1, 0, 0, 1]
-        data = (episodes, steps_list, states, actions, rewards, dones)
-
-        engine.store_results_to_database(self.db_obj,
-                                         data,
-                                         to_table=tablename,
-                                         agent_id=agent_id,
-                                         experiment_id=experiment_id)
-
-        res = self.db_obj.execute_and_return("select * from to_table_arg order by episode, step")
-
-        for i, row in res.iterrows():
-            self.assertEqual(res.iloc[i]['exp_id'], experiment_id)
-            self.assertEqual(res.iloc[i]['agent_id'], agent_id)
-            self.assertEqual(res.iloc[i]['episode'], 0 if i == 0 else 1)
-            self.assertEqual(res.iloc[i]['state_0'], i)
-            self.assertEqual(res.iloc[i]['state_1'], i*11)
-            self.assertEqual(res.iloc[i]['action_0'], i*10)
-            self.assertEqual(res.iloc[i]['reward'], i*100)
-            self.assertEqual(res.iloc[i]['done'], 1 if i == 0 or i == 3 else 0)
-
-    def test_run_episodes(self):
+    def test_run_episodes_dataframe(self):
+        expected_res_df = pd.DataFrame({
+            'episode': [0, 0, 1, 1, 1, 1, 2],
+            'step': [0, 1, 0, 1, 2, 3, 0],
+            'state_0': [0, 1, 3, 4, 5, 6, 8],
+            'state_1': [10, 11, 13, 14, 15, 16, 18],
+            'action_0': [100, 101, 103, 104, 105, 106, 108],
+            'reward': [110, 111, 113, 114, 115, 116, 118],
+            'next_state_0': [1, 2, 4, 5, 6, 7, 9],
+            'next_state_1': [11, 12, 14, 15, 16, 17, 19],
+            'done': [0, 1, 0, 0, 0, 1, 1],
+            'experiment_id': ['test_experiment']*7
+        })
         engine.run_episodes(self.env,
                             self.agent,
-                            2,
-                            log_database=self.db_obj,
-                            log_frequency=-1,
-                            verbosity=None)
+                            3,
+                            experiment_name='test_experiment',
+                            store_results='dataframe')
 
-        res = self.db_obj.execute_and_return(f"select * from {str(self.env)} order by episode, step")
+        res_df = pd.read_csv("../files/results/dataframes/test_experiment.csv")
+        self.assertTrue((expected_res_df.reset_index(drop=True) == res_df.reset_index(drop=True)).all().all())#self.assertTrue(df.equals(res_df))
 
-        ep_cnt = 0
-        for i, row in res.iterrows():
-            done = res.iloc[i]['done']
-            step = res.iloc[i]['step']
 
-            self.assertEqual(res.iloc[i]['agent_id'], self.agent.name())
-            self.assertEqual(res.iloc[i]['episode'], ep_cnt)
 
-            self.assertEqual(res.iloc[i]['state_0'], step+0.1)
-            self.assertEqual(res.iloc[i]['state_1'], step+0.2)
-            self.assertEqual(res.iloc[i]['state_2'], step+0.3)
-            self.assertTrue(np.isnan(res.iloc[i]['action_0']) if done == -1 else res.iloc[i]['action_0'] == step + 0.1)
-            self.assertTrue(np.isnan(res.iloc[i]['action_1']) if done == -1 else res.iloc[i]['action_1'] == step + 0.2)
-            self.assertEqual(res.iloc[i]['reward'], step+1 if done >= 0 else 0)
-
-            ep_cnt += 1 if done == -1 else 0
