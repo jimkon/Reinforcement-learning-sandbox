@@ -15,41 +15,39 @@ TODO
 """
 
 
-def get_engine(db_path=None):
-    if not db_path:
-        db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
+def get_engine():
+    db_path = DEFAULT_STORE_DATABASE_OBJECT_PATH
 
     engine = create_engine('sqlite:///'+db_path, echo=False)
 
     return engine
 
 
-def execute_query(query, db_path=None):
-    engine = get_engine(db_path)
+def execute_query(query):
+    engine = get_engine()
 
     with engine.connect() as connection:
         connection.execute(query)
 
 
-def execute_query_and_return(query, db_path=None):
-    engine = get_engine(db_path)
+def execute_query_and_return(query):
+    engine = get_engine()
 
     with engine.connect() as connection:
         result = connection.execute(query)
         return list(result)
 
 
-def check_if_exp_id_already_exists(experiment_id, db_path=None):
-    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1', db_path=db_path)
+def check_if_exp_id_already_exists(experiment_id):
+    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
     return res is not None and len(res) > 0
 
 
 def add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=None, total_steps=None, start_time=None,
-                        end_time=None, db_path=None):
-    engine = get_engine(db_path)
+                        end_time=None):
+    engine = get_engine()
 
     args = locals()
-    del args['db_path']
     del args['engine']
     for k, v in args.items():
         args[k] = [v]
@@ -58,14 +56,14 @@ def add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=
     df.to_sql('experiments', con=engine, if_exists='append', index=False)
 
 
-def upload_df_in_db(df, to_table, db_path=None):
-    engine = get_engine(db_path)
+def upload_df_in_db(df, to_table):
+    engine = get_engine()
 
     df.to_sql(to_table, con=engine, if_exists='append', index=False)
 
 
-def download_df_from_db(experiment_id, from_table, db_path=None):
-    engine = get_engine(db_path)
+def download_df_from_db(experiment_id, from_table):
+    engine = get_engine()
 
     df = pd.read_sql(f'select * from {from_table} where experiment_id=\"{experiment_id}\"',
                      con=engine,
@@ -162,9 +160,8 @@ class StoreResultsInDatabase(StoreResultsAbstract):
     def __init__(self, experiment_name, to_table, db_path=None, agent_id=None, env_id=None):
         self.to_table = to_table
         self.experiment_name = experiment_name
-        self.db_path = db_path if db_path else DEFAULT_STORE_DATABASE_OBJECT_PATH
 
-        if check_if_exp_id_already_exists(experiment_name, db_path=self.db_path):
+        if check_if_exp_id_already_exists(experiment_name):
             raise ValueError(f"{experiment_name} has to be unique in the experiments table")
 
         self.store_in_df = StoreResultsInDataframe(experiment_name=experiment_name)

@@ -68,3 +68,5 @@ class TestEnvs(unittest.TestCase):
             self.assertTrue(all(diff >= 0))
 
 
+if __name__ == '__main__':
+    unittest.main()

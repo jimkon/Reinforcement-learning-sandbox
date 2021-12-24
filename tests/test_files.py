@@ -4,7 +4,6 @@ import pandas as pd
 pd.set_option('display.max_columns', None)
 import numpy as np
 
-import sqlite3
 from sqlalchemy.exc import OperationalError
 
 from rl.core import files
@@ -90,3 +89,6 @@ class TestFiles(unittest.TestCase):
         res_df = files.data_to_df(episodes, steps_list, states, actions, rewards, dones, compressed=False)
         self.assertTrue((df2.reset_index(drop=True) == res_df.reset_index(drop=True)).all().all())#self.assertTrue(df.equals(res_df))
 
+
+if __name__ == '__main__':
+    unittest.main()

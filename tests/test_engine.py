@@ -1,13 +1,12 @@
-import os
 import unittest
 
-import numpy as np
 import pandas as pd
 
 from rl.core import engine
+from rl.core.files import download_df_from_db, execute_query, execute_query_and_return
 
 
-class TestEngine(unittest.TestCase):
+class TestEngineMisc(unittest.TestCase):
     def test_env_name_to_table(self):
         self.assertEqual(engine.env_name_to_table('<a<b<table-name>>>'), 'table_name')
         self.assertEqual(engine.env_name_to_table('table-name'), 'table_name')
@@ -90,10 +89,19 @@ class TestEngine(unittest.TestCase):
                             self.agent,
                             3,
                             experiment_name='test_experiment',
-                            store_results='dataframe')
+                            store_results='database')
 
-        res_df = pd.read_csv("../files/results/dataframes/test_experiment.csv")
+        res_df = download_df_from_db('test_experiment', 'test_env')
+        # res_df = pd.read_csv("../files/results/dataframes/test_experiment.csv")
         self.assertTrue((expected_res_df.reset_index(drop=True) == res_df.reset_index(drop=True)).all().all())#self.assertTrue(df.equals(res_df))
 
+        print(execute_query_and_return("select * from experiments where experiment_id='test_experiment'"))
+        # self.assertTrue()
+        execute_query("delete from experiments where experiment_id='test_experiment'")
+        execute_query("drop table test_env")
+
+
+if __name__ == '__main__':
+    unittest.main()
 
 

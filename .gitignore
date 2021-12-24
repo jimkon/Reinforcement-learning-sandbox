@@ -4,3 +4,19 @@
 /bin
 
 __pycache__
+
+
+/files/
+
+/venv/
+
+.idea
+
+venv
+
+*.db
+*.csv
+
+files
+
+

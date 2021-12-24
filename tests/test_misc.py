@@ -1,6 +1,6 @@
 import unittest
 
-from experiments.qleaning_pendulum_v0.misc import *
+from rl.misc.misc import *
 
 
 class TestClip(unittest.TestCase):
