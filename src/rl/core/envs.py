@@ -5,6 +5,14 @@ from functools import lru_cache
 from collections.abc import Iterable
 
 
+class AbstractEnv:
+    def reset(self):
+        raise NotImplementedError
+
+    def step(self, action):
+        raise NotImplementedError
+
+
 class EnvWrapper:
     def __init__(self, env):
         raise NotImplementedError

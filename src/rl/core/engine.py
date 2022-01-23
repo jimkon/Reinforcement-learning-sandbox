@@ -106,7 +106,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                 state = next_state
                 step += 1
 
-            if render:
+            if render and hasattr(env, render):
                 env.render()
 
         episode_rewards.append(episode_reward)
