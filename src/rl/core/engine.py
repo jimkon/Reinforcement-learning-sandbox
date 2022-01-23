@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 import numpy as np
 
+from src.rl.core.logging import log
 from src.rl.core.files import StoreResultsInDataframe, StoreResultsInDatabase
 
 
@@ -26,18 +27,7 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
-    if experiment_name is None:
-        experiment_name = f"{agent.name()}_{env_name_to_table(str(env))}"
-    # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
-    if store_results == 'database':
-        store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
-                                                   to_table=env_name_to_table(str(env)),
-                                                   agent_id=agent.name(),
-                                                   env_id=str(env))
-    elif store_results == 'dataframe':
-        store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
-    else:
-        store_results_obj = store_results
+
 
     start_time = time.time()
 
@@ -54,30 +44,28 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     agent.set_env(env)
 
     if not storage_dict:
-        episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
-    else:
-        episodes = storage_dict['episodes']
-        steps_list = storage_dict['steps_list']
-        states = storage_dict['states']
-        actions = storage_dict['actions']
-        rewards = storage_dict['rewards']
-        dones = storage_dict['dones']
+        storage_dict = {
+            'episodes': [],
+            'steps_list': [],
+            'states': [],
+            'actions': [],
+            'rewards': [],
+            'dones': []
+        }
 
     episode_rewards = []
-
-    last_log_step = 0
 
     total_reward, total_steps = 0, 0
 
     n_actions = None
 
     if verbosity == 1:
-        iter_ = tqdm(range(n_episodes), f"Agent {agent.name()} execution in {str(env)} environment")
+        _iter = tqdm(range(n_episodes), f"Agent {agent.name()} execution in {str(env)} environment")
     else:
-        iter_ = range(n_episodes)
+        _iter = range(n_episodes)
 
     episode = 0
-    for episode in iter_:
+    for episode in _iter:
         episode_reward = 0
         step = 0
         state = env.reset()
@@ -97,17 +85,25 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             episode_reward += reward
 
             if verbosity >= 4:
-                print(
+                log (
                     f"Episode:{episode}, Step:{step}, state:{state}, action:{action}, reward:{reward}, next state:{next_state}, done:{done}")
 
             action = np.atleast_1d(action)
 
-            episodes.append(episode), steps_list.append(step), states.append(state), actions.append(
-                action), rewards.append(reward), dones.append(done)
+            storage_dict['episodes'].append(episode)
+            storage_dict['steps_list'].append(step)
+            storage_dict['states'].append(state)
+            storage_dict['actions'].append(action)
+            storage_dict['rewards'].append(reward)
+            storage_dict['dones'].append(done)
 
             if done:
-                episodes.append(episode), steps_list.append(step + 1), states.append(next_state), actions.append(
-                    ['null'] * n_actions), rewards.append(.0), dones.append(-1)
+                storage_dict['episodes'].append(episode)
+                storage_dict['steps_list'].append(step+1)
+                storage_dict['states'].append(next_state)
+                storage_dict['actions'].append(['null'] * n_actions)
+                storage_dict['rewards'].append(.0)
+                storage_dict['dones'].append(-1)
                 step += 1
             else:
                 state = next_state
@@ -121,37 +117,39 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
         total_steps += step
         if verbosity >= 3:
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
-            print(
+            log (
                 f"Agent {agent.name()} completed the {episode} episode. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
 
     elapsed_time = time.time() - start_time
     if verbosity >= 1:
         episode += 1
         avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
-        print(
+        log (
             f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}")
 
-    if store_results_obj:
-        store_results_obj.save(episodes[last_log_step:],
-                               steps_list[last_log_step:],
-                               states[last_log_step:],
-                               actions[last_log_step:],
-                               rewards[last_log_step:],
-                               dones[last_log_step:])
-        store_results_obj.finalize()
-
-    if not storage_dict:
-        storage_dict = {
-            'episodes': episodes,
-            'steps_list': steps_list,
-            'states': states,
-            'actions': actions,
-            'rewards': rewards,
-            'dones': dones
-        }
     return storage_dict
 
 
-def run_and_store_episodes():
-    pass
+# def run_and_store_episodes():
+#     if experiment_name is None:
+#         experiment_name = f"{agent.name()}_{env_name_to_table(str(env))}"
+#     # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
+#     if store_results == 'database':
+#         store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
+#                                                    to_table=env_name_to_table(str(env)),
+#                                                    agent_id=agent.name(),
+#                                                    env_id=str(env))
+#     elif store_results == 'dataframe':
+#         store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
+#     else:
+#         store_results_obj = store_results
+#
+#     if store_results_obj:
+#         store_results_obj.save(episodes[last_log_step:],
+#                                steps_list[last_log_step:],
+#                                states[last_log_step:],
+#                                actions[last_log_step:],
+#                                rewards[last_log_step:],
+#                                dones[last_log_step:])
+#         store_results_obj.finalize()
 
