@@ -25,6 +25,7 @@ class TestEngine(unittest.TestCase):
             'reward': [110, 111, 112, 113, 114, 115, 116, 117, 118, 119],
             'done': [0, 1, -1, 0, 0, 0, 1, -1, 1, -1],
         })
+
         class TestAgent:
             def __init__(self):
                 self.df = df
@@ -83,21 +84,21 @@ class TestEngine(unittest.TestCase):
             'next_state_0': [1, 2, 4, 5, 6, 7, 9],
             'next_state_1': [11, 12, 14, 15, 16, 17, 19],
             'done': [0, 1, 0, 0, 0, 1, 1],
-            'experiment_id': ['test_experiment']*7
+            'experiment_id': ['test']*7
         })
         engine.run_episodes(self.env,
                             self.agent,
                             3,
-                            experiment_name='test_experiment',
+                            experiment_name='test',
                             store_results='database')
 
-        res_df = download_df_from_db('test_experiment', 'test_env')
-        # res_df = pd.read_csv("../files/results/dataframes/test_experiment.csv")
+        res_df = download_df_from_db('test', 'test_env')
+        # res_df = pd.read_csv("../files/results/dataframes/test.csv")
         self.assertTrue((expected_res_df.reset_index(drop=True) == res_df.reset_index(drop=True)).all().all())#self.assertTrue(df.equals(res_df))
 
-        print(execute_query_and_return("select * from experiments where experiment_id='test_experiment'"))
+        print(execute_query_and_return("select * from experiments where experiment_id='test'"))
         # self.assertTrue()
-        execute_query("delete from experiments where experiment_id='test_experiment'")
+        execute_query("delete from experiments where experiment_id='test'")
         execute_query("drop table test_env")
 
 

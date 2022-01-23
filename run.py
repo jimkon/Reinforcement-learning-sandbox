@@ -4,6 +4,7 @@ from time import time
 from configparser import ConfigParser
 
 from src.rl.core.configs.run import RUN_CONFIGS_ABSPATH
+from src.rl.core.configs.experiment import STORE_DATABASE_OBJECT_ABSPATH
 from src.rl.core.logging import log
 from src.rl.core.engine import run_episodes
 
@@ -33,6 +34,7 @@ def process_args(args, configs):
     args['experiment_file'] = configs['DEFAULTS']['experiment_file']
 
     args['module_name'] = f"{args['experiments_dir']}.{args['module_source']}.{args['experiment_file']}"
+
 
     return args
 
