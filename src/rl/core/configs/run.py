@@ -1,19 +1,19 @@
-from os.path import dirname, join, normpath
+from os.path import dirname, join, normpath, sep
 
-
-PROJECT_DIRECTORY = dirname(dirname(__file__))
-print("PROJECT_DIRECTORY", PROJECT_DIRECTORY)
+PROJECT_ROOT_DIRECTORY = "Reinforcement-learning-sandbox"
+PROJECT_ROOT_ABSPATH = join(__file__.split(PROJECT_ROOT_DIRECTORY)[0], PROJECT_ROOT_DIRECTORY)
+print("PROJECT_DIRECTORY", PROJECT_ROOT_ABSPATH)
 
 RUN_CONFIGS_FILENAME = 'run_config.ini'
-RUN_CONFIGS_ABSPATH = join(PROJECT_DIRECTORY, RUN_CONFIGS_FILENAME)
+RUN_CONFIGS_ABSPATH = join(PROJECT_ROOT_ABSPATH, RUN_CONFIGS_FILENAME)
 
 
 STORE_COMPRESSED_DATA = False
 
 DEFAULT_STORE_RESULTS_OBJECT = 'database'
 
-DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH = normpath(join(PROJECT_DIRECTORY, '../files/results/dataframes/'))
-DEFAULT_STORE_DATABASES_DIRECTORY_PATH = normpath(join(PROJECT_DIRECTORY, '../files/results/databases/'))
+DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH = normpath(join(PROJECT_ROOT_DIRECTORY, '../files/results/dataframes/'))
+DEFAULT_STORE_DATABASES_DIRECTORY_PATH = normpath(join(PROJECT_ROOT_DIRECTORY, '../files/results/databases/'))
 DEFAULT_STORE_DATABASE_OBJECT_PATH = normpath(join(DEFAULT_STORE_DATABASES_DIRECTORY_PATH, 'rl.db'))
 
 DB_VERBOSITY = 1

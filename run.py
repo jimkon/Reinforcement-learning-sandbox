@@ -8,27 +8,42 @@ from src.rl.core.logging import log
 from src.rl.core.engine import run_episodes
 
 
-def main():
-    config = ConfigParser()
-    config.read(RUN_CONFIGS_ABSPATH)
+def read_run_configs():
+    configs = ConfigParser()
+    configs.read(RUN_CONFIGS_ABSPATH)
+    return configs
 
+
+def read_args():
     parser = argparse.ArgumentParser(description='Execute the experiments defined on the run_configs.ini')
     parser.add_argument('-s', '--source', help='Source of the experiment dir', required=False)
     args = vars(parser.parse_args())
+    return args
 
+
+def process_args(args, configs):
     if args['source'] is not None:
-        module_source = args['source']
+        args['module_source'] = args['source']
     else:
-        module_source = config['EXPERIMENT']['module']
+        args['module_source'] = configs['EXPERIMENT']['module']
 
-    experiments_dir = config['DEFAULTS']['experiments_dir']
-    experiment_file = config['DEFAULTS']['experiment_file']
+    args['iters'] = int(configs['EXPERIMENT']['iterations'])
 
-    module_name = f"{experiments_dir}.{module_source}.{experiment_file}"
+    args['experiments_dir'] = configs['DEFAULTS']['experiments_dir']
+    args['experiment_file'] = configs['DEFAULTS']['experiment_file']
 
-    module = importlib.import_module(module_name)
+    args['module_name'] = f"{args['experiments_dir']}.{args['module_source']}.{args['experiment_file']}"
 
-    iters = int(config['EXPERIMENT']['iterations'])
+    return args
+
+
+def main():
+    configs = read_run_configs()
+
+    args = process_args(read_args(), configs)
+
+    module = importlib.import_module(args['module_name'])
+    iters = args['iters']
 
     start_time = time()
     log(f"Execution starts. Iterations {iters}")
