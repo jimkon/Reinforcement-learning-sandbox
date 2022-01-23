@@ -5,7 +5,7 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine
 
-from src.rl.core.configs import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH, DEFAULT_STORE_DATABASE_OBJECT_PATH
+from src.rl.core.configs.run import STORE_COMPRESSED_DATA, DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH, DEFAULT_STORE_DATABASE_OBJECT_PATH
 
 """
 TODO 

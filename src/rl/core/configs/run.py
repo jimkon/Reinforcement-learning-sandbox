@@ -1,0 +1,20 @@
+from os.path import dirname, join, normpath
+
+
+PROJECT_DIRECTORY = dirname(dirname(__file__))
+print("PROJECT_DIRECTORY", PROJECT_DIRECTORY)
+
+RUN_CONFIGS_FILENAME = 'run_config.ini'
+RUN_CONFIGS_ABSPATH = join(PROJECT_DIRECTORY, RUN_CONFIGS_FILENAME)
+
+
+STORE_COMPRESSED_DATA = False
+
+DEFAULT_STORE_RESULTS_OBJECT = 'database'
+
+DEFAULT_STORE_DATAFRAMES_DIRECTORY_PATH = normpath(join(PROJECT_DIRECTORY, '../files/results/dataframes/'))
+DEFAULT_STORE_DATABASES_DIRECTORY_PATH = normpath(join(PROJECT_DIRECTORY, '../files/results/databases/'))
+DEFAULT_STORE_DATABASE_OBJECT_PATH = normpath(join(DEFAULT_STORE_DATABASES_DIRECTORY_PATH, 'rl.db'))
+
+DB_VERBOSITY = 1
+DB_DEFAULT_DB_NAME = 'rl'

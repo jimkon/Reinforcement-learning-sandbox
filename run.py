@@ -1,15 +1,17 @@
 import importlib
 import argparse
-
 from time import time
+from configparser import ConfigParser
 
-from src.rl.core.configs import
+from src.rl.core.configs.run import RUN_CONFIGS_ABSPATH
 from src.rl.core.logging import log
 from src.rl.core.engine import run_episodes
 
 
-
 def main():
+    config = ConfigParser()
+    config.read(RUN_CONFIGS_ABSPATH)
+
     parser = argparse.ArgumentParser(description='Execute the experiments defined on the run_configs.ini')
     parser.add_argument('-s', '--source', help='Source of the experiment dir', required=False)
     args = vars(parser.parse_args())
