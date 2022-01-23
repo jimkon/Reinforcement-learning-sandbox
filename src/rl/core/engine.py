@@ -21,7 +21,7 @@ def env_name_to_table(s):
     return s
 
 
-def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None,
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, storage_dict=None,
                  render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
@@ -53,7 +53,16 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
 
     agent.set_env(env)
 
-    episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
+    if not storage_dict:
+        episodes, steps_list, states, actions, rewards, dones = [], [], [], [], [], []
+    else:
+        episodes = storage_dict['episodes']
+        steps_list = storage_dict['steps_list']
+        states = storage_dict['states']
+        actions = storage_dict['actions']
+        rewards = storage_dict['rewards']
+        dones = storage_dict['dones']
+
     episode_rewards = []
 
     last_log_step = 0
@@ -131,5 +140,18 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
                                dones[last_log_step:])
         store_results_obj.finalize()
 
-    return states, actions, rewards, dones
+    if not storage_dict:
+        storage_dict = {
+            'episodes': episodes,
+            'steps_list': steps_list,
+            'states': states,
+            'actions': actions,
+            'rewards': rewards,
+            'dones': dones
+        }
+    return storage_dict
+
+
+def run_and_store_episodes():
+    pass
 
