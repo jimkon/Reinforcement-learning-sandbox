@@ -21,7 +21,7 @@ def env_name_to_table(s):
     return s
 
 
-def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None, log_frequency=-1,
+def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=None,
                  render=False, verbosity='progress'):
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
@@ -50,8 +50,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
         }[verbosity]
     else:
         verbosity = 0
-
-    log_frequency = -1 if log_frequency == 0 else log_frequency
 
     agent.set_env(env)
 
@@ -116,15 +114,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             print(
                 f"Agent {agent.name()} completed the {episode} episode. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
-
-        if store_results_obj and episode % log_frequency == log_frequency - 1:
-            store_results_obj.save(episodes[last_log_step:],
-                                   steps_list[last_log_step:],
-                                   states[last_log_step:],
-                                   actions[last_log_step:],
-                                   rewards[last_log_step:],
-                                   dones[last_log_step:])
-            last_log_step = total_steps
 
     elapsed_time = time.time() - start_time
     if verbosity >= 1:
