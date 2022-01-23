@@ -13,7 +13,7 @@ save expreiment stats (name, total reward, total steps, time_start, time_end) in
 """
 
 
-def env_name_to_table(s):
+def __env_name_to_table(s):
     if '<' in s and '>' in s:
         s = s.split('<')[-1]
         s = s.split('>')[0]
@@ -27,7 +27,6 @@ def run_episodes(env, agent, n_episodes, experiment_name=None, store_results=Non
     """
     verbosity: None or 0, 'progress' or 1, 'total' or 2, 'episode' or 3, 'episode_step' or 4
     """
-
 
     start_time = time.time()
 
