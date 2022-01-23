@@ -6,7 +6,7 @@
 __pycache__
 
 
-/files/
+/experiments/qlearning_pendulum_v0/files/
 
 /venv/
 
@@ -17,6 +17,6 @@ venv
 *.db
 *.csv
 
-files
+experiments/qlearning_pendulum_v0/files
 
 

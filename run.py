@@ -5,7 +5,7 @@ import logging
 
 from time import time
 
-from src.rl.core import run_episodes
+from src.rl.core.engine import run_episodes
 
 
 logging.basicConfig(filename='run_logs.txt',
