@@ -7,6 +7,7 @@ from collections.abc import Iterable
 
 class EnvWrapper:
     def __init__(self, env):
+        raise NotImplementedError
         self.gym_env = env if not isinstance(env, str) else gym.make(env)
         self.gym_env.reset()
         assert self.gym_env.state is not None
@@ -98,7 +99,7 @@ def gym_envs_list():
 
 """['Acrobot-v1', 'CartPole-v0', 'CartPole-v1', 'MountainCar-v0', 'MountainCarContinuous-v0', 'NChain-v0', 'Pendulum-v0']"""
 @lru_cache()
-def wrappable_envs():
+def wrappable_gym_envs():
     res = []
     for env_id in gym_envs_list():
         try:

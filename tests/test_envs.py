@@ -12,7 +12,7 @@ class TestEnvs(unittest.TestCase):
 
     def test_wrappable_envs(self):
         gym_envs = envs.gym_envs_list()
-        wrapped_envs = envs.wrappable_envs()
+        wrapped_envs = envs.wrappable_gym_envs()
 
         self.assertIsNotNone(wrapped_envs)
         self.assertTrue(len(wrapped_envs) > 0)
@@ -28,14 +28,14 @@ class TestEnvs(unittest.TestCase):
         self.assertTrue(not envs.wrap_env('MountainCarContinuous-v0').is_action_space_discrete())
 
     def test_state_dims(self):
-        wrappable_envs = envs.wrappable_envs()
+        wrappable_envs = envs.wrappable_gym_envs()
 
         for env_id in wrappable_envs:
             env = envs.EnvWrapper(env_id)
             self.assertTrue(env.state_dims() > 0)
 
     def test_state_limits(self):
-        wrappable_envs = envs.wrappable_envs()
+        wrappable_envs = envs.wrappable_gym_envs()
 
         for env_id in wrappable_envs:
             env = envs.EnvWrapper(env_id)
@@ -45,7 +45,7 @@ class TestEnvs(unittest.TestCase):
             self.assertTrue(all(diff >= 0))
 
     def test_action_dims(self):
-        wrappable_envs = envs.wrappable_envs()
+        wrappable_envs = envs.wrappable_gym_envs()
 
         for env_id in wrappable_envs:
             env = envs.EnvWrapper(env_id)
@@ -54,7 +54,7 @@ class TestEnvs(unittest.TestCase):
                 self.assertTrue(env.action_dims() == 1)
 
     def test_action_limits(self):
-        wrappable_envs = envs.wrappable_envs()
+        wrappable_envs = envs.wrappable_gym_envs()
 
         for env_id in wrappable_envs:
             env = envs.EnvWrapper(env_id)
