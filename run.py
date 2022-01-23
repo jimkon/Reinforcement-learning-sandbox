@@ -1,25 +1,12 @@
-from configparser import ConfigParser
 import importlib
 import argparse
-import logging
 
 from time import time
 
+from src.rl.core.configs import
+from src.rl.core.logging import log
 from src.rl.core.engine import run_episodes
 
-
-logging.basicConfig(filename='run_logs.txt',
-                    format='%(asctime)s %(message)s',
-                    level=logging.INFO)
-
-
-def log(msg):
-    print(msg)
-    logging.info(msg)
-
-
-config = ConfigParser()
-config.read('run_config.ini')
 
 
 def main():
