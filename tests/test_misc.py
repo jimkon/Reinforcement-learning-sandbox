@@ -1,7 +1,5 @@
 import unittest
 
-from rl.misc.misc import *
-
 
 class TestClip(unittest.TestCase):
     def test_clip(self):

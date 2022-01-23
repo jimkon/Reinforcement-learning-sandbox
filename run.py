@@ -5,11 +5,7 @@ import logging
 
 from time import time
 
-from rl.core.engine import run_episodes
-# def run_episodes(**kwargs):
-#     import time
-#     print('run_episodes', kwargs)
-#     time.sleep(1)
+from src.rl.core import run_episodes
 
 
 logging.basicConfig(filename='run_logs.txt',
@@ -26,21 +22,20 @@ config = ConfigParser()
 config.read('run_config.ini')
 
 
-if __name__ == "__main__":
-
+def main():
     parser = argparse.ArgumentParser(description='Execute the experiments defined on the run_configs.ini')
     parser.add_argument('-s', '--source', help='Source of the experiment dir', required=False)
     args = vars(parser.parse_args())
 
     if args['source'] is not None:
-        module = args['source']
+        module_source = args['source']
     else:
-        module = config['EXPERIMENT']['module']
+        module_source = config['EXPERIMENT']['module']
 
     experiments_dir = config['DEFAULTS']['experiments_dir']
     experiment_file = config['DEFAULTS']['experiment_file']
 
-    module_name = f"{experiments_dir}.{module}.{experiment_file}"
+    module_name = f"{experiments_dir}.{module_source}.{experiment_file}"
 
     module = importlib.import_module(module_name)
 
@@ -55,10 +50,13 @@ if __name__ == "__main__":
         log(f"Experiment {i} starts. Args: {experiment_kwargs}")
         exp_start_time = time()
         run_episodes(**experiment_kwargs)
-        exp_end_time = time()-exp_start_time
+        exp_end_time = time() - exp_start_time
         log(f"Experiment {i} ended in {exp_end_time} seconds.")
 
-    end_time = time()-start_time
-    log(f"Execution ended in {end_time} seconds. Iterations {i+1}/{iters}")
+    end_time = time() - start_time
+    log(f"Execution ended in {end_time} seconds. Iterations {i + 1}/{iters}")
 
+
+if __name__ == "__main__":
+    main()
 

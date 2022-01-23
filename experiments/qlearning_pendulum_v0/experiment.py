@@ -2,9 +2,7 @@ import datetime
 
 import gym
 
-from rl.core.engine import run_episodes
-
-from rl.agents.QLearning import TabularQLearningAgent
+from src.rl.agents.QLearning import TabularQLearningAgent
 
 
 def experiment_args():

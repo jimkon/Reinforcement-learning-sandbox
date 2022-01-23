@@ -2,8 +2,8 @@ import unittest
 
 import pandas as pd
 
-from rl.core import engine
-from rl.core.files import download_df_from_db, execute_query, execute_query_and_return
+from src.rl.core import engine
+from src.rl.core import download_df_from_db, execute_query, execute_query_and_return
 
 
 class TestEngineMisc(unittest.TestCase):

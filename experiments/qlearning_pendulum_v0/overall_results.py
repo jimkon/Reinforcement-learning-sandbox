@@ -2,7 +2,6 @@ import math
 import time
 
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('bmh')
 plt.rcParams.update({'xtick.labelsize': 6})
@@ -284,7 +283,7 @@ def plot(df, save_graph=None):
 
 
 def plot_db_experiment(experiment_name, from_table, save_graph=True):
-    from rl.core.files import download_df_from_db
+    from src.rl.core import download_df_from_db
     import os
 
     df = download_df_from_db(experiment_name, from_table)

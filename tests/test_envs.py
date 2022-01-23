@@ -1,10 +1,6 @@
-import os
 import unittest
 
-import gym
-import numpy as np
-
-from rl.core import envs
+from src.rl.core import envs
 
 
 class TestEnvs(unittest.TestCase):
