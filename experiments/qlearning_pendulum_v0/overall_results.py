@@ -283,7 +283,7 @@ def plot(df, save_graph=None):
 
 
 def plot_db_experiment(experiment_name, from_table, save_graph=True):
-    from src.rl.core import download_df_from_db
+    from rl.src import download_df_from_db
     import os
 
     df = download_df_from_db(experiment_name, from_table)

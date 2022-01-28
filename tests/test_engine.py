@@ -2,14 +2,14 @@ import unittest
 
 import pandas as pd
 
-from src.rl.core import engine
-from src.rl.core import download_df_from_db, execute_query, execute_query_and_return
+from rl.src import engine
+from rl.src import download_df_from_db, execute_query, execute_query_and_return
 
 
 class TestEngineMisc(unittest.TestCase):
     def test_env_name_to_table(self):
-        self.assertEqual(engine.env_name_to_table('<a<b<table-name>>>'), 'table_name')
-        self.assertEqual(engine.env_name_to_table('table-name'), 'table_name')
+        self.assertEqual(engine.__env_name_to_table('<a<b<table-name>>>'), 'table_name')
+        self.assertEqual(engine.__env_name_to_table('table-name'), 'table_name')
 
 
 class TestEngine(unittest.TestCase):

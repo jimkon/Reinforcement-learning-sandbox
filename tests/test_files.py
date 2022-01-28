@@ -6,7 +6,7 @@ import numpy as np
 
 from sqlalchemy.exc import OperationalError
 
-from src.rl.core import files
+from rl.src import files
 
 
 class TestFiles(unittest.TestCase):

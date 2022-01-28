@@ -1,9 +1,9 @@
 import numpy as np
 
-from src.rl.core.agents import Agent
-from src.rl.core.envs import wrap_env
+from rl.src import Agent
+from rl.src import wrap_env
 
-from experiments.qlearning_pendulum_v0.src.misc import MapFloatToInteger
+from experiments.qlearning_pendulum_v0.misc import MapFloatToInteger
 
 
 class TabularQLearningAgent(Agent):

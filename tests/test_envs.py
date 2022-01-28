@@ -1,6 +1,6 @@
 import unittest
 
-from src.rl.core import envs
+from rl.src import envs
 
 
 class TestEnvs(unittest.TestCase):
