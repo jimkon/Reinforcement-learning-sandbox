@@ -3,10 +3,8 @@ import argparse
 from time import time
 from configparser import ConfigParser
 
-from src.rl.core.configs.run import RUN_CONFIGS_ABSPATH
-from src.rl.core.configs.experiment import STORE_DATABASE_OBJECT_ABSPATH
-from src.rl.core.logging import log
-from src.rl.core.engine import run_episodes
+from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH
+from rl.src.core.logging import log
 
 
 def read_run_configs():
@@ -44,18 +42,19 @@ def main():
 
     args = process_args(read_args(), configs)
 
+    log(args)
+
     module = importlib.import_module(args['module_name'])
     iters = args['iters']
 
     start_time = time()
     log(f"Execution starts. Iterations {iters}")
     for i in range(iters):
-        experiment_kwargs = module.experiment_args()
-        experiment_kwargs['render'] = False
+        run_experiment = module.run_experiment
 
-        log(f"Experiment {i} starts. Args: {experiment_kwargs}")
+        log(f"Experiment {i} starts.")
         exp_start_time = time()
-        run_episodes(**experiment_kwargs)
+        run_experiment()
         exp_end_time = time() - exp_start_time
         log(f"Experiment {i} ended in {exp_end_time} seconds.")
 
