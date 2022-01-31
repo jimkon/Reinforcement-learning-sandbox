@@ -1,13 +1,15 @@
 
 import pandas as pd
+import sqlalchemy.exc
 from sqlalchemy import create_engine
 
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH,\
-                                                STORE_COMPRESSED_DATA
+from rl.src.core.configs.general_configs import EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
+from rl.src.core.utilities.file_utils import create_path
 
 
 def __get_engine():
     db_path = EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
+    create_path(EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH)
 
     engine = create_engine('sqlite:///'+db_path, echo=False)
 
@@ -29,13 +31,25 @@ def execute_query_and_return(query):
         return list(result)
 
 
-def check_if_exp_id_already_exists(experiment_id):
-    res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
+def exp_id_already_exists(experiment_id):
+    try:
+        res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
+        print(res)
+    except sqlalchemy.exc.OperationalError as e:
+        return False# no such table: experiments
+
     return res is not None and len(res) > 0
 
 
-def __add_experiment_info(experiment_id, agent_id=None, env_id=None, total_reward=None, total_steps=None, start_time=None,
-                          end_time=None):
+def add_experiment_info(experiment_id,
+                        agent_id=None,
+                        env_id=None,
+                        total_reward=None,
+                        episodes=None,
+                        total_steps=None,
+                        start_time=None,
+                        duration_secs=None,
+                        comment=None):
     engine = __get_engine()
 
     args = locals()

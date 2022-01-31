@@ -79,7 +79,7 @@ def run_experiment():
     env = TestEnv()
     experiment_name = 'test_experiment'
 
-    run_and_store_episodes(env, agent, 3, experiment_name, store_results_func='dataframe', verbosity='step')
+    run_and_store_episodes(env, agent, 3, experiment_name, store_results_func='database', verbosity='step')
 
 
 if __name__ == "__main__":

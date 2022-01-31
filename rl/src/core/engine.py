@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 
 from rl.src.core.logging import log
+from rl.src.core.utilities.timestamp import timestamp_str
 from rl.src.core.storage.storage import store_results_as_dataframe, store_results_in_database
 from rl.src.core.configs.storage_configs import DATA_COLUMNS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_EPISODES,\
@@ -52,7 +53,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
     agent.set_env(env)
 
     if not storage_dict:
-        storage_dict = {col:[] for col in DATA_COLUMNS}
+        storage_dict = {col: [] for col in DATA_COLUMNS}
 
     episode_rewards = []
 
@@ -135,12 +136,6 @@ def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_r
     if experiment_name is None:
         experiment_name = f"{agent.name()}_{__env_name_to_table(str(env))}"
 
-    if store_results_func is None:
-        store_results_func = lambda x: None
-    elif store_results_func.lower() == 'dataframe':
-        store_results_func = store_results_as_dataframe
-    elif store_results_func.lower() == 'database':
-        store_results_func = store_results_in_database
     # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
     # if store_results == 'database':
     #     store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
@@ -153,12 +148,32 @@ def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_r
     #     store_results_obj = store_results
 
     res_dict = {col: [] for col in DATA_COLUMNS}
-
+    start_time, duration_secs = None, None
+    start_time_str = timestamp_str()
     try:
-        res_dict = run_episodes(env, agent, n_episodes, storage_dict=res_dict, render=False, verbosity=verbosity)
+        start_time = time.time()
+        res_dict = run_episodes(env,
+                                agent,
+                                n_episodes,
+                                storage_dict=res_dict,
+                                render=False,
+                                verbosity=verbosity)
+        duration_secs = time.time()-start_time
     except Exception as e:
         pass
     finally:
-        store_results_func(res_dict)
-
+        if store_results_func is None:
+            pass
+        elif store_results_func.lower() == 'dataframe':
+            store_results_as_dataframe(res_dict,
+                                       name=experiment_name)
+        elif store_results_func.lower() == 'database':
+            store_results_in_database(res_dict,
+                                      to_table=__env_name_to_table(str(env)),
+                                      experiment_id=experiment_name,
+                                      agent_id=agent.name(),
+                                      env_id=str(env),
+                                      start_time=start_time_str,
+                                      duration_secs=duration_secs,
+                                      comment=None)
 

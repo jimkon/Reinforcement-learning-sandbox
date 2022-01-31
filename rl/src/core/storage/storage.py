@@ -16,26 +16,21 @@ from rl.src.core.configs.general_configs import EXPERIMENT_STORE_DATAFRAMES_DIRE
 
 from rl.src.core.utilities.timestamp import timestamp_str, timestamp_long_str
 from rl.src.core.utilities.file_utils import create_path
-from rl.src.core.storage.db import upload_df_in_db, check_if_exp_id_already_exists
+from rl.src.core.storage.db import upload_df_in_db,\
+                                    exp_id_already_exists,\
+                                    add_experiment_info
 
 
-def _generate_df_filename(path_to_file, suggested_name):
-    name = suggested_name
-    if not name:
-        name = f"default_df_name_{timestamp_str()}.csv"
-
-    if ".csv" not in name:
-        name += ".csv"
-
-    filepath = join(path_to_file, name)
+def _generate_df_filename(path_to_file, name='default_df_name'):
+    filepath = join(path_to_file, name+".csv")
 
     if exists(filepath):
-        name = suggested_name
-        if not name:
-            name = f"default_df_name_{timestamp_long_str()}.csv"
+        name = f"{name}_{timestamp_str()}.csv"
 
-        if ".csv" not in name:
-            name += ".csv"
+        filepath = join(path_to_file, name)
+
+    if exists(filepath):
+        name = f"{name}_{timestamp_long_str()}.csv"
 
         filepath = join(path_to_file, name)
 
@@ -45,15 +40,18 @@ def _generate_df_filename(path_to_file, suggested_name):
     return filepath
 
 
-def _generate_valid_experiment_id(suggested_experiment_id):
+def _generate_valid_experiment_id(suggested_experiment_id='default_experiment_id'):
     experiment_id = suggested_experiment_id
-    if not experiment_id:
-        experiment_id = f"default_experiment_id_{timestamp_str()}"
+    if experiment_id:
+        experiment_id = f"default_experiment_id"
 
-    if not check_if_exp_id_already_exists(experiment_id):
-        experiment_id = f"default_experiment_id_{timestamp_long_str()}"
+    if exp_id_already_exists(experiment_id):
+        experiment_id = f"{suggested_experiment_id}_{timestamp_str()}"
 
-    if not check_if_exp_id_already_exists(experiment_id):
+    if exp_id_already_exists(experiment_id):
+        experiment_id = f"{suggested_experiment_id}_{timestamp_long_str()}"
+
+    if exp_id_already_exists(experiment_id):
         raise ValueError(f"Experiment id {experiment_id} already exists")
 
     return experiment_id
@@ -89,20 +87,21 @@ def data_to_df(results_dict):
     return df
 
 
-def compress_data_df(df):
-    dones = df[DB_EXPERIMENT_TABLE_NAME_COL_DONE]
-    del df[DB_EXPERIMENT_TABLE_NAME_COL_DONE]
-    for i in range(len(df[DB_EXPERIMENT_TABLE_NAME_COL_STATES])):
-        df[f"{DB_EXPERIMENT_TABLE_NAME_COL_NEXTSTATES}_{i}"] = df[f"{DB_EXPERIMENT_TABLE_NAME_COL_STATES}_{i}"].shift(periods=-1)
+# def compress_data_df(df):#TODO
+#     dones = df[DB_EXPERIMENT_TABLE_NAME_COL_DONE]
+#     del df[DB_EXPERIMENT_TABLE_NAME_COL_DONE]
+#     n_states = DB_EXPERIMENT_TABLE_NAME_COL_STATES
+#     for c in df.columns:
+#         df[f"{DB_EXPERIMENT_TABLE_NAME_COL_NEXTSTATES}_{i}"] = df[f"{DB_EXPERIMENT_TABLE_NAME_COL_STATES}_{i}"].shift(periods=-1)
+#
+#     df[DB_EXPERIMENT_TABLE_NAME_COL_DONE] = dones
+#
+#     df = df[df[DB_EXPERIMENT_TABLE_NAME_COL_DONE] >= 0]
+#
+#     return df
 
-    df[DB_EXPERIMENT_TABLE_NAME_COL_DONE] = dones
 
-    df = df[df[DB_EXPERIMENT_TABLE_NAME_COL_DONE] >= 0]
-
-    return df
-
-
-def store_dataframe(df, name=None):
+def store_dataframe(df, name):
     path_to_file = join(EXPERIMENT_STORE_DATAFRAMES_DIRECTORY_ABSPATH)
     create_path(path_to_file)
 
@@ -113,11 +112,11 @@ def store_dataframe(df, name=None):
     return filepath
 
 
-def store_results_as_dataframe(results_dict, name=None):
+def store_results_as_dataframe(results_dict, name):
     df = data_to_df(results_dict)
-    if STORE_COMPRESSED_DATA:
-        df = compress_data_df(df)
-    store_dataframe(df, name=name)
+    # if STORE_COMPRESSED_DATA:#TODO
+    #     df = compress_data_df(df)
+    store_dataframe(df, name)
 
 
 def store_results_in_database(results_dict,
@@ -126,16 +125,28 @@ def store_results_in_database(results_dict,
                               agent_id=None,
                               env_id=None,
                               start_time=None,
-                              end_time=None,
+                              duration_secs=None,
                               comment=None):
     df = data_to_df(results_dict)
-    df_compressed = compress_data_df(df)
+    # df_compressed = compress_data_df(df)#TODO
 
     experiment_id = _generate_valid_experiment_id(experiment_id)
 
-    df_compressed[DB_EXPERIMENT_TABLE_NAME_COL_EXPID] = experiment_id
+    df[DB_EXPERIMENT_TABLE_NAME_COL_EXPID] = experiment_id
 
-    upload_df_in_db(df_compressed, to_table)
+    upload_df_in_db(df, to_table)
+
+    add_experiment_info(
+        experiment_id,
+        agent_id=agent_id,
+        env_id=env_id,
+        total_reward=df[DB_EXPERIMENT_TABLE_NAME_COL_REWARDS].sum(),
+        episodes=df[DB_EXPERIMENT_TABLE_NAME_COL_EPISODES].max()-len(df),
+        total_steps=len(df),
+        start_time=start_time,
+        duration_secs=duration_secs,
+        comment=comment
+    )
 
     #TODO add_experiment_info
 
