@@ -6,7 +6,11 @@ logging.basicConfig(filename='run_logs.txt',
 
 
 def log(*args, **kwargs):
-    # msg = "".join(list(args))
-    msg = str(args)
+
+    if isinstance(args, dict):
+        msg = str(args)
+    else:
+        msg = "".join(list(args))
+    # msg = str(args)
     print(msg)
     logging.info(msg)

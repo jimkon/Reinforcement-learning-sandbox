@@ -12,6 +12,10 @@ class AbstractEnv:
     def step(self, action):
         raise NotImplementedError
 
+    def render(self):
+        pass
+
+
 
 class EnvWrapper:
     def __init__(self, env):
