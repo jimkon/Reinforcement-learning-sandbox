@@ -34,7 +34,6 @@ def execute_query_and_return(query):
 def exp_id_already_exists(experiment_id):
     try:
         res = execute_query_and_return(query=f'select experiment_id from experiments where experiment_id="{experiment_id}" limit 1')
-        print(res)
     except sqlalchemy.exc.OperationalError as e:
         return False# no such table: experiments
 

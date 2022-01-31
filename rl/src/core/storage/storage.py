@@ -76,7 +76,7 @@ def data_to_df(results_dict):
 
     actions = list(map(list, zip(*actions)))
     for i, action_i in enumerate(actions):
-        to_dict[f"{DB_EXPERIMENT_TABLE_NAME_COL_ACTIONS}_{i}"] = action_i
+        to_dict[f"{DB_EXPERIMENT_TABLE_NAME_COL_ACTIONS}_{i}"] = [a if a is not 'null' else None for a in action_i]
 
     to_dict[DB_EXPERIMENT_TABLE_NAME_COL_REWARDS] = rewards
 
