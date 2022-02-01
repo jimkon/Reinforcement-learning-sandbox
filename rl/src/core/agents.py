@@ -1,4 +1,4 @@
-class Agent:
+class AbstractAgent:
 
     def set_env(self, env):
         pass

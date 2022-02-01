@@ -2,7 +2,7 @@ import datetime
 
 import gym
 
-from experiments.qlearning_pendulum_v0.QLearning import TabularQLearningAgent
+from experiments.qlearning_pendulum_v0.tabularQLearning import TabularQLearningAgent
 
 
 def experiment_args():

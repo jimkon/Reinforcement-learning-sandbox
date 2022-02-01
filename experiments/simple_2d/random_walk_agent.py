@@ -1,6 +1,6 @@
 import random
 
-from rl.src.core.agents import Agent
+from rl.src.core.agents import AbstractAgent
 
 DIR = [
         [-1, 1],
@@ -15,7 +15,7 @@ DIR = [
     ]
 
 
-class RandomWalkAgent(Agent):
+class RandomWalkAgent(AbstractAgent):
 
     def __init__(self):
         self.step_count = -1
