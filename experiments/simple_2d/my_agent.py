@@ -35,13 +35,24 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         return reward
 
     @np_cache()
-    def goal_state(self):
-        print('goal_state')
+    def max_reward_state(self):
         map = DEFAULT_MAP
         max_1d = np.max(map, axis=0)
         argmax_x = np.argmax(max_1d)
         argmax_y = np.argmax(map[:, argmax_x])
         return np.array([argmax_x, argmax_y])
+
+    # @np_cache()
+    def shortest_path_actions(self, state, to_state):
+        delta = to_state-state
+        actions = []
+        for i in range(np.abs(delta).max()):
+            action = np.clip(delta,
+                             a_min=MIN_ACTION,
+                             a_max=MAX_ACTION)
+            delta -= action
+            actions.append(action)
+        return np.array(actions)
 
 
 
@@ -88,7 +99,7 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
     #     return __best_action
 
     def act(self, state):
-        current_goal_state = self.goal_state()
+        current_goal_state = self.max_reward_state()
         if self.path_states and\
             current_goal_state == self.last_goal_state and\
             state in self.path_states:
@@ -103,7 +114,7 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
     def name(self):
         return 'my_agent_shortest_path_to_global_max_hardcoded'
 
-    def pathfinding(self, state, to_state):
+    def shortest_path(self, state, to_state):
         start_node, n, open_set, close_set = solve(start_state=state,
                                                 goal_state=to_state,
                                                 h_func=self.h_func,
@@ -118,6 +129,7 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
 
 
 
-# if __name__ == "__main__":
-#     a = MyAgent_Greedy_SE_HC()
+if __name__ == "__main__":
+    a = MyAgent_Greedy_SE_HC()
+    print(a.shortest_path_actions(np.array([50, 50]), np.array([45, 70])))
 
