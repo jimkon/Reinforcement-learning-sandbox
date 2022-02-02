@@ -5,13 +5,10 @@ import numpy as np
 from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.np_cache import np_cache
+from experiments.simple_2d.alphastar import solve, path
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
-
-    def __init__(self):
-        self.min_reward = DEFAULT_MAP.min()
-        self.max_reward = DEFAULT_MAP.max()
 
     @np_cache()
     def actions(self):
@@ -67,21 +64,55 @@ class MyAgent_Greedy_SE_HC(MyAgent_Abstract_SE_HC):
 
 class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
 
+    def __init__(self):
+        self.h_func = lambda cs, gs: np.max(np.abs(cs-gs))
+        self.next_actions_func = lambda s: self.actions(s)
+        self.next_states_func = lambda s: self.transitions(s)
+        self.g_func = lambda s1, s2: 1
+
+        self.last_goal_state = None
+        self.path_states = None
+        self.path_actions = None
+
+    # def act(self, state):
+    #     goal_state = self.goal_state()
+    #     __min_distance = np.inf
+    #     __best_action = None
+    #     for action in self.actions():
+    #         next_state = self.transition(state, action)
+    #         dist = np.sqrt(np.sum(np.square(goal_state-next_state)))
+    #         if dist <= __min_distance:
+    #             __min_distance = dist
+    #             __best_action = action
+    #         pass
+    #     return __best_action
+
     def act(self, state):
-        goal_state = self.goal_state()
-        __min_distance = np.inf
-        __best_action = None
-        for action in self.actions():
-            next_state = self.transition(state, action)
-            dist = np.sqrt(np.sum(np.square(goal_state-next_state)))
-            if dist <= __min_distance:
-                __min_distance = dist
-                __best_action = action
-            pass
-        return __best_action
+        current_goal_state = self.goal_state()
+        if self.path_states and\
+            current_goal_state == self.last_goal_state and\
+            state in self.path_states:
+
+            for i, s in enumerate(self.path_states):
+                if state == s:
+                    return self.path_actions[i]
+        else:
+            self.last_goal_state = current_goal_state
+            self.pathfinding(state, self.last_goal_state)
 
     def name(self):
         return 'my_agent_shortest_path_to_global_max_hardcoded'
+
+    def pathfinding(self, state, to_state):
+        start_node, n, open_set, close_set = solve(start_state=state,
+                                                goal_state=to_state,
+                                                h_func=self.h_func,
+                                                next_actions_func=self.next_actions_func,
+                                                next_states_func=self.next_states_func,
+                                                g_func=self.g_func)
+
+        self.path_states, self.path_actions = path(start_node)
+
 
 
 
