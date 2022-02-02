@@ -13,7 +13,7 @@ def run_experiment():
     experiment_name = 'simple_experiment_test'
 
     # run_and_store_episodes(env, agent, 3, experiment_name, store_results_func='database', verbosity='step')
-    run_episodes(env, agent, 3, verbosity='step', render=True)
+    run_episodes(env, agent, 1, verbosity='step', render=True)
 
 
 if __name__ == "__main__":

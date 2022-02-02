@@ -8,7 +8,7 @@ from perlin_noise import PerlinNoise
 from rl.src.core.envs import AbstractEnv
 
 
-def perlin_map(width=100, height=100, octaves=3, seed=2):
+def perlin_map(width=100, height=100, octaves=3, seed=6):
     noise = PerlinNoise(octaves=octaves, seed=seed)
     xpix, ypix = width, height
     pic = np.array([[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)])

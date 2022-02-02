@@ -4,6 +4,7 @@ import numpy as np
 
 from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
+from experiments.simple_2d.np_cache import np_cache
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
@@ -12,6 +13,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         self.min_reward = DEFAULT_MAP.min()
         self.max_reward = DEFAULT_MAP.max()
 
+    @np_cache()
     def actions(self):
         range_1d = list(range(MIN_ACTION, MAX_ACTION+1))
 
@@ -35,7 +37,9 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         reward = DEFAULT_MAP[state_x][state_y]
         return reward
 
+    @np_cache()
     def goal_state(self):
+        print('goal_state')
         map = DEFAULT_MAP
         max_1d = np.max(map, axis=0)
         argmax_x = np.argmax(max_1d)
