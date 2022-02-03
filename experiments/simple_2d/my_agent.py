@@ -14,7 +14,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         self.h_func = lambda s_a, s_b: self.step_distance(s_a, s_b)
         self.next_actions_func = lambda s: self.actions(s)
         self.next_states_func = lambda s: self.transitions(s)
-        self.g_func = lambda s1, s2: 1
+        self.g_func = lambda s1, s2: self.reward(s2)
 
     @np_cache()
     def actions(self):
@@ -43,6 +43,9 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
     def step_distance(self, state_a, state_b):
         return np.max(np.abs(state_a-state_b))
 
+    def euclidean_distance(self, state_a, state_b):
+        return np.sqrt(np.sum(np.square(state_b-state_a)))
+
     @np_cache()
     def max_reward_state(self):
         map = DEFAULT_MAP
@@ -63,7 +66,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
             actions.append(action)
         return np.array(actions)
 
-    def shortest_path(self, state, to_state):
+    def best_path_actions(self, state, to_state):
         start_node, n, open_set, close_set = solve(start_state=state,
                                                 goal_state=to_state,
                                                 h_func=self.h_func,
