@@ -10,13 +10,7 @@ from experiments.simple_2d.alphastar import solve, path
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
 
-    def __init__(self):
-        self.h_func = lambda s_a, s_b: self.step_distance(s_a, s_b)
-        self.next_actions_func = lambda s: self.actions(s)
-        self.next_states_func = lambda s: self.transitions(s)
-        self.g_func = lambda s1, s2: self.reward(s2)
-
-    @np_cache()
+    # @np_cache()
     def actions(self):
         range_1d = list(range(MIN_ACTION, MAX_ACTION+1))
 
@@ -46,7 +40,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
     def euclidean_distance(self, state_a, state_b):
         return np.sqrt(np.sum(np.square(state_b-state_a)))
 
-    @np_cache()
+    # @np_cache()
     def max_reward_state(self):
         map = DEFAULT_MAP
         max_1d = np.max(map, axis=0)
@@ -66,13 +60,14 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
             actions.append(action)
         return np.array(actions)
 
-    def best_path_actions(self, state, to_state):
-        start_node, n, open_set, close_set = solve(start_state=state,
-                                                goal_state=to_state,
-                                                h_func=self.h_func,
-                                                next_actions_func=self.next_actions_func,
-                                                next_states_func=self.next_states_func,
-                                                g_func=self.g_func)
+    def best_path_actions(self, state_a, state_b):
+
+        start_node, n, open_set, close_set = solve(start_state=state_a,
+                                                   goal_state=state_b,
+                                                   h_func=lambda s_a, s_b: self.step_distance(s_a, s_b),
+                                                   next_actions_func=lambda s: self.actions(),
+                                                   next_states_func=lambda s, a: self.transitions(s),
+                                                   g_func=lambda s1, s2: self.reward(s2))
 
         self.path_states, self.path_actions = path(start_node)
 
