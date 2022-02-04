@@ -6,8 +6,7 @@ from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.np_cache import np_cache
 from experiments.simple_2d.alphastar import solve, path
-from rl.src.core.configs.general_configs import LOGGING_ALLOW_GRAPHS
-from rl.src.core.logging import log
+from rl.src.core.logging import logger
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
@@ -20,6 +19,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
 
         return actions
 
+    @logger.log_func_call()
     def transition(self, state, action):
         next_state = np.clip(state + action,
                              a_min=[0, 0],

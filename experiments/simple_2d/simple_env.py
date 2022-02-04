@@ -24,7 +24,7 @@ DEFAULT_MAP = perlin_map(width=DEFAULT_MAP_WIDTH, height=DEFAULT_MAP_HEIGHT)
 
 MIN_ACTION = -1
 MAX_ACTION = 1
-STEPS_PER_EPISODE = 200
+STEPS_PER_EPISODE = 100
 STARTING_X = 50
 STARTING_Y = 50
 
@@ -69,9 +69,11 @@ class SimpleEnv(AbstractEnv):
 
     def render(self):
         plt.imshow(self.map)
+        plt.tight_layout()
         plt.plot(self.x, self.y, 'ro')
+        plt.plot(STARTING_X, STARTING_Y, 'mx')
         plt.draw()
-        plt.pause(0.001)
+        plt.pause(0.00001)
         plt.clf()
 
     def __repr__(self):
