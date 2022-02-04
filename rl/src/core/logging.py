@@ -36,6 +36,12 @@ def _time():
 
 class __Logger:
     def __init__(self, name):
+        self.name = name
+        self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.name)
+        self.__log_dict = {
+            'message': [],
+            'tags': []
+        }
         self.__timing_dict = {
             'function': [],
             'time': []
@@ -50,8 +56,12 @@ class __Logger:
             msg = str(args)
         else:
             msg = "".join(list(args))
+
+        tags = [] if not tags else tags if isinstance(tags, list) else [tags]
         # msg = str(args)
         print(msg, 'tags:', tags)
+        self.__log_dict['message'].append(msg)
+        self.__log_dict['tags'].append(','.join(tags))
         # logging.info(msg)
 
     def add_timing(self, func, time_elapsed):
@@ -59,16 +69,19 @@ class __Logger:
         self.__timing_dict['time'].append(time_elapsed)
 
     def save(self):
-        path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, 'function_times.csv')
-        create_path(path)
+        create_path(self.path)
+
         df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(path, index_label=None)
+        df.to_csv(join(self.path, 'function_times.csv'), index_label=None)
+
+        df = pd.DataFrame(self.__log_dict)
+        df.to_csv(join(self.path, 'logs_df.csv'), index_label=None)
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
         TAG = "func_call"
         if not tags:
-            tags = []
+            tags = [TAG]
         elif isinstance(tags, list):
             tags.append(TAG)
         elif isinstance(tags, str):
