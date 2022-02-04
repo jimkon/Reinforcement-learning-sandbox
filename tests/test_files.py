@@ -11,7 +11,7 @@ from rl.src import files
 
 class TestFiles(unittest.TestCase):
     def test_db(self):
-        self.assertIsNotNone(files.get_engine())
+        self.assertIsNotNone(files.__get_engine())
 
         files.execute_query("drop table if exists test_table")
         self.assertRaises(OperationalError, files.execute_query, "select * from test_table")
@@ -23,14 +23,14 @@ class TestFiles(unittest.TestCase):
 
     def test_experiments_table(self):
         files.execute_query("delete from experiments where experiment_id='test_experiment_id'")
-        self.assertFalse(files.check_if_exp_id_already_exists('test_experiment_id'))
+        self.assertFalse(files.exp_id_already_exists('test_experiment_id'))
 
         files.execute_query("insert into experiments(experiment_id) values ('test_experiment_id')")
-        self.assertTrue(files.check_if_exp_id_already_exists('test_experiment_id'))
+        self.assertTrue(files.exp_id_already_exists('test_experiment_id'))
 
         files.execute_query("delete from experiments where experiment_id='test_experiment_id'")
-        files.add_experiment_info('test_experiment_id')
-        self.assertTrue(files.check_if_exp_id_already_exists('test_experiment_id'))
+        files.__add_experiment_info('test_experiment_id')
+        self.assertTrue(files.exp_id_already_exists('test_experiment_id'))
 
         files.execute_query("delete from experiments where experiment_id='test_experiment_id'")
 
