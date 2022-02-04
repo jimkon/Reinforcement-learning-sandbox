@@ -61,7 +61,7 @@ class __Logger:
         # msg = str(args)
         print(msg, 'tags:', tags)
         self.__log_dict['message'].append(msg)
-        self.__log_dict['tags'].append(','.join(tags))
+        self.__log_dict['tags'].append('|'.join(tags))
         # logging.info(msg)
 
     def add_timing(self, func, time_elapsed):
@@ -75,7 +75,7 @@ class __Logger:
         df.to_csv(join(self.path, 'function_times.csv'), index_label=None)
 
         df = pd.DataFrame(self.__log_dict)
-        df.to_csv(join(self.path, 'logs_df.csv'), index_label=None)
+        df.to_csv(join(self.path, 'all_logs_df.csv'), index_label=None)
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
