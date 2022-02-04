@@ -124,12 +124,6 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
         return 'my_agent_shortest_path_to_global_max_hardcoded'
 
 
-
-
-
-
-
-
 if __name__ == "__main__":
     a = MyAgent_Greedy_SE_HC()
     print(a.shortest_path_actions(np.array([50, 50]), np.array([51, 51])))
