@@ -61,11 +61,14 @@ class Logger:
     def save(self):
         create_path(self.path)
 
+        perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
+        create_path(perf_mon_path)
+
         df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(join(self.path, f"{self.name}_function_times.csv"), index_label=None)
+        df.to_csv(join(perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index_label=None)
 
         df = pd.DataFrame(self.__log_dict)
-        df.to_csv(join(self.path, f"{self.name}_logs.csv"), index_label=None)
+        df.to_csv(join(self.path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index_label=None)
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
