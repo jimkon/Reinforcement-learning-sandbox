@@ -19,7 +19,12 @@ def _time():
 
 
 class Logger:
+
+    instances = []
+
     def __init__(self, name):
+        Logger.instances.append(self)
+
         self.name = name
         self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.name)
         self.__log_dict = {
@@ -31,7 +36,6 @@ class Logger:
             'function': [],
             'time': []
         }
-        pass
 
     def log(self, *args, tags=None, **kwargs):
         if not GENERAL_LOG_FLAG:
@@ -55,7 +59,7 @@ class Logger:
 
     def save(self):
         create_path(self.path)
-
+        print('path created', self.path)
         df = pd.DataFrame(self.__timing_dict)
         df.to_csv(join(self.path, 'function_times.csv'), index_label=None)
 
@@ -95,5 +99,10 @@ class Logger:
         return log_tags
 
 
-logger = Logger("default")
+def save_loggers():
+    for _logger in Logger.instances:
+        _logger.save()
+
+
+logger = Logger('default')
 log = logger.log
