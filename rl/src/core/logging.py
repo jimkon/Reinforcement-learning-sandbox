@@ -22,11 +22,12 @@ class Logger:
 
     instances = []
 
-    def __init__(self, name):
+    def __init__(self, name, directory=None):
         Logger.instances.append(self)
 
         self.name = name
-        self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.name)
+        self.directory = directory if directory else ''
+        self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.directory)
         self.__log_dict = {
             "timestamp": [],
             'message': [],
@@ -59,12 +60,12 @@ class Logger:
 
     def save(self):
         create_path(self.path)
-        print('path created', self.path)
+
         df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(join(self.path, 'function_times.csv'), index_label=None)
+        df.to_csv(join(self.path, f"{self.name}_function_times.csv"), index_label=None)
 
         df = pd.DataFrame(self.__log_dict)
-        df.to_csv(join(self.path, 'all_logs_df.csv'), index_label=None)
+        df.to_csv(join(self.path, f"{self.name}_logs.csv"), index_label=None)
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
@@ -104,5 +105,5 @@ def save_loggers():
         _logger.save()
 
 
-logger = Logger('default')
+logger = Logger('general')
 log = logger.log
