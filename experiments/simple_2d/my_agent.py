@@ -6,7 +6,9 @@ from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.np_cache import np_cache
 from experiments.simple_2d.alphastar import solve, path
-from rl.src.core.logging import logger
+from rl.src.core.logging import Logger
+
+logger = Logger('my_agent')
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
@@ -19,7 +21,6 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
 
         return actions
 
-    @logger.log_func_call()
     def transition(self, state, action):
         next_state = np.clip(state + action,
                              a_min=[0, 0],
@@ -31,6 +32,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         next_states = [self.transition(state, a) for a in self.actions()]
         return next_states
 
+    @logger.log_func_call('agent')
     def reward(self, state):
         state_x, state_y = state
         reward = DEFAULT_MAP[state_x][state_y]
@@ -44,6 +46,8 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
 
     # @np_cache()
     def max_reward_state(self):
+        logger.log("test message in function")
+        exit()
         map = DEFAULT_MAP
         max_1d = np.max(map, axis=0)
         argmax_x = np.argmax(max_1d)
@@ -63,7 +67,6 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         return np.array(actions)
 
     def best_path_actions(self, state_a, state_b):
-
         start_node, n, open_set, close_set = solve(start_state=state_a,
                                                    goal_state=state_b,
                                                    h_func=lambda s_a, s_b: self.step_distance(s_a, s_b),
@@ -72,7 +75,6 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
                                                    g_func=lambda s1, s2: self.reward(s2))
 
         self.path_states, self.path_actions = path(start_node)
-
         return self.path_actions
 
 

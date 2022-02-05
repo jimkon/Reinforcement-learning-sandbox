@@ -8,10 +8,7 @@ import pandas as pd
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
 from rl.src.core.utilities.file_utils import create_path
-
-# logging.basicConfig(filename='run_logs.txt',
-#                     format='%(asctime)s %(message)s',
-#                     level=logging.INFO)
+from rl.src.core.utilities.timestamp import timestamp_str
 
 
 def _time():
@@ -21,24 +18,12 @@ def _time():
         return .0
 
 
-# def log(*args, tags=None, **kwargs):
-#     if not GENERAL_LOG_FLAG:
-#         return
-#
-#     if isinstance(args, dict):
-#         msg = str(args)
-#     else:
-#         msg = "".join(list(args))
-#     # msg = str(args)
-#     print(tags, msg)
-#     # logging.info(msg)
-
-
-class __Logger:
+class Logger:
     def __init__(self, name):
         self.name = name
         self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.name)
         self.__log_dict = {
+            "timestamp": [],
             'message': [],
             'tags': []
         }
@@ -60,9 +45,9 @@ class __Logger:
         tags = [] if not tags else tags if isinstance(tags, list) else [tags]
         # msg = str(args)
         print(msg, 'tags:', tags)
+        self.__log_dict['timestamp'].append(timestamp_str())
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
-        # logging.info(msg)
 
     def add_timing(self, func, time_elapsed):
         self.__timing_dict['function'].append(func)
@@ -110,16 +95,5 @@ class __Logger:
         return log_tags
 
 
-logger = None
-
-
-def set_logger(name):
-    global logger, log
-    logger = __Logger(name)
-
-    return logger
-
-
-set_logger('default')
-
-
+logger = Logger("default")
+log = logger.log

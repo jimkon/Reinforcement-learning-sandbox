@@ -3,7 +3,7 @@ from tqdm import tqdm
 
 import numpy as np
 
-from rl.src.core.logging import logger
+from rl.src.core.logging import log
 from rl.src.core.utilities.timestamp import timestamp_str
 from rl.src.core.storage.storage import store_results_as_dataframe, store_results_in_database
 from rl.src.core.configs.storage_configs import DATA_COLUMNS,\
@@ -87,7 +87,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
             episode_reward += reward
 
             if verbosity >= 4:
-                logger.log (
+                log (
                     f"Episode:{episode}, Step:{step}, state:{state}, action:{action}, reward:{reward}, next state:{next_state}, done:{done}")
 
             action = np.atleast_1d(action)
@@ -119,14 +119,14 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
         total_steps += step
         if verbosity >= 3:
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
-            logger.log (
+            log (
                 f"Agent {agent.name()} completed the episode {episode}. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
 
     elapsed_time = time.time() - start_time
     if verbosity >= 1:
         episode += 1
         avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
-        logger.log (
+        log (
             f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}")
 
     return storage_dict
