@@ -49,7 +49,9 @@ class Logger:
 
         tags = [] if not tags else tags if isinstance(tags, list) else [tags]
         # msg = str(args)
-        print(msg, 'tags:', tags)
+        if GENERAL_LOG_STDOUT_FLAG:
+            print(msg, 'tags:', tags)
+
         self.__log_dict['timestamp'].append(timestamp_str())
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
@@ -63,6 +65,9 @@ class Logger:
 
         perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
         create_path(perf_mon_path)
+
+        imgs_path = join(self.path, LOG_IMAGES_DIR_PATH)
+        create_path(imgs_path)
 
         df = pd.DataFrame(self.__timing_dict)
         df.to_csv(join(perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index_label=None)
