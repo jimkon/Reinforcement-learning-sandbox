@@ -94,7 +94,6 @@ class SimpleEnv(AbstractEnv):
         plt.pause(0.00001)
         plt.clf()
 
-
     def __repr__(self):
         return "SimpleEnv"
 

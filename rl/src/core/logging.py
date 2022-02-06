@@ -10,7 +10,7 @@ from PIL import Image
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
-from rl.src.core.utilities.file_utils import create_path
+from rl.src.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
 from rl.src.core.utilities.timestamp import timestamp_str, timestamp_unique_str
 
 
@@ -33,6 +33,12 @@ class Logger:
         self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.directory)
 
         create_path(self.path)
+
+        self.log_path = join(self.path, LOG_CSV_DIR_PATH)
+        create_path(self.log_path)
+
+        self.html_path = join(self.path, LOG_HTML_DIR_PATH)
+        create_path(self.html_path)
 
         self.perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
         create_path(self.perf_mon_path)
@@ -85,6 +91,8 @@ class Logger:
         else:
             title = f"{title}_{timestamp_unique_str()}"
 
+        title += '.png'
+
         path = join(self.imgs_path, title)
 
         buf = io.BytesIO()
@@ -95,6 +103,8 @@ class Logger:
         self.__img_dict['timestamp'].append(timestamp_str())
         self.__img_dict['path'].append(path)
 
+        self.log(f"![]({path})", tags='image')
+
         if store_directly_on_disk:
             img.save(path)
             self.__img_dict['image'].append(None)
@@ -103,18 +113,17 @@ class Logger:
             self.__img_dict['image'].append(img)
             self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
-
     def add_timing(self, func, time_elapsed):
         self.__timing_dict['timestamp'].append(timestamp_str())
         self.__timing_dict['function'].append(func)
         self.__timing_dict['time'].append(time_elapsed)
 
     def save(self):
-        df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(join(self.perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index_label=None)
-
         df = pd.DataFrame(self.__log_dict)
-        df.to_csv(join(self.path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index_label=None)
+        df.to_csv(join(self.log_path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index=False)
+
+        df = pd.DataFrame(self.__timing_dict)
+        df.to_csv(join(self.perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index=False)
 
         for i in range(len(self.__img_dict['image'])):
             path = self.__img_dict['path'][i]
@@ -122,6 +131,9 @@ class Logger:
             if img:
                 img.save(path)
                 self.log(f"Image saved as {path}")
+
+        fpath = generate_markdown_from_logs()
+        markdown_to_html(fpath)
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
