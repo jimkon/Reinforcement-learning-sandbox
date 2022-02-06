@@ -10,9 +10,8 @@ from PIL import Image
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
-from rl.src.core.utilities.file_utils import unique_string
 from rl.src.core.utilities.file_utils import create_path
-from rl.src.core.utilities.timestamp import timestamp_str, timestamp_long_str
+from rl.src.core.utilities.timestamp import timestamp_str, timestamp_unique_str
 
 
 def _time():
@@ -82,11 +81,10 @@ class Logger:
             tags.append('log_plt')
 
         if not title:
-            title = unique_string
+            title = timestamp_unique_str()
         else:
-            title = f"{title}_{unique_string()}"
+            title = f"{title}_{timestamp_unique_str()}"
 
-        title = f"{title}_{timestamp_str()}.png" if title else f"{timestamp_long_str()}.png"
         path = join(self.imgs_path, title)
 
         buf = io.BytesIO()
