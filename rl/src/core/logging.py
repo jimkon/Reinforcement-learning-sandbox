@@ -11,7 +11,7 @@ from PIL import Image
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
 from rl.src.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
-from rl.src.core.utilities.timestamp import timestamp_str, timestamp_unique_str
+from rl.src.core.utilities.timestamp import timestamp_long_str, timestamp_unique_str
 
 
 def _time():
@@ -51,11 +51,6 @@ class Logger:
             'message': [],
             'tags': []
         }
-        self.__timing_dict = {
-            "timestamp": [],
-            'function': [],
-            'time': []
-        }
         self.__img_dict = {
             "timestamp": [],
             'path': [],
@@ -76,7 +71,7 @@ class Logger:
         if GENERAL_LOG_STDOUT_FLAG:
             print(msg, 'tags:', tags)
 
-        self.__log_dict['timestamp'].append(timestamp_str())
+        self.__log_dict['timestamp'].append(timestamp_long_str())
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
 
@@ -100,7 +95,7 @@ class Logger:
         buf.seek(0)
         img = Image.open(buf)
 
-        self.__img_dict['timestamp'].append(timestamp_str())
+        self.__img_dict['timestamp'].append(timestamp_long_str())
         self.__img_dict['path'].append(path)
 
         self.log(f"![]({path})", tags='image')
@@ -113,17 +108,9 @@ class Logger:
             self.__img_dict['image'].append(img)
             self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
-    def add_timing(self, func, time_elapsed):
-        self.__timing_dict['timestamp'].append(timestamp_str())
-        self.__timing_dict['function'].append(func)
-        self.__timing_dict['time'].append(time_elapsed)
-
     def save(self):
         df = pd.DataFrame(self.__log_dict)
         df.to_csv(join(self.log_path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index=False)
-
-        df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(join(self.perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index=False)
 
         for i in range(len(self.__img_dict['image'])):
             path = self.__img_dict['path'][i]
@@ -160,7 +147,8 @@ class Logger:
                 run_time = 1000.0 * (_time() - start_time)
                 result_str = repr(result).replace('\n', '')
                 self.log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f}", tags=tags)  #
-                self.add_timing(func.__name__, run_time)
+                self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
+
                 return result
 
             return wrapper
