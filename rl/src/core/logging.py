@@ -4,11 +4,12 @@ import time
 from os.path import join
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
 from rl.src.core.utilities.file_utils import create_path
-from rl.src.core.utilities.timestamp import timestamp_str
+from rl.src.core.utilities.timestamp import timestamp_str, timestamp_long_str
 
 
 def _time():
@@ -28,14 +29,29 @@ class Logger:
         self.name = name
         self.directory = directory if directory else ''
         self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.directory)
+
+        create_path(self.path)
+
+        self.perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
+        create_path(self.perf_mon_path)
+
+        self.imgs_path = join(self.path, LOG_IMAGES_DIR_PATH)
+        create_path(self.imgs_path)
+
         self.__log_dict = {
             "timestamp": [],
             'message': [],
             'tags': []
         }
         self.__timing_dict = {
+            "timestamp": [],
             'function': [],
             'time': []
+        }
+        self.__img_dict = {
+            "timestamp": [],
+            'title': [],
+            'image': []
         }
 
     def log(self, *args, tags=None, **kwargs):
@@ -56,21 +72,24 @@ class Logger:
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
 
+    def log_plt(self, title=None, tags=None):
+        title = f"{title}_{timestamp_str()}.png" if title else f"{timestamp_long_str()}.png"
+        path = join(self.imgs_path, title)
+        plt.savefig(path)
+
+        # self.__img_dict['timestamp'].append(timestamp_str())
+        # self.__img_dict['title'].append(title)
+        # self.__img_dict['tags'].append(img)
+
+
     def add_timing(self, func, time_elapsed):
+        self.__timing_dict['timestamp'].append(timestamp_str())
         self.__timing_dict['function'].append(func)
         self.__timing_dict['time'].append(time_elapsed)
 
     def save(self):
-        create_path(self.path)
-
-        perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
-        create_path(perf_mon_path)
-
-        imgs_path = join(self.path, LOG_IMAGES_DIR_PATH)
-        create_path(imgs_path)
-
         df = pd.DataFrame(self.__timing_dict)
-        df.to_csv(join(perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index_label=None)
+        df.to_csv(join(self.perf_mon_path, f"{self.name}_{CSV_FILENAME_EXTENSION_FUNCTION_TIMES_CSV}.csv"), index_label=None)
 
         df = pd.DataFrame(self.__log_dict)
         df.to_csv(join(self.path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index_label=None)

@@ -81,14 +81,15 @@ class SimpleEnv(AbstractEnv):
         plt.imshow(self.map)
         plt.tight_layout()
         if len(self.track_x) >= 4:
-            c1 = np.linspace(.2, 1, len(self.track_x))
+            c1 = np.square(np.linspace(.0, 1, len(self.track_x)))
             c = np.array([c1, c1, c1]).T
             plt.scatter(self.track_x,
                         self.track_y,
                         c=c,
-                        marker='o')
+                        marker='.')
         plt.plot(self.x, self.y, 'ro')
-        plt.plot(STARTING_X, STARTING_Y, 'mx')
+        plt.plot(STARTING_X, STARTING_Y, 'm^')
+        logger.log_plt()
         plt.draw()
         plt.pause(0.00001)
         plt.clf()
