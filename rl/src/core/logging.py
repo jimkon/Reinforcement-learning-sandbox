@@ -1,13 +1,16 @@
 import logging
 from functools import wraps
 import time
+import io
 from os.path import join
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from PIL import Image
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
+from rl.src.core.utilities.file_utils import unique_string
 from rl.src.core.utilities.file_utils import create_path
 from rl.src.core.utilities.timestamp import timestamp_str, timestamp_long_str
 
@@ -50,7 +53,7 @@ class Logger:
         }
         self.__img_dict = {
             "timestamp": [],
-            'title': [],
+            'path': [],
             'image': []
         }
 
@@ -72,14 +75,35 @@ class Logger:
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
 
-    def log_plt(self, title=None, tags=None):
+    def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
+        if not tags:
+            tags = ['log_plt']
+        else:
+            tags.append('log_plt')
+
+        if not title:
+            title = unique_string
+        else:
+            title = f"{title}_{unique_string()}"
+
         title = f"{title}_{timestamp_str()}.png" if title else f"{timestamp_long_str()}.png"
         path = join(self.imgs_path, title)
-        plt.savefig(path)
 
-        # self.__img_dict['timestamp'].append(timestamp_str())
-        # self.__img_dict['title'].append(title)
-        # self.__img_dict['tags'].append(img)
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img = Image.open(buf)
+
+        self.__img_dict['timestamp'].append(timestamp_str())
+        self.__img_dict['path'].append(path)
+
+        if store_directly_on_disk:
+            img.save(path)
+            self.__img_dict['image'].append(None)
+            self.log(f"Image {title} saved as {path}", tags=tags)
+        else:
+            self.__img_dict['image'].append(img)
+            self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
 
     def add_timing(self, func, time_elapsed):
@@ -93,6 +117,13 @@ class Logger:
 
         df = pd.DataFrame(self.__log_dict)
         df.to_csv(join(self.path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index_label=None)
+
+        for i in range(len(self.__img_dict['image'])):
+            path = self.__img_dict['path'][i]
+            img = self.__img_dict['image'][i]
+            if img:
+                img.save(path)
+                self.log(f"Image saved as {path}")
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):

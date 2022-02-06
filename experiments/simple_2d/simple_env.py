@@ -89,10 +89,11 @@ class SimpleEnv(AbstractEnv):
                         marker='.')
         plt.plot(self.x, self.y, 'ro')
         plt.plot(STARTING_X, STARTING_Y, 'm^')
-        logger.log_plt()
+        logger.log_plt(title='render')
         plt.draw()
         plt.pause(0.00001)
         plt.clf()
+
 
     def __repr__(self):
         return "SimpleEnv"
