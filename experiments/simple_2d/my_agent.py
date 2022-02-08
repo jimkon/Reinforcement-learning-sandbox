@@ -1,13 +1,39 @@
 from functools import cached_property, lru_cache
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.np_cache import np_cache
 from experiments.simple_2d.alphastar import solve, path
-from rl.src.core.configs.general_configs import LOGGING_ALLOW_GRAPHS
-from rl.src.core.logging import log
+from rl.src.core.logging import Logger
+
+logger = Logger('my_agent')
+
+
+def plot_path(path):
+    start_state, end_state = path[0], path[-1]
+    plt.figure()
+    plt.imshow(DEFAULT_MAP)
+
+    # plt.plot([start_state[0]], [start_state[1]], 'ro')
+    plt.plot(path[:, 0], path[:, 1], 'r-')
+    plt.plot([start_state[0]], [start_state[1]], 'mo')
+    plt.plot([end_state[0]], [end_state[1]], 'rv')
+    plt.tight_layout()
+    logger.log_plt(title='agent_action')
+
+
+def state_plus_actions(state, actions):
+    new_state = state
+    path = [new_state]
+    for action in actions:
+        new_state = new_state+action
+        path.append(new_state)
+
+    return np.array(path)
+
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
@@ -31,6 +57,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         next_states = [self.transition(state, a) for a in self.actions()]
         return next_states
 
+    @logger.log_func_call('agent')
     def reward(self, state):
         state_x, state_y = state
         reward = DEFAULT_MAP[state_x][state_y]
@@ -60,10 +87,13 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
                              a_max=MAX_ACTION)
             delta -= action
             actions.append(action)
+
+        if len(actions) == 0:
+            return np.array([0, 0])
+
         return np.array(actions)
 
     def best_path_actions(self, state_a, state_b):
-
         start_node, n, open_set, close_set = solve(start_state=state_a,
                                                    goal_state=state_b,
                                                    h_func=lambda s_a, s_b: self.step_distance(s_a, s_b),
@@ -72,7 +102,6 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
                                                    g_func=lambda s1, s2: self.reward(s2))
 
         self.path_states, self.path_actions = path(start_node)
-
         return self.path_actions
 
 
@@ -107,7 +136,12 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
 
     def act(self, state):
         current_goal_state = self.max_reward_state()
-        actions = self.best_path_actions(state, current_goal_state)
+        logger.log(f"my agent: act: from {state} to {current_goal_state}")
+        actions = self.shortest_path_actions(state, current_goal_state)
+        # actions = self.best_path_actions(state, current_goal_state)
+
+        plot_path(state_plus_actions(state, actions))
+        # plt.show()
         return actions[0]
         # if self.path_states and\
         #     current_goal_state == self.last_goal_state and\
@@ -124,7 +158,7 @@ class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
         return 'my_agent_shortest_path_to_global_max_hardcoded'
 
 
-if __name__ == "__main__":
-    a = MyAgent_Greedy_SE_HC()
-    print(a.shortest_path_actions(np.array([50, 50]), np.array([51, 51])))
+# if __name__ == "__main__":
+#     a = MyAgent_Greedy_SE_HC()
+#     print(a.shortest_path_actions(np.array([50, 50]), np.array([51, 51])))
 

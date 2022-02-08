@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 
 from rl.src.core.envs import AbstractEnv
+from rl.src.core.logging import Logger
 
 
 def perlin_map(width=100, height=100, octaves=3, seed=6):
@@ -24,9 +25,11 @@ DEFAULT_MAP = perlin_map(width=DEFAULT_MAP_WIDTH, height=DEFAULT_MAP_HEIGHT)
 
 MIN_ACTION = -1
 MAX_ACTION = 1
-STEPS_PER_EPISODE = 200
+STEPS_PER_EPISODE = 100
 STARTING_X = 50
 STARTING_Y = 50
+
+logger = Logger('simple_env')
 
 
 class SimpleEnv(AbstractEnv):
@@ -40,11 +43,15 @@ class SimpleEnv(AbstractEnv):
         self.x, self.y = -1, -1
         self.step_count = -1
 
-        plt.ion()
+        self.track_x, self.track_y = [], []
 
+    @logger.log_func_call()
     def reset(self):
         self.x, self.y = STARTING_X, STARTING_Y
         self.step_count = -1
+
+        self.track_x, self.track_y = [self.x], [self.y]
+
         state = np.array([self.x, self.y])
         return state
 
@@ -59,6 +66,7 @@ class SimpleEnv(AbstractEnv):
                              a_min=[0, 0],
                              a_max=[self.width-1, self.height-1])
         self.x, self.y = next_state
+        self.track_x.append(self.x), self.track_y.append(self.y)
 
         reward = self.map[self.x][self.y]
 
@@ -68,10 +76,22 @@ class SimpleEnv(AbstractEnv):
         return next_state, reward, done, None
 
     def render(self):
+        plt.ion()
+
         plt.imshow(self.map)
+        plt.tight_layout()
+        if len(self.track_x) >= 4:
+            c1 = np.square(np.linspace(.0, 1, len(self.track_x)))
+            c = np.array([c1, c1, c1]).T
+            plt.scatter(self.track_x,
+                        self.track_y,
+                        c=c,
+                        marker='.')
         plt.plot(self.x, self.y, 'ro')
+        plt.plot(STARTING_X, STARTING_Y, 'm^')
+        logger.log_plt(title='render')
         plt.draw()
-        plt.pause(0.001)
+        plt.pause(0.00001)
         plt.clf()
 
     def __repr__(self):

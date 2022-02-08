@@ -120,7 +120,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
         if verbosity >= 3:
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             log (
-                f"Agent {agent.name()} completed the {episode} episode. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
+                f"Agent {agent.name()} completed the episode {episode}. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}")
 
     elapsed_time = time.time() - start_time
     if verbosity >= 1:

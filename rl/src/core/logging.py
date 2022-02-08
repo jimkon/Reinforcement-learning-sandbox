@@ -1,63 +1,175 @@
 import logging
 from functools import wraps
 import time
+import io
+from os.path import join
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from PIL import Image
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from rl.src.core.configs.log_configs import *
+from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
+from rl.src.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
+from rl.src.core.utilities.timestamp import timestamp_long_str, timestamp_unique_str
 
-# logging.basicConfig(filename='run_logs.txt',
-#                     format='%(asctime)s %(message)s',
-#                     level=logging.INFO)
 
-
-def __time():
+def _time():
     if GENERAL_LOG_TIMINGS_FLAG:
         return time.time()
     else:
         return .0
 
 
-def log(*args, tags=None, **kwargs):
-    if not GENERAL_LOG_FLAG:
-        return
+class Logger:
 
-    if isinstance(args, dict):
-        msg = str(args)
-    else:
-        msg = "".join(list(args))
-    # msg = str(args)
-    print(tags, msg)
-    # logging.info(msg)
+    instances = []
 
-class LogRun:
-    pass
+    def __init__(self, name, directory=None):
+        Logger.instances.append(self)
+
+        self.name = name
+        self.directory = directory if directory else ''
+        self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.directory)
+
+        create_path(self.path)
+
+        self.log_path = join(self.path, LOG_CSV_DIR_PATH)
+        create_path(self.log_path)
+
+        self.html_path = join(self.path, LOG_HTML_DIR_PATH)
+        create_path(self.html_path)
+
+        self.perf_mon_path = join(self.path, PERFORMANCE_MONITORING_DIR_PATH)
+        create_path(self.perf_mon_path)
+
+        self.imgs_path = join(self.path, LOG_IMAGES_DIR_PATH)
+        create_path(self.imgs_path)
+
+        self.__log_dict = {
+            "timestamp": [],
+            'message': [],
+            'tags': []
+        }
+        self.__img_dict = {
+            "timestamp": [],
+            'path': [],
+            'image': []
+        }
+
+    def log(self, *args, tags=None, **kwargs):
+        if not GENERAL_LOG_FLAG:
+            return
+
+        if isinstance(args, dict):
+            msg = str(args)
+        else:
+            msg = "".join(list(args))
+
+        tags = [] if not tags else tags if isinstance(tags, list) else [tags]
+        # msg = str(args)
+        if GENERAL_LOG_STDOUT_FLAG:
+            print(msg, 'tags:', tags)
+
+        self.__log_dict['timestamp'].append(timestamp_long_str())
+        self.__log_dict['message'].append(msg)
+        self.__log_dict['tags'].append('|'.join(tags))
+
+    def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
+        if not tags:
+            tags = ['log_plt']
+        else:
+            tags.append('log_plt')
+
+        if not title:
+            title = timestamp_unique_str()
+        else:
+            title = f"{title}_{timestamp_unique_str()}"
+
+        title += '.png'
+
+        path = join(self.imgs_path, title)
+
+        # fig = plt.gcf()
+        # canvas = FigureCanvas(fig)
+        # canvas.draw()
+        # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img = Image.open(buf)
+
+        self.__img_dict['timestamp'].append(timestamp_long_str())
+        self.__img_dict['path'].append(path)
+
+        self.log(f"![]({path})", tags='image')
+
+        if store_directly_on_disk:
+            # img.save(path)
+            im = Image.fromarray(img)
+            im.save(path)
+            self.__img_dict['image'].append(None)
+            self.log(f"Image {title} saved as {path}", tags=tags)
+        else:
+            self.__img_dict['image'].append(img)
+            self.log(f"Image {title} saved temporarily in RAM", tags=tags)
+
+    def save(self):
+        df = pd.DataFrame(self.__log_dict)
+        df.to_csv(join(self.log_path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index=False)
+
+        for i in range(len(self.__img_dict['image'])):
+            path = self.__img_dict['path'][i]
+            img = self.__img_dict['image'][i]
+            if img is not None:
+                # im = Image.fromarray(img)
+                # im.save(path)
+                img.save(path)
+                self.log(f"Image saved as {path}")
+
+        fpath = generate_markdown_from_logs()
+        markdown_to_html(fpath)
+
+    # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
+    def log_func_call(self, tags=None):
+        TAG = "func_call"
+        if not tags:
+            tags = [TAG]
+        elif isinstance(tags, list):
+            tags.append(TAG)
+        elif isinstance(tags, str):
+            tags = [tags, TAG]
+        else:
+            tags = [TAG]
+
+        def log_tags(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                args_repr = [repr(a) for a in args]  # 1
+                kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # 2
+                signature = ", ".join(args_repr + kwargs_repr)  # 3
+                start_time = _time()
+
+                result = func(*args, **kwargs)
+
+                run_time = 1000.0 * (_time() - start_time)
+                result_str = repr(result).replace('\n', '')
+                self.log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f}", tags=tags)  #
+                self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
+
+                return result
+
+            return wrapper
+
+        return log_tags
 
 
-# https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
-def log_func_call(tags=None):
-    TAG = "func_call"
-    if not tags:
-        tags = []
-    elif isinstance(tags, list):
-        tags.append(TAG)
-    elif isinstance(tags, str):
-        tags = [tags, TAG]
-    else:
-        tags = [TAG]
+def save_loggers():
+    for _logger in Logger.instances:
+        _logger.save()
 
-    def log_tags(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            args_repr = [repr(a) for a in args]  # 1
-            kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # 2
-            signature = ", ".join(args_repr + kwargs_repr)  # 3
-            start_time = __time()
 
-            result = func(*args, **kwargs)
-
-            run_time = 1000 * (__time() - start_time)
-            result_str = repr(result).replace('\n', '')
-            log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f}", tags=tags) #
-
-            return result
-        return wrapper
-    return log_tags
+logger = Logger('general')
+log = logger.log
