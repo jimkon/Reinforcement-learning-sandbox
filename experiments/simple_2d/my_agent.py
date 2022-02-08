@@ -1,8 +1,3 @@
-from functools import cached_property, lru_cache
-
-import matplotlib.pyplot as plt
-import numpy as np
-
 from rl.src.core.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.np_cache import np_cache
@@ -17,7 +12,6 @@ def plot_path(path):
     plt.figure()
     plt.imshow(DEFAULT_MAP)
 
-    # plt.plot([start_state[0]], [start_state[1]], 'ro')
     plt.plot(path[:, 0], path[:, 1], 'r-')
     plt.plot([start_state[0]], [start_state[1]], 'mo')
     plt.plot([end_state[0]], [end_state[1]], 'rv')
@@ -34,6 +28,12 @@ def state_plus_actions(state, actions):
 
     return np.array(path)
 
+
+def find_state_in_path(state, path):
+    for i, s in enumerate(path):
+        if np.array_equal(state, s):
+            return i
+    return -1
 
 
 class MyAgent_Abstract_SE_HC(AbstractAgent):
@@ -91,7 +91,8 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         if len(actions) == 0:
             return np.array([0, 0])
 
-        return np.array(actions)
+        actions = np.array(actions)
+        return actions
 
     def best_path_actions(self, state_a, state_b):
         start_node, n, open_set, close_set = solve(start_state=state_a,
@@ -123,42 +124,30 @@ class MyAgent_Greedy_SE_HC(MyAgent_Abstract_SE_HC):
 
 
 class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
-    #
-    # def __init__(self):
-    #     self.h_func = lambda cs, gs: np.max(np.abs(cs-gs))
-    #     self.next_actions_func = lambda s: self.actions(s)
-    #     self.next_states_func = lambda s: self.transitions(s)
-    #     self.g_func = lambda s1, s2: 1
-    #
-    #     self.last_goal_state = None
-    #     self.path_states = None
-    #     self.path_actions = None
+    def __init__(self):
+        self.path = None
+        self.actions = None
+        self.current_goal = self.max_reward_state()
 
     def act(self, state):
-        current_goal_state = self.max_reward_state()
-        logger.log(f"my agent: act: from {state} to {current_goal_state}")
-        actions = self.shortest_path_actions(state, current_goal_state)
-        # actions = self.best_path_actions(state, current_goal_state)
+        if self.path is not None:
+            ind = find_state_in_path(state, self.path)
+            if ind < 0:
+                self.path = None
+                self.actions = None
+            elif ind >= len(self.actions):
+                return [0, 0]
+            else:
+                return self.actions[ind]
 
-        plot_path(state_plus_actions(state, actions))
-        # plt.show()
-        return actions[0]
-        # if self.path_states and\
-        #     current_goal_state == self.last_goal_state and\
-        #     state in self.path_states:
-        #
-        #     for i, s in enumerate(self.path_states):
-        #         if state == s:
-        #             return self.path_actions[i]
-        # else:
-        #     self.last_goal_state = current_goal_state
-        #     self.best_path_actions(state, self.last_goal_state)
+        if self.path is None:
+            self.actions = self.shortest_path_actions(state, self.current_goal)
+            self.path = state_plus_actions(state, self.actions)
+            plot_path(self.path)
+            logger.log(f"my agent: act: Regenerate path from {state} to {self.current_goal}")
+
+        return self.actions[0]
 
     def name(self):
         return 'my_agent_shortest_path_to_global_max_hardcoded'
-
-
-# if __name__ == "__main__":
-#     a = MyAgent_Greedy_SE_HC()
-#     print(a.shortest_path_actions(np.array([50, 50]), np.array([51, 51])))
 
