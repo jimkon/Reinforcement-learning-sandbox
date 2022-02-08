@@ -45,8 +45,6 @@ class SimpleEnv(AbstractEnv):
 
         self.track_x, self.track_y = [], []
 
-        plt.ion()
-
     @logger.log_func_call()
     def reset(self):
         self.x, self.y = STARTING_X, STARTING_Y
@@ -78,6 +76,8 @@ class SimpleEnv(AbstractEnv):
         return next_state, reward, done, None
 
     def render(self):
+        plt.ion()
+
         plt.imshow(self.map)
         plt.tight_layout()
         if len(self.track_x) >= 4:

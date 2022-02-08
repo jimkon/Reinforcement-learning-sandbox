@@ -48,7 +48,6 @@ def generate_markdown_from_logs(tags=None):
     dfs = [pd.read_csv(file, index_col=False) for file in files_abspath]
 
     df = pd.concat(dfs).sort_values(by='timestamp')
-    # df = df[df['tags'].str.contain('markdown')]
 
     file_str = '   \n'.join(df['message'].to_list())
 

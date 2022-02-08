@@ -4,9 +4,11 @@ import time
 import io
 from os.path import join
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from PIL import Image
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
@@ -90,6 +92,10 @@ class Logger:
 
         path = join(self.imgs_path, title)
 
+        # fig = plt.gcf()
+        # canvas = FigureCanvas(fig)
+        # canvas.draw()
+        # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
@@ -101,7 +107,9 @@ class Logger:
         self.log(f"![]({path})", tags='image')
 
         if store_directly_on_disk:
-            img.save(path)
+            # img.save(path)
+            im = Image.fromarray(img)
+            im.save(path)
             self.__img_dict['image'].append(None)
             self.log(f"Image {title} saved as {path}", tags=tags)
         else:
@@ -115,7 +123,9 @@ class Logger:
         for i in range(len(self.__img_dict['image'])):
             path = self.__img_dict['path'][i]
             img = self.__img_dict['image'][i]
-            if img:
+            if img is not None:
+                # im = Image.fromarray(img)
+                # im.save(path)
                 img.save(path)
                 self.log(f"Image saved as {path}")
 
