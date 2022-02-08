@@ -1,11 +1,20 @@
-# Model
+### Model
 * POC my agent
 * Add learning to my agent
 
-# Pltafrom
+### Pltafrom
 * structure project as commands (run experiment, set experiments, enrich results, aggregate/process result)
 * Introduce Celery to run the tasks
 * AWS
 
-# Software Engineering
+### Software Engineering
 * make config var names more descriptive {type}_{name}
+
+
+### Other
+
+
+# DONE tasks
+
+* 6/2
+  * [SE] set AWS (create account, install CLI)
