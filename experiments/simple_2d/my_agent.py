@@ -36,7 +36,7 @@ def find_state_in_path(state, path):
     return -1
 
 
-class MyAgent_Abstract_SE_HC(AbstractAgent):
+class MyAgent_Abstract_SE_POC(AbstractAgent):
 
     # @np_cache()
     def actions(self):
@@ -106,7 +106,7 @@ class MyAgent_Abstract_SE_HC(AbstractAgent):
         return self.path_actions
 
 
-class MyAgent_Greedy_SE_HC(MyAgent_Abstract_SE_HC):
+class MyAgent_Greedy_SE_POC(MyAgent_Abstract_SE_POC):
 
     def act(self, state):
         __min_reward = -np.Inf
@@ -123,7 +123,7 @@ class MyAgent_Greedy_SE_HC(MyAgent_Abstract_SE_HC):
         return 'my_agent_greedy_hardcoded'
 
 
-class MyAgent_ShortestPath_SE_HC(MyAgent_Abstract_SE_HC):
+class MyAgent_ShortestPath_SE_POC(MyAgent_Abstract_SE_POC):
     def __init__(self):
         self.path = None
         self.actions = None
