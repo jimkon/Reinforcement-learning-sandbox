@@ -10,6 +10,7 @@
 ### Software Engineering
 * make config var names more descriptive {type}_{name}
 * convert configs to enums
+* np_cache decorator (my implementation)
 
 ### Other
 
