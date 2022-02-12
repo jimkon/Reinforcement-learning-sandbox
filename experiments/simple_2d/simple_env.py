@@ -45,7 +45,6 @@ class SimpleEnv(AbstractEnv):
 
         self.track_x, self.track_y = [], []
 
-    @logger.log_func_call()
     def reset(self):
         self.x, self.y = STARTING_X, STARTING_Y
         self.step_count = -1
@@ -89,21 +88,12 @@ class SimpleEnv(AbstractEnv):
                         marker='.')
         plt.plot(self.x, self.y, 'ro')
         plt.plot(STARTING_X, STARTING_Y, 'm^')
-        logger.log_plt(title='render')
+        # logger.log_plt(title='simple_env.render', tags=['render'])
         plt.draw()
         plt.pause(0.00001)
         plt.clf()
 
     def __repr__(self):
         return "SimpleEnv"
-
-#
-# if __name__ == "__main__":
-#     env = SimpleEnv()
-#     env.reset()
-#
-#     while True:
-#         env.render()
-#         print("key")
 
 
