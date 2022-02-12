@@ -9,7 +9,7 @@
 
 ### Software Engineering
 * make config var names more descriptive {type}_{name}
-
+* convert configs to enums
 
 ### Other
 
