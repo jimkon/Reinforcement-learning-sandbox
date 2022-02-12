@@ -16,6 +16,7 @@
 * convert configs to enums
 * np_cache decorator (my implementation)
 * optimize plot map
+* use tags to make markdown text formatting
 
 ### Other
 
