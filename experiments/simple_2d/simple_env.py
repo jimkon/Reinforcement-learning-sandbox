@@ -46,8 +46,8 @@ class SimpleEnv(AbstractEnv):
         self.track_x, self.track_y = [], []
 
         max_1d = np.max(self.map, axis=0)
-        self.argmax_x = np.argmax(max_1d)
-        self.argmax_y = np.argmax(self.map[:, self.argmax_x])
+        self.argmax_y = np.argmax(max_1d)
+        self.argmax_x = np.argmax(self.map[:, self.argmax_y])
 
     def reset(self):
         self.x, self.y = STARTING_X, STARTING_Y
@@ -79,7 +79,7 @@ class SimpleEnv(AbstractEnv):
         return next_state, reward, done, None
 
     @logger.log_func_call('run_time')
-    def render(self, width=500, height=500, fps=10):
+    def render(self, width=500, height=500, fps=30):
         approx_wait_time = 1000//fps
 
         # m = self.map
@@ -92,21 +92,21 @@ class SimpleEnv(AbstractEnv):
 
         for i, (x, y) in enumerate(zip(self.track_x, self.track_y)):
             i_ratio = i/100.
-            r_img[y][x] = i_ratio*0.5
-            g_img[y][x] = 1-i_ratio
-            b_img[y][x] = 1
+            r_img[x][y] = i_ratio*0.5
+            g_img[x][y] = 1-i_ratio
+            b_img[x][y] = 1
 
-        r_img[STARTING_Y][STARTING_X] = 1
-        g_img[STARTING_Y][STARTING_X] = 0
-        b_img[STARTING_Y][STARTING_X] = 1
+        r_img[STARTING_X][STARTING_Y] = 1
+        g_img[STARTING_X][STARTING_Y] = 0
+        b_img[STARTING_X][STARTING_Y] = 1
 
-        r_img[self.y][self.x] = 1
-        g_img[self.y][self.x] = 0
-        b_img[self.y][self.x] = 0
+        r_img[self.x][self.y] = 1
+        g_img[self.x][self.y] = 0
+        b_img[self.x][self.y] = 0
 
-        r_img[self.argmax_y][self.argmax_x] = 0
-        g_img[self.argmax_y][self.argmax_x] = 0
-        b_img[self.argmax_y][self.argmax_x] = 1
+        r_img[self.argmax_x][self.argmax_y] = 0
+        g_img[self.argmax_x][self.argmax_y] = 0
+        b_img[self.argmax_x][self.argmax_y] = 1
 
         p_img = np.dstack([b_img, g_img, r_img])
         p_img = cv2.resize(p_img, (width, height), interpolation=cv2.INTER_NEAREST)#INTER_AREA
