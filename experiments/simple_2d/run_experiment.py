@@ -9,8 +9,8 @@ from experiments.simple_2d.my_agent import *
 
 
 def run_experiment():
-    # agent = RandomWalkAgent()
-    agent = MyAgent_Greedy_SE_POC()
+    agent = RandomWalkAgent()
+    # agent = MyAgent_Greedy_SE_POC()
     # agent = MyAgent_ShortestPath_SE_HC()
     env = SimpleEnv()
     experiment_name = 'simple_experiment_test'

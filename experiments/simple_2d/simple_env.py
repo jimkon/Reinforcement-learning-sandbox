@@ -45,6 +45,10 @@ class SimpleEnv(AbstractEnv):
 
         self.track_x, self.track_y = [], []
 
+        max_1d = np.max(self.map, axis=0)
+        self.argmax_y = np.argmax(max_1d)
+        self.argmax_x = np.argmax(self.map[:, self.argmax_y])
+
     def reset(self):
         self.x, self.y = STARTING_X, STARTING_Y
         self.step_count = -1
@@ -71,27 +75,43 @@ class SimpleEnv(AbstractEnv):
 
         self.step_count += 1
 
-        done = self.step_count == self.steps_per_episode
+        done = self.step_count == self.steps_per_episode-1
         return next_state, reward, done, None
 
-    def render(self):
-        plt.ion()
+    @logger.log_func_call('run_time')
+    def render(self, width=500, height=500, fps=30):
+        approx_wait_time = 1000//fps
 
-        plt.imshow(self.map)
-        plt.tight_layout()
-        if len(self.track_x) >= 4:
-            c1 = np.square(np.linspace(.0, 1, len(self.track_x)))
-            c = np.array([c1, c1, c1]).T
-            plt.scatter(self.track_x,
-                        self.track_y,
-                        c=c,
-                        marker='.')
-        plt.plot(self.x, self.y, 'ro')
-        plt.plot(STARTING_X, STARTING_Y, 'm^')
-        # logger.log_plt(title='simple_env.render', tags=['render'])
-        plt.draw()
-        plt.pause(0.00001)
-        plt.clf()
+        # m = self.map
+        # m = np.square(self.map)
+        m = np.round(self.map, 1)
+
+        r_img = np.zeros(m.shape)
+        g_img = m
+        b_img = np.zeros(m.shape)
+
+        for i, (x, y) in enumerate(zip(self.track_x, self.track_y)):
+            i_ratio = i/100.
+            r_img[x][y] = i_ratio*0.5
+            g_img[x][y] = 1-i_ratio
+            b_img[x][y] = 1
+
+        r_img[STARTING_X][STARTING_Y] = 1
+        g_img[STARTING_X][STARTING_Y] = 0
+        b_img[STARTING_X][STARTING_Y] = 1
+
+        r_img[self.x][self.y] = 1
+        g_img[self.x][self.y] = 0
+        b_img[self.x][self.y] = 0
+
+        r_img[self.argmax_x][self.argmax_y] = 0
+        g_img[self.argmax_x][self.argmax_y] = 0
+        b_img[self.argmax_x][self.argmax_y] = 1
+
+        p_img = np.dstack([b_img, g_img, r_img])
+        p_img = cv2.resize(p_img, (width, height), interpolation=cv2.INTER_NEAREST)#INTER_AREA
+        cv2.imshow('simple_env', p_img)
+        cv2.waitKey(approx_wait_time)
 
     def __repr__(self):
         return "SimpleEnv"
