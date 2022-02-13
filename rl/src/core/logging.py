@@ -18,7 +18,7 @@ from rl.src.core.utilities.timestamp import timestamp_long_str, timestamp_unique
 
 def _time():
     if GENERAL_LOG_TIMINGS_FLAG:
-        return time.time()
+        return time.time_ns()
     else:
         return .0
 
@@ -153,10 +153,10 @@ class Logger:
                 start_time = _time()
 
                 result = func(*args, **kwargs)
-
-                run_time = 1000.0 * (_time() - start_time)
+                end_time = _time()
+                run_time = (end_time - start_time)/1000000
                 result_str = repr(result).replace('\n', '')
-                self.log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f}", tags=tags)  #
+                self.log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f} ms", tags=tags)
                 self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
 
                 return result
