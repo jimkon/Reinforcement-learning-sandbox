@@ -15,7 +15,6 @@
 * make config var names more descriptive {type}_{name}
 * convert configs to enums
 * np_cache decorator (my implementation)
-* optimize plot map
 * use tags to make markdown text formatting
 * add log_image in logging (work with np arrays)
 * log_plt part of log_image 
