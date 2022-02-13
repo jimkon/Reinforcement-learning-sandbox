@@ -10,15 +10,11 @@ logger = Logger('my_agent')
 
 
 def plot_path(path):
-    start_state, end_state = path[0], path[-1]
-    plt.figure()
-    plt.imshow(DEFAULT_MAP)
+    img = np.dstack(DEFAULT_MAP.copy())
+    cv2.polylines(img, [path], False, (0, 255, 255))
+    cv2.imshow('plotting the path', img)
+    cv2.waitKey(0)
 
-    plt.plot(path[:, 0], path[:, 1], 'r-')
-    plt.plot([start_state[0]], [start_state[1]], 'mo')
-    plt.plot([end_state[0]], [end_state[1]], 'rv')
-    plt.tight_layout()
-    logger.log_plt(title='agent_action')
 
 
 def state_plus_actions(state, actions):
