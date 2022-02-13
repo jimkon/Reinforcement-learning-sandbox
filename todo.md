@@ -17,6 +17,8 @@
 * np_cache decorator (my implementation)
 * optimize plot map
 * use tags to make markdown text formatting
+* add log_image in logging (work with np arrays)
+* log_plt part of log_image 
 
 ### Other
 
