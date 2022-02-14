@@ -18,9 +18,3 @@
 * log_plt part of log_image 
 
 ### Other
-
-
-# DONE tasks
-
-* 6/2
-  * [SE] set AWS (create account, install CLI)
