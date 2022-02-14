@@ -59,7 +59,7 @@ class Logger:
             'image': []
         }
 
-    def log(self, msg, tags=None, **kwargs):
+    def log(self, msg, tags=None):
         if not GENERAL_LOG_FLAG:
             return
 
@@ -71,6 +71,35 @@ class Logger:
         self.__log_dict['timestamp'].append(timestamp_long_str())
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
+
+    def log_image(self, img, title=None, store_directly_on_disk=False, tags=None):
+        assert isinstance(img, np.ndarray), f"Image must be in numpy array format. Given {type(img)}"
+
+        if not tags:
+            tags = ['log_plt']
+        else:
+            tags.append('log_plt')
+
+        if not title:
+            title = timestamp_unique_str()
+        else:
+            title = f"{title}_{timestamp_unique_str()}"
+
+        title += '.png'
+
+        path = join(self.imgs_path, title)
+
+        self.__img_dict['timestamp'].append(timestamp_long_str())
+        self.__img_dict['path'].append(path)
+
+        if store_directly_on_disk:
+            im = Image.fromarray(img)
+            im.save(path)
+            self.__img_dict['image'].append(None)
+            self.log(f"Image {title} saved as {path}", tags=tags)
+        else:
+            self.__img_dict['image'].append(img)
+            self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
     def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
         if not tags:
