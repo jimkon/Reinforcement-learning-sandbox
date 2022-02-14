@@ -97,45 +97,6 @@ class Logger:
             self.__img_dict['image'].append(img)
             self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
-    # def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
-    #     if not tags:
-    #         tags = ['log_plt']
-    #     else:
-    #         tags.append('log_plt')
-    #
-    #     if not title:
-    #         title = timestamp_unique_str()
-    #     else:
-    #         title = f"{title}_{timestamp_unique_str()}"
-    #
-    #     title += '.png'
-    #
-    #     path = join(self.imgs_path, title)
-    #
-    #     # fig = plt.gcf()
-    #     # canvas = FigureCanvas(fig)
-    #     # canvas.draw()
-    #     # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
-    #     buf = io.BytesIO()
-    #     plt.savefig(buf, format='png')
-    #     buf.seek(0)
-    #     img = Image.open(buf)
-    #
-    #     self.__img_dict['timestamp'].append(timestamp_long_str())
-    #     self.__img_dict['path'].append(path)
-    #
-    #     self.log(f"![]({path})", tags='image')
-    #
-    #     if store_directly_on_disk:
-    #         # img.save(path)
-    #         im = Image.fromarray(img)
-    #         im.save(path)
-    #         self.__img_dict['image'].append(None)
-    #         self.log(f"Image {title} saved as {path}", tags=tags)
-    #     else:
-    #         self.__img_dict['image'].append(img)
-    #         self.log(f"Image {title} saved temporarily in RAM", tags=tags)
-
     def save(self):
         df = pd.DataFrame(self.__log_dict)
         df.to_csv(join(self.log_path, f"{self.name}_{CSV_FILENAME_EXTENSION_LOGS_CSV}.csv"), index=False)
