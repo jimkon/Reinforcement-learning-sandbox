@@ -59,17 +59,12 @@ class Logger:
             'image': []
         }
 
-    def log(self, *args, tags=None, **kwargs):
+    def log(self, msg, tags=None, **kwargs):
         if not GENERAL_LOG_FLAG:
             return
 
-        if isinstance(args, dict):
-            msg = str(args)
-        else:
-            msg = "".join(list(args))
-
         tags = [] if not tags else tags if isinstance(tags, list) else [tags]
-        # msg = str(args)
+
         if GENERAL_LOG_STDOUT_FLAG:
             print(msg, 'tags:', tags)
 
@@ -156,7 +151,7 @@ class Logger:
                 end_time = _time()
                 run_time = (end_time - start_time)/1000000
                 result_str = repr(result).replace('\n', '')
-                self.log(f"Calle: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f} ms", tags=tags)
+                self.log(f"Called: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f} ms", tags=tags)
                 self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
 
                 return result
