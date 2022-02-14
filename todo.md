@@ -14,7 +14,6 @@
 * convert configs to enums
 * np_cache decorator (my implementation)
 * use tags to make markdown text formatting
-* add log_image in logging (work with np arrays)
 * log_plt part of log_image 
 
 ### Other
