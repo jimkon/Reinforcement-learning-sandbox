@@ -129,7 +129,7 @@ def solve(start_state, goal_state, h_func, next_actions_func, state_similarity=N
     return start_node, num_nodes_searched, open_set.nodes, close_set.nodes
 
 
-def path(start_node):#TODO update readme
+def get_path(start_node):#TODO update readme
     states, actions = [], []
     current = start_node
     while current is not None:
