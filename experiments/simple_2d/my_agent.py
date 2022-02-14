@@ -183,7 +183,7 @@ class MyAgent_BestPath_SE_POC(MyAgent_Abstract_PathPlanning_POC):
         path, actions = self.best_path_actions(state_a, state_b)
         if len(path) > 2:
             create_path_plot(path, plot=True)
-        return path, actions
+        return path, self.all_possible_actions()[np.random.randint(0, len(self.all_possible_actions()-1))]#actions
 
     def best_path_actions(self, state_a, state_b):
         if states_equal(state_a, state_b):
