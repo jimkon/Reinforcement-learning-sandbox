@@ -1,7 +1,5 @@
 ### Model
 * POC my agent
-  * greedy agent
-  * shortest path to max reward state
   * best path agent to max reward state
   * max total reward path
 * Add learning to my agent
