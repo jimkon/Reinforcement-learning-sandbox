@@ -1,14 +1,10 @@
-import logging
 from functools import wraps
 import time
-import io
 from os.path import join
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from PIL import Image
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import cv2
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
@@ -91,54 +87,54 @@ class Logger:
 
         self.__img_dict['timestamp'].append(timestamp_long_str())
         self.__img_dict['path'].append(path)
-
-        if store_directly_on_disk:
-            im = Image.fromarray(img)
-            im.save(path)
-            self.__img_dict['image'].append(None)
-            self.log(f"Image {title} saved as {path}", tags=tags)
-        else:
-            self.__img_dict['image'].append(img)
-            self.log(f"Image {title} saved temporarily in RAM", tags=tags)
-
-    def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
-        if not tags:
-            tags = ['log_plt']
-        else:
-            tags.append('log_plt')
-
-        if not title:
-            title = timestamp_unique_str()
-        else:
-            title = f"{title}_{timestamp_unique_str()}"
-
-        title += '.png'
-
-        path = join(self.imgs_path, title)
-
-        # fig = plt.gcf()
-        # canvas = FigureCanvas(fig)
-        # canvas.draw()
-        # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        img = Image.open(buf)
-
-        self.__img_dict['timestamp'].append(timestamp_long_str())
-        self.__img_dict['path'].append(path)
-
         self.log(f"![]({path})", tags='image')
 
         if store_directly_on_disk:
-            # img.save(path)
-            im = Image.fromarray(img)
-            im.save(path)
+            self.__save_image(img, path)
             self.__img_dict['image'].append(None)
-            self.log(f"Image {title} saved as {path}", tags=tags)
+            # self.log(f"Image {title} saved as {path}", tags=tags)
         else:
             self.__img_dict['image'].append(img)
             self.log(f"Image {title} saved temporarily in RAM", tags=tags)
+
+    # def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
+    #     if not tags:
+    #         tags = ['log_plt']
+    #     else:
+    #         tags.append('log_plt')
+    #
+    #     if not title:
+    #         title = timestamp_unique_str()
+    #     else:
+    #         title = f"{title}_{timestamp_unique_str()}"
+    #
+    #     title += '.png'
+    #
+    #     path = join(self.imgs_path, title)
+    #
+    #     # fig = plt.gcf()
+    #     # canvas = FigureCanvas(fig)
+    #     # canvas.draw()
+    #     # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
+    #     buf = io.BytesIO()
+    #     plt.savefig(buf, format='png')
+    #     buf.seek(0)
+    #     img = Image.open(buf)
+    #
+    #     self.__img_dict['timestamp'].append(timestamp_long_str())
+    #     self.__img_dict['path'].append(path)
+    #
+    #     self.log(f"![]({path})", tags='image')
+    #
+    #     if store_directly_on_disk:
+    #         # img.save(path)
+    #         im = Image.fromarray(img)
+    #         im.save(path)
+    #         self.__img_dict['image'].append(None)
+    #         self.log(f"Image {title} saved as {path}", tags=tags)
+    #     else:
+    #         self.__img_dict['image'].append(img)
+    #         self.log(f"Image {title} saved temporarily in RAM", tags=tags)
 
     def save(self):
         df = pd.DataFrame(self.__log_dict)
@@ -147,14 +143,19 @@ class Logger:
         for i in range(len(self.__img_dict['image'])):
             path = self.__img_dict['path'][i]
             img = self.__img_dict['image'][i]
-            if img is not None:
-                # im = Image.fromarray(img)
-                # im.save(path)
-                img.save(path)
-                self.log(f"Image saved as {path}")
+            self.__save_image(img, path)
 
         fpath = generate_markdown_from_logs()
         markdown_to_html(fpath)
+
+    def __save_image(self, image, path):
+        if image is None:
+            return
+
+        if image.max() <= 1.:
+            image = (255 * image).astype(int)
+        cv2.imwrite(path, image)
+        self.log(f"Image saved as {path}")
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
