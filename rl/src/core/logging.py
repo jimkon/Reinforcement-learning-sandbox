@@ -87,7 +87,6 @@ class Logger:
 
         self.__img_dict['timestamp'].append(timestamp_long_str())
         self.__img_dict['path'].append(path)
-        self.log(f"![]({path})", tags='image')
 
         if store_directly_on_disk:
             self.__save_image(img, path)
