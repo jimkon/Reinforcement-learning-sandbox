@@ -1,8 +1,5 @@
-import numpy as np
-
-from rl.src.core.agents import AbstractAgent
+from rl.src.core.rl.agents import AbstractAgent
 from experiments.simple_2d.simple_env import *
-from experiments.simple_2d.np_cache import np_cache
 from experiments.simple_2d.alphastar import solve, get_path
 from rl.src.core.logging import Logger
 

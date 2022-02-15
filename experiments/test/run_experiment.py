@@ -1,6 +1,6 @@
-from rl.src.core.engine import run_and_store_episodes
+from rl.src.core.rl.engine import run_and_store_episodes
 
-from rl.src.core.envs import AbstractEnv
+from rl.src.core.rl.envs import AbstractEnv
 
 
 def cnt():

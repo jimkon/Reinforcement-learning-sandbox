@@ -1,11 +1,8 @@
-import time
-
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 
-from rl.src.core.envs import AbstractEnv
+from rl.src.core.rl.envs import AbstractEnv
 from rl.src.core.logging import Logger
 
 

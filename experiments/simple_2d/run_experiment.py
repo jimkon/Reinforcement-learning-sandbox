@@ -1,10 +1,6 @@
-import cProfile
+from rl.src.core.rl.engine import run_episodes
+from rl.src.core.logging import save_loggers
 
-from rl.src.core.engine import run_episodes
-from rl.src.core.logging import logger, save_loggers
-
-from experiments.simple_2d.simple_env import SimpleEnv
-from experiments.simple_2d.random_walk_agent import RandomWalkAgent
 from experiments.simple_2d.my_agent import *
 
 
