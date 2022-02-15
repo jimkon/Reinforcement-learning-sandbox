@@ -19,7 +19,7 @@ def run_experiment():
     experiment_name = 'simple_experiment_test'
     # logger(experiment_name)
     # run_and_store_episodes(env, agent, 3, experiment_name, store_results_func='database', verbosity='step')
-    run_episodes(env, agent, 1, verbosity='step', render=False)
+    run_episodes(env, agent, 1, verbosity='step', render=True)
     # logger.save()
     save_loggers()
 

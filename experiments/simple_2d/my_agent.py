@@ -113,7 +113,6 @@ class MyAgent_Abstract_PathPlanning_POC(MyAgent_Abstract_SE_POC):
     def __init__(self):
         self.__path = None
         self.__actions = None
-        # self.current_goal = None
 
     def act(self, state):
         action = self.follow_the_path(state)
@@ -132,7 +131,8 @@ class MyAgent_Abstract_PathPlanning_POC(MyAgent_Abstract_SE_POC):
             self.__path, self.__actions = self.calculate_path_and_actions(current_state, target_state)
 
         result_action = self.__actions[0]
-        if len(self.__actions)>1:
+        logger.log(f"Picking the last action {result_action}")
+        if len(self.__actions) > 1:
             self.__path, self.__actions = self.__path[1:], self.__actions[1:]
         return result_action
 
@@ -188,9 +188,9 @@ class MyAgent_BestPath_SE_POC(MyAgent_Abstract_PathPlanning_POC):
     def calculate_path_and_actions(self, state_a, state_b):
         path, actions = self.best_path_actions(state_a, state_b)
         if len(path) > 2:
-            img = create_path_plot(path, plot=True)
+            img = create_path_plot(path, plot=False)
             logger.log_image(img)
-        return path, self.all_possible_actions()[np.random.randint(0, len(self.all_possible_actions()-1))]#actions
+        return path, actions
 
     def best_path_actions(self, state_a, state_b):
         if states_equal(state_a, state_b):
