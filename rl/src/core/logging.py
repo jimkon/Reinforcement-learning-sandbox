@@ -55,11 +55,11 @@ class Logger:
             'image': []
         }
 
-    def log(self, msg, tags=None):
+    def log(self, msg, tags='general'):
         if not GENERAL_LOG_FLAG:
             return
 
-        tags = [] if not tags else tags if isinstance(tags, list) else [tags]
+        tags = ['general'] if (tags is None) else tags if isinstance(tags, list) else [tags]
 
         if GENERAL_LOG_STDOUT_FLAG:
             print(msg, 'tags:', tags)
@@ -87,6 +87,7 @@ class Logger:
 
         self.__img_dict['timestamp'].append(timestamp_long_str())
         self.__img_dict['path'].append(path)
+        self.log(path, tags='markdown_image')
 
         if store_directly_on_disk:
             self.__save_image(img, path)
@@ -107,15 +108,6 @@ class Logger:
 
         fpath = generate_markdown_from_logs()
         markdown_to_html(fpath)
-
-    def __save_image(self, image, path):
-        if image is None:
-            return
-
-        if image.max() <= 1.:
-            image = (255 * image).astype(int)
-        cv2.imwrite(path, image)
-        self.log(f"Image saved as {path}")
 
     # https://realpython.com/primer-on-python-decorators/#decorators-with-arguments
     def log_func_call(self, tags=None):
@@ -149,6 +141,15 @@ class Logger:
             return wrapper
 
         return log_tags
+
+    def __save_image(self, image, path):
+        if image is None:
+            return
+
+        if image.max() <= 1.:
+            image = (255 * image).astype(int)
+        cv2.imwrite(path, image)
+        self.log(f"Image saved as {path}")
 
 
 def save_loggers():

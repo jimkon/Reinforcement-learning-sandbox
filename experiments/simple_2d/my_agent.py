@@ -12,7 +12,13 @@ logger = Logger('my_agent')
 def create_path_plot(path, plot=False):
     img = DEFAULT_MAP.copy()
     img = np.dstack([img, img, img])
+
     cv2.polylines(img, [path], False, (0., 1., 1.))
+
+    (x1, y1), (x2, y2) = path[0], path[-1]
+    img[y1, x1] = np.array([1, 0.2, 0.2])
+    img[y2, x2] = np.array([0.2, 0.2, 1])
+
     img = cv2.resize(img, (500, 500), interpolation=cv2.INTER_NEAREST)  # INTER_AREA
 
     if plot:
@@ -182,7 +188,7 @@ class MyAgent_BestPath_SE_POC(MyAgent_Abstract_PathPlanning_POC):
     def calculate_path_and_actions(self, state_a, state_b):
         path, actions = self.best_path_actions(state_a, state_b)
         if len(path) > 2:
-            img = create_path_plot(path, plot=False)
+            img = create_path_plot(path, plot=True)
             logger.log_image(img)
         return path, self.all_possible_actions()[np.random.randint(0, len(self.all_possible_actions()-1))]#actions
 

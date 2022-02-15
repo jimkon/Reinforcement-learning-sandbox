@@ -49,9 +49,11 @@ def generate_markdown_from_logs(tags=None):
 
     df = pd.concat(dfs).sort_values(by='timestamp')
 
+    df['tags'] = df['tags'].fillna('general')
+
     df_md_conv = __convert_logs_for_markdown(df)
 
-    file_str = ''.join(df['message'].to_list())
+    file_str = '   \n'.join(df_md_conv['message'].to_list())
 
     markdown_abspath = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, LOG_HTML_DIR_PATH)+"/report.md"
 
@@ -62,11 +64,10 @@ def generate_markdown_from_logs(tags=None):
 
 
 def __convert_logs_for_markdown(df):
-    t = df['tags'].str.contains('markdown_image').sum()
-    k = df[t]
-    df[df['tags'].str.contains('markdown_image')]['message'] = "[]("+df[df['tags'].str.contains('markdown_image')]['message']+")"
-    df['message'] = df['message']+"   \n"
-    # df['']
+    df = df.copy()
+    __apply_str_func_to_tag(df, 'markdown_image', lambda s: f"![]({s})")
+    __apply_str_func_to_tag(df, 'markdown_heading', lambda s: f"### {s}")
+
     return df
 
 
@@ -74,7 +75,8 @@ def __apply_str_func_to_tag(df, tag, func):
     indx = df['tags'].str.contains(tag)
     n = indx.sum()
     if n > 0:
-        df[indx] = df[indx].apply(func)
+        t = df.loc[indx, 'message'].apply(func)
+        df.loc[indx, 'message'] = t
     return n
 
 if __name__ == "__main__":
