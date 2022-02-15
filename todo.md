@@ -13,7 +13,6 @@
 * make config var names more descriptive {type}_{name}
 * convert configs to enums
 * np_cache decorator (my implementation)
-* use tags to make markdown text formatting
 * log_plt part of log_image 
 
 ### Other
