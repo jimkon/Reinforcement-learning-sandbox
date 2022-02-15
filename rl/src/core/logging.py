@@ -1,14 +1,10 @@
-import logging
 from functools import wraps
 import time
-import io
 from os.path import join
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from PIL import Image
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import cv2
 
 from rl.src.core.configs.log_configs import *
 from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
@@ -18,7 +14,7 @@ from rl.src.core.utilities.timestamp import timestamp_long_str, timestamp_unique
 
 def _time():
     if GENERAL_LOG_TIMINGS_FLAG:
-        return time.time()
+        return time.time_ns()
     else:
         return .0
 
@@ -59,17 +55,12 @@ class Logger:
             'image': []
         }
 
-    def log(self, *args, tags=None, **kwargs):
+    def log(self, msg, tags='general'):
         if not GENERAL_LOG_FLAG:
             return
 
-        if isinstance(args, dict):
-            msg = str(args)
-        else:
-            msg = "".join(list(args))
+        tags = ['general'] if (tags is None) else tags if isinstance(tags, list) else [tags]
 
-        tags = [] if not tags else tags if isinstance(tags, list) else [tags]
-        # msg = str(args)
         if GENERAL_LOG_STDOUT_FLAG:
             print(msg, 'tags:', tags)
 
@@ -77,7 +68,9 @@ class Logger:
         self.__log_dict['message'].append(msg)
         self.__log_dict['tags'].append('|'.join(tags))
 
-    def log_plt(self, title=None, store_directly_on_disk=False, tags=None):
+    def log_image(self, img, title=None, store_directly_on_disk=False, tags=None):
+        assert isinstance(img, np.ndarray), f"Image must be in numpy array format. Given {type(img)}"
+
         if not tags:
             tags = ['log_plt']
         else:
@@ -92,26 +85,14 @@ class Logger:
 
         path = join(self.imgs_path, title)
 
-        # fig = plt.gcf()
-        # canvas = FigureCanvas(fig)
-        # canvas.draw()
-        # img = np.frombuffer(canvas.tostring_rgb(), dtype='uint8')
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        img = Image.open(buf)
-
         self.__img_dict['timestamp'].append(timestamp_long_str())
         self.__img_dict['path'].append(path)
-
-        self.log(f"![]({path})", tags='image')
+        self.log(path, tags='markdown_image')
 
         if store_directly_on_disk:
-            # img.save(path)
-            im = Image.fromarray(img)
-            im.save(path)
+            self.__save_image(img, path)
             self.__img_dict['image'].append(None)
-            self.log(f"Image {title} saved as {path}", tags=tags)
+            # self.log(f"Image {title} saved as {path}", tags=tags)
         else:
             self.__img_dict['image'].append(img)
             self.log(f"Image {title} saved temporarily in RAM", tags=tags)
@@ -123,11 +104,7 @@ class Logger:
         for i in range(len(self.__img_dict['image'])):
             path = self.__img_dict['path'][i]
             img = self.__img_dict['image'][i]
-            if img is not None:
-                # im = Image.fromarray(img)
-                # im.save(path)
-                img.save(path)
-                self.log(f"Image saved as {path}")
+            self.__save_image(img, path)
 
         fpath = generate_markdown_from_logs()
         markdown_to_html(fpath)
@@ -153,10 +130,10 @@ class Logger:
                 start_time = _time()
 
                 result = func(*args, **kwargs)
-
-                run_time = 1000.0 * (_time() - start_time)
+                end_time = _time()
+                run_time = (end_time - start_time)/1000000
                 result_str = repr(result).replace('\n', '')
-                self.log(f"Calling: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f}", tags=tags)  #
+                self.log(f"Called: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f} ms", tags=tags)
                 self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
 
                 return result
@@ -164,6 +141,15 @@ class Logger:
             return wrapper
 
         return log_tags
+
+    def __save_image(self, image, path):
+        if image is None:
+            return
+
+        if image.max() <= 1.:
+            image = (255 * image).astype(int)
+        cv2.imwrite(path, image)
+        self.log(f"Image saved as {path}")
 
 
 def save_loggers():

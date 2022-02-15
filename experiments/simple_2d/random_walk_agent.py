@@ -25,7 +25,6 @@ class RandomWalkAgent(AbstractAgent):
         self.direction_duration = 0
         self.direction = 0
 
-    @logger.log_func_call()
     def act(self, state):
         self.step_count += 1
 
@@ -36,7 +35,6 @@ class RandomWalkAgent(AbstractAgent):
 
         return DIR[self.direction]
 
-    @logger.log_func_call()
     def name(self):
         return 'Random Walk Agent'
 

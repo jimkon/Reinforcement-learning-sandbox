@@ -49,7 +49,11 @@ def generate_markdown_from_logs(tags=None):
 
     df = pd.concat(dfs).sort_values(by='timestamp')
 
-    file_str = '   \n'.join(df['message'].to_list())
+    df['tags'] = df['tags'].fillna('general')
+
+    df_md_conv = __convert_logs_for_markdown(df)
+
+    file_str = '   \n'.join(df_md_conv['message'].to_list())
 
     markdown_abspath = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, LOG_HTML_DIR_PATH)+"/report.md"
 
@@ -59,6 +63,22 @@ def generate_markdown_from_logs(tags=None):
     return markdown_abspath
 
 
-if __name__=="__main__":
+def __convert_logs_for_markdown(df):
+    df = df.copy()
+    __apply_str_func_to_tag(df, 'markdown_image', lambda s: f"![]({s})")
+    __apply_str_func_to_tag(df, 'markdown_heading', lambda s: f"### {s}")
+
+    return df
+
+
+def __apply_str_func_to_tag(df, tag, func):
+    indx = df['tags'].str.contains(tag)
+    n = indx.sum()
+    if n > 0:
+        t = df.loc[indx, 'message'].apply(func)
+        df.loc[indx, 'message'] = t
+    return n
+
+if __name__ == "__main__":
     fpath = generate_markdown_from_logs()
     markdown_to_html(fpath)
