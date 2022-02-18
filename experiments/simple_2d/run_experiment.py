@@ -20,17 +20,5 @@ def run_experiment():
     save_loggers()
 
 if __name__ == "__main__":
-    # import cProfile, pstats, io
-    # from pstats import SortKey
-    #
-    # pr = cProfile.Profile()
-    # pr.enable()
-    # run_experiment()
-    # pr.disable()
-    # s = io.StringIO()
-    # sortby = SortKey.CUMULATIVE
-    # # sortby = SortKey.TIME
-    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    # ps.print_stats()
-    # print(s.getvalue())
+
     run_experiment()
