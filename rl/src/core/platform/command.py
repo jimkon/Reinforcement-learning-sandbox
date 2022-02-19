@@ -1,4 +1,12 @@
 
+def run_command(command):
+    try:
+        command.__input()
+        command.__run()
+        command.__output()
+    except Exception as e:
+        pass
+
 
 # task decorator (celery or aws)
 class AbstractCommand:
