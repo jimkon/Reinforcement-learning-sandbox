@@ -5,7 +5,9 @@
 * Add learning to my agent
 
 ### Platform
-* structure project as commands (run experiment, set experiments, enrich results, aggregate/process result)
+* structure project around commands
+  * commands (run experiment, set experiments, enrich results, aggregate/process result)
+  * run script
 * Introduce Celery to run the tasks
 * AWS
 
