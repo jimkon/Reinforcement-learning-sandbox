@@ -131,7 +131,7 @@ class Logger:
 
                 result = func(*args, **kwargs)
                 end_time = _time()
-                run_time = (end_time - start_time)/1000000
+                run_time = (end_time - start_time)/1000000#TODO config 's'|'ms'|'us'
                 result_str = repr(result).replace('\n', '')
                 self.log(f"Called: {func.__name__}( {signature} ) -> |{result_str!r}| in {run_time:.3f} ms", tags=tags)
                 self.log(f"Function:{func.__name__} Time:{run_time}", tags="run_time")  #
