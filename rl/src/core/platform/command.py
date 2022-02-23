@@ -1,7 +1,3 @@
-from configparser import ConfigParser
-
-from rl.src.core.logging import Logger
-from rl.src.core.utilities.profiling import cprofile
 from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
                                             CPROFILE_COMMAND_EXECUTION_FLAG, \
                                             EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
@@ -36,25 +32,17 @@ def run_command(command):
 # task decorator (celery or aws)
 class AbstractCommand:
 
-    alias = None
-    logger = Logger(f"Command {alias}")
-
-    @logger.log_func_call() #TODO
     def __init__(self, input_dir, output_dir):
         # TODO instantiate on-demand file loaders
         pass
 
-    @logger.log_func_call()
     def input(self):
         #TODO read input files
         pass
 
-    @cprofile
-    @logger.log_func_call()
     def run(self):
         pass
 
-    @logger.log_func_call()
     def output(self):
         #TODO write output to files
         pass
