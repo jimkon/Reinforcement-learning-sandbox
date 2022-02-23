@@ -25,9 +25,9 @@ def run_command(command):
     try:
         input_dir, output_dir = get_configs_for_command(command.alias)
         cmd_obj = command(input_dir, output_dir)
-        cmd_obj._input()
-        cmd_obj._run()
-        cmd_obj._output()
+        cmd_obj.input()
+        cmd_obj.run()
+        cmd_obj.output()
     except Exception as e:
         print(e)
         pass
