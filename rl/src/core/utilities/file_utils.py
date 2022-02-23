@@ -19,8 +19,10 @@ def create_path(path):
         makedirs(path)
 
 
-def unique_string():
-    return uuid.uuid4().hex[:UNIQUE_STRING_LENGHT].upper()
+def unique_string(length=None):
+    if length is None:
+        length = UNIQUE_STRING_LENGHT
+    return uuid.uuid4().hex[:length].upper()
 
 
 def markdown_to_html(abspath):
