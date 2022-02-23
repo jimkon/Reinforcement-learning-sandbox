@@ -10,6 +10,9 @@ class RunEpisodeCommand(AbstractCommand):
     alias = 're'
     logger = Logger(f"Command {alias}")
 
+    def input(self):
+        self.read_file('run_parameters')
+
     @cprofile
     @logger.log_func_call()
     def run(self):

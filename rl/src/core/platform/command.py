@@ -1,7 +1,9 @@
+from os.path import splitext, join
+
 from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
                                             CPROFILE_COMMAND_EXECUTION_FLAG, \
                                             EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
-
+from rl.src.core.utilities.file_utils import read_json_file
 
 def get_configs_for_command(command):
     #TODO enable multiple comfigs for different commands
@@ -27,8 +29,18 @@ def run_command(command):
 class AbstractCommand:
 
     def __init__(self, input_dir, output_dir):
-        # TODO instantiate on-demand file loaders
+        self.__input_dir = join(EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH, input_dir)
+        self.__output_dir = join(EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH, output_dir)
+
         pass
+
+    @property
+    def input_dir(self):
+        return self.__input_dir
+
+    @property
+    def output_dir(self):
+        return self.__output_dir
 
     def input(self):
         #TODO read input files
@@ -43,3 +55,21 @@ class AbstractCommand:
 
     def __repr__(self):
         return str(self.__class__)
+
+    def read_file(self, file):
+        filename, ext = splitext(file)
+        ext = ext[1:] if len(ext) > 1 else None
+        abspath = join(self.__input_dir, file)
+        result = None
+        if ext is None:
+            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+        elif ext == 'json':
+            read_json_file(abspath)
+        elif ext == 'csv':
+            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+        elif ext == 'txt':
+            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+        else:
+            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+
+        return result

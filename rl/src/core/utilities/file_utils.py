@@ -1,6 +1,7 @@
 from os import makedirs, listdir
 from os.path import exists, split, splitext, join
 import uuid
+import json
 
 import pandas as pd
 from markdown import markdown
@@ -78,6 +79,12 @@ def __apply_str_func_to_tag(df, tag, func):
         t = df.loc[indx, 'message'].apply(func)
         df.loc[indx, 'message'] = t
     return n
+
+
+def read_json_file(file):
+    with open(file, 'r') as f:
+        return json.load(f)
+
 
 if __name__ == "__main__":
     fpath = generate_markdown_from_logs()
