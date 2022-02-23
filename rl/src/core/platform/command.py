@@ -1,5 +1,7 @@
 from os.path import splitext, join
 
+import pandas as pd
+
 from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
                                             CPROFILE_COMMAND_EXECUTION_FLAG, \
                                             EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
@@ -72,3 +74,8 @@ class AbstractCommand:
             raise ValueError(f"Not recognized file {file}. Extension: {ext}")
 
         return result
+
+    def write_to_file(self, file):
+        # if isinstance(file, pd.DataFrame):
+        #     df.to_csv(filepath, index=False)
+        pass

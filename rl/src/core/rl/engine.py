@@ -139,17 +139,6 @@ def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_r
     if experiment_name is None:
         experiment_name = f"{agent.name()}_{__env_name_to_table(str(env))}"
 
-    # store_results = store_results if store_results else DEFAULT_STORE_RESULTS_OBJECT
-    # if store_results == 'database':
-    #     store_results_obj = StoreResultsInDatabase(experiment_name=experiment_name,
-    #                                                to_table=__env_name_to_table(str(env)),
-    #                                                agent_id=agent.name(),
-    #                                                env_id=str(env))
-    # elif store_results == 'dataframe':
-    #     store_results_obj = StoreResultsInDataframe(experiment_name=experiment_name)
-    # else:
-    #     store_results_obj = store_results
-
     res_dict = {col: [] for col in DATA_COLUMNS}
     start_time, duration_secs = None, None
     start_time_str = timestamp_str()

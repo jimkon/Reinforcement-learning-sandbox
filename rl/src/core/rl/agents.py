@@ -1,4 +1,13 @@
+
+def get_agent(agent_name):
+    for agent in AbstractAgent.agents:
+        if agent.name() == agent_name:
+            return agent
+
+
 class AbstractAgent:
+
+    agents = []
 
     def set_env(self, env):
         pass

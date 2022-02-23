@@ -4,8 +4,16 @@ import gym
 from functools import lru_cache
 from collections.abc import Iterable
 
+def get_env(env_name):
+    for env in AbstractEnv.envs:
+        if env.name() == env_name:
+            return env
+
 
 class AbstractEnv:
+
+    envs = []
+
     def reset(self):
         raise NotImplementedError
 
@@ -16,7 +24,7 @@ class AbstractEnv:
         pass
 
 
-
+# TODO redo envwrapper
 class EnvWrapper:
     def __init__(self, env):
         raise NotImplementedError
