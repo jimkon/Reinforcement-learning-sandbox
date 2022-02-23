@@ -14,15 +14,15 @@ def get_configs_for_command(command):
 
 
 def run_command(command):
-    try:
-        input_dir, output_dir = get_configs_for_command(command.alias)
-        cmd_obj = command(input_dir, output_dir)
-        cmd_obj.input()
-        cmd_obj.run()
-        cmd_obj.output()
-    except Exception as e:
-        print(e)
-        pass
+    # try:
+    input_dir, output_dir = get_configs_for_command(command.alias)
+    cmd_obj = command(input_dir, output_dir)
+    cmd_obj.input()
+    cmd_obj.run()
+    cmd_obj.output()
+    # except Exception as e:
+    #     print(e)
+    #     pass
 
 
 # task decorator (celery or aws)
@@ -60,16 +60,15 @@ class AbstractCommand:
         filename, ext = splitext(file)
         ext = ext[1:] if len(ext) > 1 else None
         abspath = join(self.__input_dir, file)
-        result = None
         if ext is None:
-            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+            raise ValueError(f"Not recognized file {file}. Extension: {ext}")
         elif ext == 'json':
-            read_json_file(abspath)
+            result = read_json_file(abspath)
         elif ext == 'csv':
-            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+            raise ValueError(f"Not recognized file {file}. Extension: {ext}")
         elif ext == 'txt':
-            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+            raise ValueError(f"Not recognized file {file}. Extension: {ext}")
         else:
-            raise ValueError(f"Not recognized files {file}. Extension: {ext}")
+            raise ValueError(f"Not recognized file {file}. Extension: {ext}")
 
         return result
