@@ -16,5 +16,3 @@ class RunEpisodeCommand(AbstractCommand):
         print('RUN re')
 
 
-# if __name__=="__main__":
-#     RunEpisodeCommand()

@@ -2,12 +2,6 @@ from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
                                             CPROFILE_COMMAND_EXECUTION_FLAG, \
                                             EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
 
-#
-# def read_run_configs(config_path=None):
-#     configs = ConfigParser()
-#     configs.read(RUN_CONFIGS_ABSPATH if config_path is None else config_path)
-#     return configs
-
 
 def get_configs_for_command(command):
     #TODO enable multiple comfigs for different commands

@@ -6,6 +6,12 @@ from rl.src.core.platform.command import run_command
 from rl.src.core.logging import log
 
 
+# def read_run_configs(config_path=None):
+#     configs = ConfigParser()
+#     configs.read(RUN_CONFIGS_ABSPATH if config_path is None else config_path)
+#     return configs
+
+
 def read_args():
     all_cmds_str = [cmd.alias for cmd in COMMANDS]
 
@@ -22,7 +28,7 @@ def main():
     args = read_args()
     # args = process_args(args, configs)
 
-    log(f"run args {args}")
+    log(f"Run args {args}")
 
     command = get_command(args['command'])
 

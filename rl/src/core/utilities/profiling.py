@@ -4,9 +4,8 @@ from pstats import SortKey
 
 from rl.src.core.logging import log
 
-from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
-    CPROFILE_COMMAND_EXECUTION_FLAG,\
-    EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH
+from rl.src.core.configs.general_configs import EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH,\
+    CPROFILE_COMMAND_EXECUTION_FLAG
 
 
 def cprofile(func):
