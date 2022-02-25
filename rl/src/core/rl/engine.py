@@ -62,7 +62,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
     n_actions = None
 
     if verbosity == 1:
-        _iter = tqdm(range(n_episodes), f"Agent {agent.name()} execution in {str(env)} environment")
+        _iter = tqdm(range(n_episodes), f"Agent {agent.name} execution in {str(env)} environment")
     else:
         _iter = range(n_episodes)
 
@@ -121,7 +121,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
         if verbosity >= 3:
             avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
             log (
-                f"Agent {agent.name()} completed the episode {episode}. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}",
+                f"Agent {agent.name} completed the episode {episode}. Steps {step}, Total reward {episode_reward}, rolling avg reward(10%) {avg_rewards:.02f}",
                 tags='markdown_heading3')
 
     elapsed_time = time.time() - start_time
@@ -129,7 +129,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
         episode += 1
         avg_rewards = np.mean(episode_rewards[int(0.1 * len(episode_rewards)):])
         log (
-            f"Agent {agent.name()} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}",
+            f"Agent {agent.name} completed {episode} episodes in {elapsed_time:.02f} seconds in {str(env)}. Total reward {total_reward} (avg ep. reward(100%) {total_reward / episode}, rolling avg ep. reward(10%) {avg_rewards:.02f}). Steps {total_steps}",
             tags='markdown_heading3')
 
     return storage_dict
@@ -137,7 +137,7 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
 
 def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_results_func=None, verbosity='progress'):
     if experiment_name is None:
-        experiment_name = f"{agent.name()}_{__env_name_to_table(str(env))}"
+        experiment_name = f"{agent.name}_{__env_name_to_table(str(env))}"
 
     res_dict = {col: [] for col in DATA_COLUMNS}
     start_time, duration_secs = None, None

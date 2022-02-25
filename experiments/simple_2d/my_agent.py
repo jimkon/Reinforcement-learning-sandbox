@@ -1,4 +1,4 @@
-from rl.src.core.rl.agents import AbstractAgent
+from rl.src.core.rl.agent import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.alphastar import solve, get_path
 from rl.src.core.logging import Logger
@@ -94,15 +94,14 @@ class MyAgent_Abstract_SE_POC(AbstractAgent):
 
 class MyAgent_Greedy_SE_POC(MyAgent_Abstract_SE_POC):
 
+    name = 'my_greedy_POC_agent'
+
     def act(self, state):
         next_states, actions = self.transitions(state)
         rewards = [self.reward(next_state) for next_state in next_states]
         index = np.argmax(rewards)
         res_action = actions[index]
         return res_action
-
-    def name(self):
-        return 'my_greedy_POC_agent'
 
 
 class MyAgent_Abstract_PathPlanning_POC(MyAgent_Abstract_SE_POC):

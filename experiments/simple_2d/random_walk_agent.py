@@ -1,6 +1,6 @@
 import random
 
-from rl.src.core.rl.agents import AbstractAgent
+from rl.src.core.rl.agent import AbstractAgent
 from rl.src.core.logging import Logger
 
 DIR = [

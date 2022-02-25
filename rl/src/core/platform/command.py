@@ -7,6 +7,7 @@ from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
                                             EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
 from rl.src.core.utilities.file_utils import read_json_file
 
+
 def get_configs_for_command(command):
     #TODO enable multiple comfigs for different commands
     # configs = read_run_configs()
@@ -16,7 +17,7 @@ def get_configs_for_command(command):
 
 
 def run_command(command):
-    # try:
+    # try: TODO
     input_dir, output_dir = get_configs_for_command(command.alias)
     cmd_obj = command(input_dir, output_dir)
     cmd_obj.input()
@@ -75,7 +76,6 @@ class AbstractCommand:
 
         return result
 
-    def write_to_file(self, file):
-        # if isinstance(file, pd.DataFrame):
-        #     df.to_csv(filepath, index=False)
-        pass
+    def write_to_file(self, data, filename):
+        if isinstance(data, pd.DataFrame):
+            data.to_csv(join(self.__output_dir, filename), index=False)

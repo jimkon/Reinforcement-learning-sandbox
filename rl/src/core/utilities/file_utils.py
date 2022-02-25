@@ -25,6 +25,10 @@ def unique_string(length=None):
     return uuid.uuid4().hex[:length].upper()
 
 
+def date_unique_string(length=None):
+    unique_s = unique_string(length)
+
+
 def markdown_to_html(abspath):
     with open(abspath, "r", encoding="utf-8") as input_file:
         text = input_file.read()

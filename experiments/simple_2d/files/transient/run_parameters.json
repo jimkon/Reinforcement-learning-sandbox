@@ -1,0 +1,10 @@
+{
+  "agent_name": "my_greedy_POC_agent",
+  "agent_params": {},
+  "env_name": "SimpleEnv",
+  "env_params": {},
+  "run_kwargs": {
+    "n_episodes": 3
+  },
+  "n_repeat": 2
+}

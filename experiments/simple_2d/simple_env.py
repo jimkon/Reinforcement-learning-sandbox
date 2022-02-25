@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from perlin_noise import PerlinNoise
 
-from rl.src.core.rl.envs import AbstractEnv
+from rl.src.core.rl.env import AbstractEnv
 from rl.src.core.logging import Logger
 
 
@@ -30,6 +30,8 @@ logger = Logger('simple_env')
 
 
 class SimpleEnv(AbstractEnv):
+
+    name = 'SimpleEnv'
 
     def __init__(self):
         self.width, self.height = DEFAULT_MAP_WIDTH, DEFAULT_MAP_HEIGHT
@@ -111,6 +113,6 @@ class SimpleEnv(AbstractEnv):
         cv2.waitKey(approx_wait_time)
 
     def __repr__(self):
-        return "SimpleEnv"
+        return self.__class__
 
 
