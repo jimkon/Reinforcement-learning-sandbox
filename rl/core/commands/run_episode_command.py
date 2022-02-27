@@ -1,5 +1,3 @@
-import pandas as pd
-
 from rl.core.configs.path_confgis import EXPERIMENT_EXP_INPUTS_DIRECTORY_ABSPATH, \
     EXPERIMENT_DATAFRAMES_DIRECTORY_ABSPATH
 from rl.core.platform.command import AbstractCommand
@@ -11,8 +9,7 @@ from rl.core.rl.engine import run_episodes
 from rl.core.utilities.timestamp import timestamp_unique_str
 from rl.core.storage.storage import data_to_df
 
-# TODO
-# execute experiment
+
 class RunEpisodeCommand(AbstractCommand):
 
     alias = 're'
@@ -45,11 +42,10 @@ class RunEpisodeCommand(AbstractCommand):
                                 #storage_dict=res_dict,
                                 render=False
                                 )
-            self.res_dict[exp_id] = res
+            self.res_dict[exp_id] = data_to_df(res)
 
     def output(self):
-        for key, data in self.res_dict.items():
-            df = pd.DataFrame(data_to_df(data))
+        for key, df in self.res_dict.items():
             self.write_to_file(df, f"{key}.csv")
 
 

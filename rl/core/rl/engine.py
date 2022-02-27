@@ -5,7 +5,6 @@ import numpy as np
 
 from rl.core.utilities.logging import log
 from rl.core.utilities.timestamp import timestamp_str
-from rl.core.storage.storage import store_results_as_dataframe, store_results_in_database
 from rl.core.configs.storage_configs import DATA_COLUMNS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_EPISODES,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_STEPS,\
@@ -134,38 +133,38 @@ def run_episodes(env, agent, n_episodes, storage_dict=None, render=False, verbos
 
     return storage_dict
 
-
-def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_results_func=None, verbosity='progress'):
-    if experiment_name is None:
-        experiment_name = f"{agent.name}_{__env_name_to_table(str(env))}"
-
-    res_dict = {col: [] for col in DATA_COLUMNS}
-    start_time, duration_secs = None, None
-    start_time_str = timestamp_str()
-    try:
-        start_time = time.time()
-        res_dict = run_episodes(env,
-                                agent,
-                                n_episodes,
-                                storage_dict=res_dict,
-                                render=False,
-                                verbosity=verbosity)
-        duration_secs = time.time()-start_time
-    except Exception as e:
-        pass
-    finally:
-        if store_results_func is None:
-            pass
-        elif store_results_func.lower() == 'dataframe':
-            store_results_as_dataframe(res_dict,
-                                       name=experiment_name)
-        elif store_results_func.lower() == 'database':
-            store_results_in_database(res_dict,
-                                      to_table=__env_name_to_table(str(env)),
-                                      experiment_id=experiment_name,
-                                      agent_id=agent.name(),
-                                      env_id=str(env),
-                                      start_time=start_time_str,
-                                      duration_secs=duration_secs,
-                                      comment=None)
+# TODO DELETE
+# def run_and_store_episodes(env, agent, n_episodes, experiment_name=None, store_results_func=None, verbosity='progress'):
+#     if experiment_name is None:
+#         experiment_name = f"{agent.name}_{__env_name_to_table(str(env))}"
+#
+#     res_dict = {col: [] for col in DATA_COLUMNS}
+#     start_time, duration_secs = None, None
+#     start_time_str = timestamp_str()
+#     try:
+#         start_time = time.time()
+#         res_dict = run_episodes(env,
+#                                 agent,
+#                                 n_episodes,
+#                                 storage_dict=res_dict,
+#                                 render=False,
+#                                 verbosity=verbosity)
+#         duration_secs = time.time()-start_time
+#     except Exception as e:
+#         pass
+#     finally:
+#         if store_results_func is None:
+#             pass
+#         elif store_results_func.lower() == 'dataframe':
+#             store_results_as_dataframe(res_dict,
+#                                        name=experiment_name)
+#         elif store_results_func.lower() == 'database':
+#             store_results_in_database(res_dict,
+#                                       to_table=__env_name_to_table(str(env)),
+#                                       experiment_id=experiment_name,
+#                                       agent_id=agent.name(),
+#                                       env_id=str(env),
+#                                       start_time=start_time_str,
+#                                       duration_secs=duration_secs,
+#                                       comment=None)
 

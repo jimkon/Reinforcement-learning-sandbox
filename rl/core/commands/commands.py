@@ -1,7 +1,9 @@
 from rl.core.commands.run_episode_command import RunEpisodeCommand
+from rl.core.commands.process_results import ProcessResultsCommand
 
 COMMANDS = [
-    RunEpisodeCommand
+    RunEpisodeCommand,
+    ProcessResultsCommand
 ]
 
 

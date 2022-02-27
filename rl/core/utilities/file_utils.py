@@ -92,6 +92,12 @@ def read_json_file(file):
         return json.load(f)
 
 
-if __name__ == "__main__":
-    fpath = generate_markdown_from_logs()
-    markdown_to_html(fpath)
+def store_df(df, abspath):
+    df.to_csv(abspath, index=False)
+
+
+def read_df(abspath):
+    df = pd.read_csv(abspath, index_col=None)
+    # TODO maybe consume the file after reading it
+    return df
+
