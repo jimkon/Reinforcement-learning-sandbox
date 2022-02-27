@@ -1,9 +1,10 @@
+from os import listdir
 from os.path import splitext, join
 
 import pandas as pd
 
 from rl.core.configs.path_confgis import EXPERIMENT_ROOT_ABSPATH
-from rl.core.utilities.file_utils import read_json_file
+from rl.core.utilities.file_utils import read_json_file, store_df, read_df
 
 
 # def get_configs_for_command(command):
@@ -44,6 +45,9 @@ class AbstractCommand:
         return self.__output_dir
 
     def input(self):
+        """
+        only file input operations (read/load/etc)
+        """
         #TODO read input files
         pass
 
@@ -51,13 +55,19 @@ class AbstractCommand:
         pass
 
     def output(self):
+        """
+        only file output operations (write/upload to db/etc)
+        """
         #TODO write output to files
         pass
 
     def __repr__(self):
         return str(self.__class__)
 
-    def read_file(self, file):
+    def read_file(self, file=None):
+        if file is None:
+            return listdir(self.__input_dir)
+
         filename, ext = splitext(file)
         ext = ext[1:] if len(ext) > 1 else None
         abspath = join(self.__input_dir, file)
@@ -66,7 +76,7 @@ class AbstractCommand:
         elif ext == 'json':
             result = read_json_file(abspath)
         elif ext == 'csv':
-            raise ValueError(f"Not recognized file {file}. Extension: {ext}")
+            result = read_df(abspath)
         elif ext == 'txt':
             raise ValueError(f"Not recognized file {file}. Extension: {ext}")
         else:
@@ -76,6 +86,11 @@ class AbstractCommand:
 
     def write_to_file(self, data, filename):
         if isinstance(data, pd.DataFrame):
-            data.to_csv(join(self.__output_dir, filename), index=False)
+            abspath = join(self.__output_dir, filename)
+            store_df(data, abspath)
         else:
             raise ValueError(f"Not recognized data type {type(data)}. end file: {filename}")
+
+    def clean_file(self, abspath):
+        # TODO append filename to be cleaned after execution
+        pass
