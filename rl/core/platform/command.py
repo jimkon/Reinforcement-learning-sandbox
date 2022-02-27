@@ -77,3 +77,5 @@ class AbstractCommand:
     def write_to_file(self, data, filename):
         if isinstance(data, pd.DataFrame):
             data.to_csv(join(self.__output_dir, filename), index=False)
+        else:
+            raise ValueError(f"Not recognized data type {type(data)}. end file: {filename}")
