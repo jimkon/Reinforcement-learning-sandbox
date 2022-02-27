@@ -17,7 +17,6 @@
 * np_cache decorator (my implementation)
 * log_plt part of log_image 
 * cProfile stats to csv
-* filesystem
-  * move paths out of general configs and change structure (remove default ones)
+
 
 ### Other
