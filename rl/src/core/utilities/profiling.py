@@ -23,11 +23,14 @@ def cprofile(func):
             sortby = SortKey.CUMULATIVE
             # sortby = SortKey.TIME
             ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+
             file = EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.txt"
-            with open(file, 'a') as f:
-                ps.print_stats()
-                f.write(s.getvalue())
-                log(f"CProfiled {func.__name__}, results in {file}")
+            ps.dump_stats(file)
+            log(f"CProfiled {func.__name__}, results in {file}")
+            # with open(file, 'a') as f:
+            #     ps.print_stats()
+            #     f.write(s.getvalue())
+            #     log(f"CProfiled {func.__name__}, results in {file}")
 
         return res
 
