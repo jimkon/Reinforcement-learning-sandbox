@@ -3,13 +3,11 @@ import pandas as pd
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 
-from rl.core.configs.general_configs import EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
-from rl.core.utilities.file_utils import create_path
+from rl.core.configs.path_confgis import EXPERIMENT_DATABASE_OBJECT_ABSPATH
 
 
 def __get_engine():
-    db_path = EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
-    create_path(EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH)
+    db_path = EXPERIMENT_DATABASE_OBJECT_ABSPATH
 
     engine = create_engine('sqlite:///'+db_path, echo=False)
 

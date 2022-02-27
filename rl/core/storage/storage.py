@@ -10,10 +10,9 @@ from rl.core.configs.storage_configs import DB_EXPERIMENT_TABLE_NAME_COL_EXPID,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_REWARDS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_DONE
 
-from rl.core.configs.general_configs import EXPERIMENT_STORE_DATAFRAMES_DIRECTORY_ABSPATH
+from rl.core.configs.path_confgis import EXPERIMENT_DATAFRAMES_DIRECTORY_ABSPATH
 
 from rl.core.utilities.timestamp import timestamp_str, timestamp_long_str
-from rl.core.utilities.file_utils import create_path
 from rl.core.storage.db import upload_df_in_db,\
                                     exp_id_already_exists,\
                                     add_experiment_info
@@ -100,8 +99,7 @@ def data_to_df(results_dict):
 
 
 def store_dataframe(df, name):
-    path_to_file = join(EXPERIMENT_STORE_DATAFRAMES_DIRECTORY_ABSPATH)
-    create_path(path_to_file)
+    path_to_file = join(EXPERIMENT_DATAFRAMES_DIRECTORY_ABSPATH)
 
     filepath = _generate_df_filename(path_to_file, name)
 

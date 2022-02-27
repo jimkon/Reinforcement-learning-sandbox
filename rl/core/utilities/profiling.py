@@ -4,8 +4,8 @@ from pstats import SortKey
 
 from rl.core.utilities.logging import log
 
-from rl.core.configs.general_configs import EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH,\
-    CPROFILE_COMMAND_EXECUTION_FLAG
+from rl.core.configs.path_confgis import EXPERIMENT_PERFMONITORING_DIRECTORY_ABSPATH
+from rl.core.configs.general_configs import CPROFILE_COMMAND_EXECUTION_FLAG
 
 
 def cprofile(func):
@@ -25,7 +25,7 @@ def cprofile(func):
             ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
             #snakeviz ./cprofile.prof
-            file = EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.prof"
+            file = EXPERIMENT_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.prof"
             ps.dump_stats(file)
             log(f"CProfiled {func.__name__}, results in {file}")
             # with open(file, 'a') as f:

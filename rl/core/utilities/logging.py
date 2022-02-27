@@ -7,8 +7,8 @@ import pandas as pd
 import cv2
 
 from rl.core.configs.log_configs import *
-from rl.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
-from rl.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
+from rl.core.configs.path_confgis import *
+from rl.core.utilities.file_utils import generate_markdown_from_logs, markdown_to_html
 from rl.core.utilities.timestamp import timestamp_long_str, timestamp_unique_str
 
 
@@ -28,7 +28,7 @@ class Logger:
 
         self.name = name
         self.directory = directory if directory else ''
-        self.path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, self.directory)
+        self.path = join(EXPERIMENT_LOGS_DIRECTORY_ABSPATH, self.directory)
 
         create_path(self.path)
 

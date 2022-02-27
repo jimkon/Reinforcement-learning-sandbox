@@ -7,16 +7,16 @@ import pandas as pd
 from markdown import markdown
 
 from rl.core.configs.storage_configs import UNIQUE_STRING_LENGHT
-from rl.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
+from rl.core.configs.path_confgis import EXPERIMENT_LOGS_DIRECTORY_ABSPATH
 from rl.core.configs.log_configs import LOG_CSV_DIR_PATH, LOG_HTML_DIR_PATH
 
 
-def create_path(path):
-    if "." in path:
-        path = split(path)[0]
-
-    if not exists(path):
-        makedirs(path)
+# def create_path(path):
+#     if "." in path:
+#         path = split(path)[0]
+#
+#     if not exists(path):
+#         makedirs(path)
 
 
 def unique_string(length=None):
@@ -48,7 +48,7 @@ def markdown_to_html(abspath):
 
 
 def generate_markdown_from_logs(tags=None):
-    logs_dir_path = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, LOG_CSV_DIR_PATH)
+    logs_dir_path = join(EXPERIMENT_LOGS_DIRECTORY_ABSPATH, LOG_CSV_DIR_PATH)
     files = listdir(logs_dir_path)
     files_abspath = [join(logs_dir_path, file) for file in files]
 
@@ -62,7 +62,7 @@ def generate_markdown_from_logs(tags=None):
 
     file_str = '   \n'.join(df_md_conv['message'].to_list())
 
-    markdown_abspath = join(EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH, LOG_HTML_DIR_PATH)+"/report.md"
+    markdown_abspath = join(EXPERIMENT_LOGS_DIRECTORY_ABSPATH, LOG_HTML_DIR_PATH)+"/report.md"
 
     with open(markdown_abspath, "w", encoding="utf-8") as output_file:
         output_file.write(file_str)
