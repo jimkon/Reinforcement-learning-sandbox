@@ -16,6 +16,6 @@
 * convert configs to enums
 * np_cache decorator (my implementation)
 * log_plt part of log_image 
-
+* cprofile: change name of result file for each func
 
 ### Other

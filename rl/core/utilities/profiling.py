@@ -27,6 +27,7 @@ def cprofile(func):
             #snakeviz ./cprofile.prof
             file = EXPERIMENT_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.prof"
             ps.dump_stats(file)
+            # TODO change name of result file for each func
             log(f"CProfiled {func.__name__}, results in {file}")
             # with open(file, 'a') as f:
             #     ps.print_stats()
