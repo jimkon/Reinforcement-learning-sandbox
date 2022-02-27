@@ -1,5 +1,7 @@
 import pandas as pd
 
+from rl.core.configs.path_confgis import EXPERIMENT_EXP_INPUTS_DIRECTORY_ABSPATH, \
+    EXPERIMENT_DATAFRAMES_DIRECTORY_ABSPATH
 from rl.core.platform.command import AbstractCommand
 from rl.core.utilities.profiling import cprofile
 from rl.core.utilities.logging import Logger
@@ -15,6 +17,10 @@ class RunEpisodeCommand(AbstractCommand):
 
     alias = 're'
     logger = Logger(f"Command {alias}")
+
+    def __init__(self):
+        super().__init__(input_dir=EXPERIMENT_EXP_INPUTS_DIRECTORY_ABSPATH,
+                         output_dir=EXPERIMENT_DATAFRAMES_DIRECTORY_ABSPATH)
 
     def input(self):
         run_params = self.read_file('run_parameters.json')

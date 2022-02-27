@@ -2,22 +2,23 @@ from os.path import splitext, join
 
 import pandas as pd
 
-from rl.core.configs.path_confgis import EXPERIMENT_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
+from rl.core.configs.path_confgis import EXPERIMENT_ROOT_ABSPATH
 from rl.core.utilities.file_utils import read_json_file
 
 
-def get_configs_for_command(command):
-    #TODO enable multiple comfigs for different commands
-    # configs = read_run_configs()
-    path = EXPERIMENT_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
-    input_dir, output_dir = path, path
-    return input_dir, output_dir
+# def get_configs_for_command(command):
+#     #TODO enable multiple comfigs for different commands
+#     # configs = read_run_configs()
+#     path = EXPERIMENT_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
+#     input_dir, output_dir = path, path
+#     return input_dir, output_dir
 
 
 def run_command(command):
     # try: TODO
-    input_dir, output_dir = get_configs_for_command(command.alias)
-    cmd_obj = command(input_dir, output_dir)
+    # input_dir, output_dir = get_configs_for_command(command.alias)
+    # cmd_obj = command(input_dir, output_dir)
+    cmd_obj = command()
     cmd_obj.input()
     cmd_obj.run()
     cmd_obj.output()
@@ -30,9 +31,8 @@ def run_command(command):
 class AbstractCommand:
 
     def __init__(self, input_dir, output_dir):
-        self.__input_dir = join(EXPERIMENT_INPUTS_OUTPUTS_DIRECTORY_ABSPATH, input_dir)
-        self.__output_dir = join(EXPERIMENT_INPUTS_OUTPUTS_DIRECTORY_ABSPATH, output_dir)
-
+        self.__input_dir = join(EXPERIMENT_ROOT_ABSPATH, input_dir)
+        self.__output_dir = join(EXPERIMENT_ROOT_ABSPATH, output_dir)
         pass
 
     @property
