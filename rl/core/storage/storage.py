@@ -2,21 +2,19 @@ from os.path import join, exists
 
 import pandas as pd
 
-from rl.src.core.configs.storage_configs import DB_EXPERIMENT_TABLE_NAME_COL_EXPID,\
+from rl.core.configs.storage_configs import DB_EXPERIMENT_TABLE_NAME_COL_EXPID,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_EPISODES,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_STEPS,\
-                                        DB_EXPERIMENT_TABLE_NAME_COL_STATES,\
-                                        DB_EXPERIMENT_TABLE_NAME_COL_NEXTSTATES,\
-                                        DB_EXPERIMENT_TABLE_NAME_COL_ACTIONS,\
+                                        DB_EXPERIMENT_TABLE_NAME_COL_STATES, \
+    DB_EXPERIMENT_TABLE_NAME_COL_ACTIONS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_REWARDS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_DONE
 
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_DATAFRAMES_DIRECTORY_ABSPATH,\
-                                                STORE_COMPRESSED_DATA
+from rl.core.configs.general_configs import EXPERIMENT_STORE_DATAFRAMES_DIRECTORY_ABSPATH
 
-from rl.src.core.utilities.timestamp import timestamp_str, timestamp_long_str
-from rl.src.core.utilities.file_utils import create_path
-from rl.src.core.storage.db import upload_df_in_db,\
+from rl.core.utilities.timestamp import timestamp_str, timestamp_long_str
+from rl.core.utilities.file_utils import create_path
+from rl.core.storage.db import upload_df_in_db,\
                                     exp_id_already_exists,\
                                     add_experiment_info
 

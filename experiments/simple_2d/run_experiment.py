@@ -1,5 +1,5 @@
-from rl.src.core.rl.engine import run_episodes
-from rl.src.core.logging import save_loggers
+from rl.core.rl.engine import run_episodes
+from rl.core.utilities.logging import save_loggers
 
 from experiments.simple_2d.my_agent import *
 

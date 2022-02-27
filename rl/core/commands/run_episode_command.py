@@ -1,13 +1,13 @@
 import pandas as pd
 
-from rl.src.core.platform.command import AbstractCommand
-from rl.src.core.utilities.profiling import cprofile
-from rl.src.core.logging import Logger
-from rl.src.core.rl.agents import get_agent
-from rl.src.core.rl.envs import get_env
-from rl.src.core.rl.engine import run_episodes
-from rl.src.core.utilities.timestamp import timestamp_unique_str
-from rl.src.core.storage.storage import data_to_df
+from rl.core.platform.command import AbstractCommand
+from rl.core.utilities.profiling import cprofile
+from rl.core.utilities.logging import Logger
+from rl.core.rl.agents import get_agent
+from rl.core.rl.envs import get_env
+from rl.core.rl.engine import run_episodes
+from rl.core.utilities.timestamp import timestamp_unique_str
+from rl.core.storage.storage import data_to_df
 
 # TODO
 # execute experiment

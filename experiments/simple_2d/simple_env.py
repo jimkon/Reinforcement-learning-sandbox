@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 from perlin_noise import PerlinNoise
 
-from rl.src.core.rl.env import AbstractEnv
-from rl.src.core.logging import Logger
+from rl.core.rl.env import AbstractEnv
+from rl.core.utilities.logging import Logger
 
 
 def perlin_map(width=100, height=100, octaves=3, seed=6):

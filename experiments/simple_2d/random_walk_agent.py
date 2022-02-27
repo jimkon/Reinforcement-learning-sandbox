@@ -1,7 +1,7 @@
 import random
 
-from rl.src.core.rl.agent import AbstractAgent
-from rl.src.core.logging import Logger
+from rl.core.rl.agent import AbstractAgent
+from rl.core.utilities.logging import Logger
 
 DIR = [
         [-1, 1],

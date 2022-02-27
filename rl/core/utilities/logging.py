@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 import cv2
 
-from rl.src.core.configs.log_configs import *
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
-from rl.src.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
-from rl.src.core.utilities.timestamp import timestamp_long_str, timestamp_unique_str
+from rl.core.configs.log_configs import *
+from rl.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
+from rl.core.utilities.file_utils import create_path, generate_markdown_from_logs, markdown_to_html
+from rl.core.utilities.timestamp import timestamp_long_str, timestamp_unique_str
 
 
 def _time():

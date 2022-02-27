@@ -1,7 +1,7 @@
-from rl.src.core.rl.agent import AbstractAgent
+from rl.core.rl.agent import AbstractAgent
 from experiments.simple_2d.simple_env import *
 from experiments.simple_2d.alphastar import solve, get_path
-from rl.src.core.logging import Logger
+from rl.core.utilities.logging import Logger
 
 logger = Logger('my_agent')
 

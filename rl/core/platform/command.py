@@ -2,10 +2,8 @@ from os.path import splitext, join
 
 import pandas as pd
 
-from rl.src.core.configs.general_configs import RUN_CONFIGS_ABSPATH,\
-                                            CPROFILE_COMMAND_EXECUTION_FLAG, \
-                                            EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
-from rl.src.core.utilities.file_utils import read_json_file
+from rl.core.configs.general_configs import EXPERIMENT_STORE_INPUTS_OUTPUTS_DIRECTORY_ABSPATH
+from rl.core.utilities.file_utils import read_json_file
 
 
 def get_configs_for_command(command):

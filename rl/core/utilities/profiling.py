@@ -2,9 +2,9 @@ from functools import wraps
 import cProfile, pstats, io
 from pstats import SortKey
 
-from rl.src.core.logging import log
+from rl.core.utilities.logging import log
 
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH,\
+from rl.core.configs.general_configs import EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH,\
     CPROFILE_COMMAND_EXECUTION_FLAG
 
 

@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from rl.src.core.configs.general_configs import TIMESTAMP_STRING_FORMAT,\
+from rl.core.configs.general_configs import TIMESTAMP_STRING_FORMAT,\
                                                 TIMESTAMP_LONG_STRING_FORMAT
-from rl.src.core.utilities.file_utils import unique_string
+from rl.core.utilities.file_utils import unique_string
 
 
 def timestamp_str():

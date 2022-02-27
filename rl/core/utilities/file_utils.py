@@ -6,9 +6,9 @@ import json
 import pandas as pd
 from markdown import markdown
 
-from rl.src.core.configs.storage_configs import UNIQUE_STRING_LENGHT
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
-from rl.src.core.configs.log_configs import LOG_CSV_DIR_PATH, LOG_HTML_DIR_PATH
+from rl.core.configs.storage_configs import UNIQUE_STRING_LENGHT
+from rl.core.configs.general_configs import EXPERIMENT_STORE_LOGS_DIRECTORY_ABSPATH
+from rl.core.configs.log_configs import LOG_CSV_DIR_PATH, LOG_HTML_DIR_PATH
 
 
 def create_path(path):

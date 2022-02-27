@@ -3,8 +3,8 @@ import pandas as pd
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 
-from rl.src.core.configs.general_configs import EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
-from rl.src.core.utilities.file_utils import create_path
+from rl.core.configs.general_configs import EXPERIMENT_STORE_DATABASE_OBJECT_ABSPATH
+from rl.core.utilities.file_utils import create_path
 
 
 def __get_engine():

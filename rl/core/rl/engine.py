@@ -3,10 +3,10 @@ from tqdm import tqdm
 
 import numpy as np
 
-from rl.src.core.logging import log
-from rl.src.core.utilities.timestamp import timestamp_str
-from rl.src.core.storage.storage import store_results_as_dataframe, store_results_in_database
-from rl.src.core.configs.storage_configs import DATA_COLUMNS,\
+from rl.core.utilities.logging import log
+from rl.core.utilities.timestamp import timestamp_str
+from rl.core.storage.storage import store_results_as_dataframe, store_results_in_database
+from rl.core.configs.storage_configs import DATA_COLUMNS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_EPISODES,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_STEPS,\
                                         DB_EXPERIMENT_TABLE_NAME_COL_STATES, \
