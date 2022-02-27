@@ -24,7 +24,8 @@ def cprofile(func):
             # sortby = SortKey.TIME
             ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
-            file = EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.txt"
+            #snakeviz ./cprofile.prof
+            file = EXPERIMENT_STORE_PERFMONITORING_DIRECTORY_ABSPATH+"cprofile.prof"
             ps.dump_stats(file)
             log(f"CProfiled {func.__name__}, results in {file}")
             # with open(file, 'a') as f:
