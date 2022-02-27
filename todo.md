@@ -18,8 +18,6 @@
 * log_plt part of log_image 
 * cProfile stats to csv
 * filesystem
-  * remove one of rl, src, core
-  * move experiments code to main src
   * move paths out of general configs and change structure (remove default ones)
 
 ### Other
