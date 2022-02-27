@@ -14,12 +14,13 @@ __pycache__
 
 venv
 
+experiments/**/files/logs
+
 *.db
 *.csv
 
-experiments/qlearning_pendulum_v0/files
 
-*/clipboard.*
-*/example.*
+**/clipboard.py
+**/example.py
 
 

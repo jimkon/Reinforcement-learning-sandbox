@@ -1,9 +1,9 @@
 import argparse
 
 
-from rl.src.core.commands.commands import COMMANDS, get_command
-from rl.src.core.platform.command import run_command
-from rl.src.core.logging import log
+from rl.core.commands.commands import COMMANDS, get_command
+from rl.core.platform.command import run_command
+from rl.core.utilities.logging import log
 
 
 # def read_run_configs(config_path=None):
