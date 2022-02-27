@@ -1,7 +1,7 @@
 from rl.core.rl.engine import run_episodes
 from rl.core.utilities.logging import save_loggers
 
-from experiments.simple_2d.my_agent import *
+from rl.experiments.simple_2d.my_agent import *
 
 
 def run_experiment():

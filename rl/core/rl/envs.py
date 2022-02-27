@@ -1,4 +1,4 @@
-from experiments.simple_2d.simple_env import SimpleEnv
+from rl.experiments.simple_2d.simple_env import SimpleEnv
 
 ENVS = {
     SimpleEnv

@@ -1,4 +1,4 @@
-from experiments.simple_2d.my_agent import *
+from rl.experiments.simple_2d.my_agent import *
 
 AGENTS = {
     MyAgent_Greedy_SE_POC

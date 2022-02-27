@@ -3,7 +3,7 @@ import numpy as np
 from rl.src import Agent
 from rl.src import wrap_env
 
-from experiments.qlearning_pendulum_v0.misc import MapFloatToInteger
+from experiments.qlearning_pendulum_v0 import MapFloatToInteger
 
 
 class TabularQLearningAgent(Agent):
