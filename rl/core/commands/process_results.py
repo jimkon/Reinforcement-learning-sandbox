@@ -28,8 +28,10 @@ class ProcessResultsCommand(AbstractCommand):
     @cprofile
     @logger.log_func_call()
     def run(self):
-        transformed_df = compress_data_df(self._input_df)
-        transformed_df[DB_EXPERIMENT_TABLE_NAME_COL_EXPID] = self._file
+        self.transformed_df = compress_data_df(self._input_df)
+        self.transformed_df.loc[:, DB_EXPERIMENT_TABLE_NAME_COL_EXPID] = self._file
+
+        # self.agg_df = self.transformed_df.agg()
         pass
 
     def output(self):
