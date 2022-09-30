@@ -4,3 +4,23 @@
 /bin
 
 __pycache__
+
+
+/experiments/qlearning_pendulum_v0/files/
+
+/venv/
+
+.idea
+
+venv
+
+experiments/**/files/logs
+
+*.db
+*.csv
+
+
+**/clipboard.py
+**/example.py
+
+
